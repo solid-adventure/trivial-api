@@ -4,8 +4,66 @@
 # model remove the '{}' from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+# admin:
+#   id: 1
+#   name: admin
+#   email: admin@email.com
+#   role: admin
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 1
+#   approval: approved
+
+# user1:
+#   id: 2
+#   name: user1
+#   email: user1@email.com
+#   role: team_manager
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 2
+#   approval: approved
+
+# user2:
+#   id: 3
+#   name: user2
+#   email: user2@email.com
+#   role: member
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 2
+#   approval: approved
+
+# user3:
+#   id: 4
+#   name: user3
+#   email: user3@email.com
+#   role: team_manager
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 3
+#   approval: approved
+
+# user4:
+#   id: 5
+#   name: user4
+#   email: user4@email.com
+#   role: member
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 3
+#   approval: approved
+
+# user5:
+#   id: 6
+#   name: user5
+#   email: user5@email.com
+#   role: member
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 3
+#   approval: pending
+
+# user6:
+#   id: 7
+#   name: user6
+#   email: user6@email.com
+#   role: member
+#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+#   team_id: 3
+#   approval: rejected
+  
