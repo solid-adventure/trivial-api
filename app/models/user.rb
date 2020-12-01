@@ -7,17 +7,22 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :validatable
   include DeviseTokenAuth::Concerns::User
 
+  after_initialize do |user|
+    user.team = Team.where(name: 'individual').first
+    user.role = 'member'
+    user.approval = 'approved'
+  end
+
   belongs_to :team
-  has_many   :board,    foreign_key: "owner_id",   dependent: :destroy
-  has_many   :flow,    foreign_key: "owner_id",   dependent: :destroy
-  has_many   :stage,    foreign_key: "owner_id",   dependent: :destroy
+  has_many   :board, foreign_key: 'owner_id', dependent: :destroy
+  has_many   :flow, foreign_key: 'owner_id', dependent: :destroy
+  has_many   :stage, foreign_key: 'owner_id', dependent: :destroy
   has_and_belongs_to_many :boards
   has_and_belongs_to_many :flows
   has_and_belongs_to_many :stages
 
-  enum role: [:member, :team_manager, :admin]
-  enum approval: [:pending, :approved, :rejected]
+  enum role: %i[member team_manager admin]
+  enum approval: %i[pending approved rejected]
 
-  validates :name,    presence: true, length: { minimum: 3 }
-  validates :team,    presence: true
+  validates :name, presence: true, length: { minimum: 3 }
 end

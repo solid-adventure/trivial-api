@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateFlowsAndUsers < ActiveRecord::Migration[6.0]
   def change
     create_table :flows_users do |t|

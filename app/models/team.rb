@@ -8,7 +8,7 @@ class Team < ActiveRecord::Base
 
   def change_teams
     User.transaction do
-      self.users.each do |team_user|
+      users.each do |team_user|
         team_user.team = Team.where(name: 'individual').first
         team_user.save!
       end

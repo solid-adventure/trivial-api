@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddColumnsToUsers < ActiveRecord::Migration[6.0]
   def change
     # if no team -> id of "individual" in Team
