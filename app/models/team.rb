@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
 class Team < ActiveRecord::Base
-  before_destroy :change_teams
   has_many :users
-
   validates :name, presence: true, length: { minimum: 3 }, uniqueness: true
 
-  def change_teams
-    User.transaction do
-      users.each do |team_user|
-        team_user.team = Team.where(name: 'individual').first
-        team_user.save!
-      end
-    end
+  after_destroy :reset_team_members
+
+  def reset_team_members
+    users.update_all(team_id: nil, role: 'member', approval: 'approved')
   end
 end

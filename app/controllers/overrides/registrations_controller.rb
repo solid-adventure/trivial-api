@@ -2,6 +2,8 @@
 
 module Overrides
   class RegistrationsController < DeviseTokenAuth::RegistrationsController
+    skip_before_action :authenticate_user!, only: [:create]
+
     def create
       super
 

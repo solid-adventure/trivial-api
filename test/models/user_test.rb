@@ -20,6 +20,13 @@ class UserTest < ActiveSupport::TestCase
     assert @user.valid?
   end
 
+  test 'valid without team' do
+    @user.team = nil
+    @user.valid?
+
+    assert_equal @user.errors[:team], []
+  end
+
   test 'invalid without password' do
     @user.password = nil
     @user.valid?
@@ -32,13 +39,6 @@ class UserTest < ActiveSupport::TestCase
     @user.valid?
 
     assert_equal @user.errors[:email], ["can't be blank"]
-  end
-
-  test 'invalid without team' do
-    @user.team = nil
-    @user.valid?
-
-    assert_equal @user.errors[:team], ['must exist']
   end
 
   test 'invalid without name' do
@@ -60,10 +60,11 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
-  test 'delete team will change user team to individual' do
+  test 'delete team will change user team to nil' do
     @user.save!
     @team.users << @user
     @team.destroy
-    assert_equal @user.team.name, 'individual'
+    @user.reload
+    assert_nil @user.team
   end
 end
