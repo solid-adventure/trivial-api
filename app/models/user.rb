@@ -7,13 +7,7 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :validatable
   include DeviseTokenAuth::Concerns::User
 
-  after_initialize do |user|
-    user.team = Team.where(name: 'individual').first
-    user.role = 'member'
-    user.approval = 'approved'
-  end
-
-  belongs_to :team
+  belongs_to :team, optional: true
   has_many   :board, foreign_key: 'owner_id', dependent: :destroy
   has_many   :flow, foreign_key: 'owner_id', dependent: :destroy
   has_many   :stage, foreign_key: 'owner_id', dependent: :destroy

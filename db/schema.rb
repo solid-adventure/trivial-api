@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -12,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_201_127_144_321) do
+ActiveRecord::Schema.define(version: 20_201_202_023_158) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension 'plpgsql'
+
   create_table 'boards', force: :cascade do |t|
     t.integer 'owner_id'
     t.string 'name', default: '', null: false
@@ -91,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_201_127_144_321) do
     t.text 'tokens'
     t.datetime 'created_at', precision: 6, null: false
     t.datetime 'updated_at', precision: 6, null: false
-    t.integer 'team_id', null: false
+    t.integer 'team_id'
     t.integer 'role', default: 0, null: false
     t.integer 'approval', default: 0, null: false
     t.index ['email'], name: 'index_users_on_email', unique: true
