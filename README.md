@@ -56,15 +56,10 @@ rbenv install 2.6.3
 
 ### Install Postgres
 
-You can download and install Postgres [here
+Install Postgres (version 13.1)
 
-](https://www.postgresql.org/download/)
-
-  
 
 ### Set environment variables
-
-  
 
 Copy `.env.example` in the project and rename it to `.env`
 
