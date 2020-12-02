@@ -84,6 +84,7 @@ test:
 #
 production:
   <<: *default
-  database: trivial_production
-  username: trivial
-  password: <%= ENV['TRIVIAL_DATABASE_PASSWORD'] %>
+  url: <%= ENV['DATABASE_URL'] %>
+  database: <%= ENV['DATABASE_NAME'] %>
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
