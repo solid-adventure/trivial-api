@@ -8,5 +8,7 @@ Rails.application.routes.draw do
 
   resources :teams
 
+  resources :users
+
   resource :profile, only: :show
 end
