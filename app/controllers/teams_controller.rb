@@ -1,25 +1,28 @@
 class TeamsController < ApplicationController
-  skip_before_action :authenticate_user!, only: :index
-  before_action :authenticate_admin!, only: :create
-  before_action :authenticate_team_managable!, only: %i[update destroy]
+  before_action :authenticate_admin!, only: [:index]
+  before_action :authenticate_individual!, only: [:create]
+  before_action :authenticate_team_manager!, only: %i[update destroy]
+  before_action :authenticate_team_member!, only: %i[show]
 
   def index
     render json: Team.all, include: []
   end
 
-  # TODO: discuss if create is needed and when
-
   def create
-    team = Team.new(team_params)
-
-    if team.save
+    ActiveRecord::Base.transaction do
+      team = Team.new(team_params)
+      unless team.save
+        render_bad_request team
+        raise ActiveRecord::Rollback
+      end
+      unless current_user.update(team: team, role: 'manager', approval: 'approved')
+        render_bad_request current_user
+        raise ActiveRecord::Rollback
+      end
       render json: team, status: :created
-    else
-      render json: { errors: team.errors }, status: :unprocessable_entity
+    rescue
     end
   end
-
-  # TODO: discuss permission of show team
 
   def show
     render json: team
@@ -29,7 +32,7 @@ class TeamsController < ApplicationController
     if team.update(team_params)
       render json: team
     else
-      render json: { errors: team.errors }, status: :unprocessable_entity
+      render_bad_request team
     end
   end
 
@@ -47,9 +50,21 @@ class TeamsController < ApplicationController
     params.permit(:name)
   end
 
-  def authenticate_team_managable!
+  def authenticate_individual!
+    if current_user.team.present?
+      render_unauthorized 'You belong to a team already'
+    end
+  end
+
+  def authenticate_team_manager!
     unless current_user.admin? || (current_user.team_manager? && current_user.team == team)
-      render_unauthorized 'You cannot modify this team!'
+      render_unauthorized 'You cannot update this team'
+    end
+  end
+
+  def authenticate_team_member!
+    if !current_user.admin? && (current_user.team != team || !current_user.approved)
+      render_unauthorized 'You do not have permission'
     end
   end
 end

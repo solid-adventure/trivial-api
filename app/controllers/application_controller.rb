@@ -9,7 +9,7 @@ class ApplicationController < ActionController::API
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit :sign_up, keys: %i[name email password]
+    devise_parameter_sanitizer.permit :sign_up, keys: %i[name email password team_id]
   end
 
   def authenticate_admin!
@@ -17,6 +17,18 @@ class ApplicationController < ActionController::API
   end
 
   def render_unauthorized(message = 'Unauthorized!')
-    render json: { errors: [message] }, status: :unauthorized
+    render_errors [message], status: :unauthorized
+  end
+
+  def render_unprocessable(message = 'Unprocessable entity!')
+    render_errors [message], status: :unprocessable_entity
+  end
+
+  def render_bad_request(object)
+    render_errors object.errors.full_messages
+  end
+
+  def render_errors(errors, status: :bad_request)
+    render json: { errors: errors }, status: status
   end
 end

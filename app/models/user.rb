@@ -19,4 +19,29 @@ class User < ActiveRecord::Base
   enum approval: %i[pending approved rejected]
 
   validates :name, presence: true, length: { minimum: 3 }
+  validate  :team_manager_cannot_be_pending
+
+  before_save :set_values_for_individual
+  after_save :set_teammates_as_member
+
+  private
+
+  def team_manager_cannot_be_pending
+    if team_manager? && pending?
+      errors.add(:approval, 'cannot be pending for team manager')
+    end
+  end
+
+  def set_values_for_individual
+    if team.nil?
+      self.role = 'member'
+      self.approval = 'approved'
+    end
+  end
+
+  def set_teammates_as_member
+    if saved_changes[:role].present? && team_manager?
+      team.users.where(role: 'team_manager').where.not(id: id).update_all(role: 'member')
+    end
+  end
 end
