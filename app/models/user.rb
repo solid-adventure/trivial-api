@@ -9,11 +9,7 @@ class User < ActiveRecord::Base
 
   belongs_to :team, optional: true
   has_many   :board, foreign_key: 'owner_id', dependent: :destroy
-  has_many   :flow, foreign_key: 'owner_id', dependent: :destroy
-  has_many   :stage, foreign_key: 'owner_id', dependent: :destroy
   has_and_belongs_to_many :boards
-  has_and_belongs_to_many :flows
-  has_and_belongs_to_many :stages
 
   enum role: %i[member team_manager admin]
   enum approval: %i[pending approved rejected]
