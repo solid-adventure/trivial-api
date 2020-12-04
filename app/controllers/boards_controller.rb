@@ -3,7 +3,7 @@ class BoardsController < ApplicationController
   before_action :authenticate_admin!, only: [:index]
   before_action :authenticate_board_user!, only: [:show]
   before_action :authenticate_board_manager!, only: [:update, :destroy]
-  after_action { pagy_headers_merge(@pagy) if @pagy }
+  after_action { pagy_headers_merge(@pagy) if @pagy }, only: [:index]
 
   def index
     @pagy, boards = pagy(Board.all, items: 250)
