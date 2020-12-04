@@ -10,4 +10,11 @@ class Board < ActiveRecord::Base
   validates :owner, presence: true
   validates :name,  presence: true, length: { minimum: 3 }
   validates :slug,  presence: true, length: { minimum: 5 }, uniqueness: true
+
+  after_initialize :generate_slug
+
+  def generate_slug
+    self.slug = SecureRandom.hex if self.new_record?
+    generate_slug if self.class.where.not(id: self.id).exists?(slug: slug)
+  end
 end

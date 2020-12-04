@@ -11,4 +11,6 @@ Rails.application.routes.draw do
   resources :users
 
   resource :profile, only: :show
+
+  resources :boards
 end

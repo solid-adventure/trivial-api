@@ -111,6 +111,7 @@ GEM
     nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
     orm_adapter (0.5.0)
+    pagy (3.10.0)
     pg (1.2.3)
     puma (4.3.6)
       nio4r (~> 2.0)
@@ -150,6 +151,7 @@ GEM
     responders (3.0.1)
       actionpack (>= 5.0)
       railties (>= 5.0)
+    securerandom (0.1.0)
     spring (2.1.1)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -182,9 +184,11 @@ DEPENDENCIES
   devise_token_auth
   dotenv-rails
   listen (~> 3.2)
+  pagy
   pg
   puma (~> 4.1)
   rails (~> 6.0.3, >= 6.0.3.4)
+  securerandom
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data
