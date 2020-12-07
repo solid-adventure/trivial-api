@@ -6,6 +6,7 @@ class CreateConnections < ActiveRecord::Migration[6.0]
       t.references  :from,  foreign_key: { to_table: :stages }
       t.references  :to,    foreign_key: { to_table: :stages }
       t.references  :flow
+      t.string :transform
 
       t.timestamps
     end

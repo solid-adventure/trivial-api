@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_04_195654) do
+ActiveRecord::Schema.define(version: 2020_11_27_144321) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "boards", force: :cascade do |t|
-    t.integer "owner_id"
+    t.bigint "owner_id"
     t.string "name", default: "", null: false
     t.string "slug", null: false
     t.integer "access_level", default: 0, null: false
@@ -26,36 +26,34 @@ ActiveRecord::Schema.define(version: 2020_12_04_195654) do
   end
 
   create_table "boards_users", force: :cascade do |t|
-    t.integer "board_id"
-    t.integer "user_id"
+    t.bigint "board_id"
+    t.bigint "user_id"
     t.index ["board_id"], name: "index_boards_users_on_board_id"
     t.index ["user_id"], name: "index_boards_users_on_user_id"
   end
 
   create_table "connections", force: :cascade do |t|
-    t.integer "from_id"
-    t.integer "to_id"
-    t.integer "flow_id"
+    t.bigint "from_id"
+    t.bigint "to_id"
+    t.bigint "flow_id"
+    t.string "transform"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "transform"
     t.index ["flow_id"], name: "index_connections_on_flow_id"
     t.index ["from_id"], name: "index_connections_on_from_id"
     t.index ["to_id"], name: "index_connections_on_to_id"
   end
 
   create_table "flows", force: :cascade do |t|
-    t.integer "owner_id"
-    t.integer "board_id"
+    t.bigint "board_id"
     t.string "name", default: "", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["board_id"], name: "index_flows_on_board_id"
-    t.index ["owner_id"], name: "index_flows_on_owner_id"
   end
 
   create_table "stages", force: :cascade do |t|
-    t.integer "flow_id"
+    t.bigint "flow_id"
     t.string "name", default: "", null: false
     t.text "subcomponents"
     t.datetime "created_at", precision: 6, null: false

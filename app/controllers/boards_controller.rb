@@ -1,13 +1,12 @@
 class BoardsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:show]
-  before_action :authenticate_admin!, only: [:index]
+  skip_before_action :authenticate_user!, only: [:index, :show]
   before_action :authenticate_board_user!, only: [:show]
   before_action :authenticate_board_manager!, only: [:update, :destroy]
-  after_action { pagy_headers_merge(@pagy) if @pagy }, only: [:index]
+  after_action { pagy_headers_merge(@pagy) if @pagy }
 
   def index
-    @pagy, boards = pagy(Board.all, items: 250)
-    render json: boards, include: []
+    @pagy, boards = pagy(available_boards, items: 250)
+    render json: boards, include: [:flows]
   end
 
   def create
@@ -24,19 +23,23 @@ class BoardsController < ApplicationController
     render json: board, include: []
   end
      
-  def update         
+  def update
     if board.update(board_params)
       render json: board
     else
       render_bad_request board
     end
-  end           
+  end
 
   def destroy
     board.destroy
   end
 
   private
+
+  def available_boards
+    @_available_boards ||= Board.available_boards(current_user)
+  end
 
   def board
     @_board ||= Board.find_by_slug!(params[:id])
@@ -47,18 +50,17 @@ class BoardsController < ApplicationController
   end
 
   def authenticate_board_user!
-    unless  board.free?||
-            current_user.present? && current_user.admin? ||
-            current_user.present? && board.trivial? ||
-            board.users.exists?(id: current_user.id) ||
-            board.team? && board.owner.team.present? &&  board.owner.team == current_user.team && current_user.approved? ||
-            board.owner == current_user
+    # unless  board.free?||
+    #         current_user.present? && current_user.admin? ||
+    #         current_user.present? && board.trivial? ||
+    #         board.users.exists?(id: current_user.id) ||
+    #         board.team? && board.owner.team.present? &&  board.owner.team == current_user.team && current_user.approved? ||
+    #         board.owner == current_user
 
-        raise ActiveRecord::RecordNotFound
-    end
+    raise ActiveRecord::RecordNotFound unless available_boards.exists?(id: board.id)
   end
 
   def authenticate_board_manager!
-    render_unauthorized 'You cannot change this board!' unless current_user.admin? || current_user == board.owner
+    render_unauthorized 'You cannot change this board!' unless current_user.admin? || current_user == board.owner || board.owner.team = current_user.team
   end
 end
