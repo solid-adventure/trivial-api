@@ -1,12 +1,11 @@
 class BoardsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :authenticate_board_user!, only: [:show]
   before_action :authenticate_board_manager!, only: [:update, :destroy]
   after_action { pagy_headers_merge(@pagy) if @pagy }
 
   def index
-    @pagy, boards = pagy(available_boards, items: 250)
-    render json: boards, include: [:flows]
+    @pagy, paginated_boards = pagy(boards, items: 250)
+    render json: paginated_boards, include: []
   end
 
   def create
@@ -20,7 +19,10 @@ class BoardsController < ApplicationController
   end
 
   def show
-    render json: board, include: []
+    render json: boards.find_by_slug!(params[:id]), include: {
+      owner: [],
+      flows: [:stages, :connections]
+    }
   end
      
   def update
@@ -37,8 +39,8 @@ class BoardsController < ApplicationController
 
   private
 
-  def available_boards
-    @_available_boards ||= Board.available_boards(current_user)
+  def boards
+    @_boards ||= Board.available(current_user)
   end
 
   def board
@@ -49,18 +51,9 @@ class BoardsController < ApplicationController
     params.permit(:name, :access_level)
   end
 
-  def authenticate_board_user!
-    # unless  board.free?||
-    #         current_user.present? && current_user.admin? ||
-    #         current_user.present? && board.trivial? ||
-    #         board.users.exists?(id: current_user.id) ||
-    #         board.team? && board.owner.team.present? &&  board.owner.team == current_user.team && current_user.approved? ||
-    #         board.owner == current_user
-
-    raise ActiveRecord::RecordNotFound unless available_boards.exists?(id: board.id)
-  end
-
   def authenticate_board_manager!
-    render_unauthorized 'You cannot change this board!' unless current_user.admin? || current_user == board.owner || board.owner.team = current_user.team
+    unless current_user.admin? || current_user == board.owner
+      render_unauthorized 'You cannot change this board!' 
+    end
   end
 end

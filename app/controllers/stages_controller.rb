@@ -1,10 +1,7 @@
 class StagesController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:show]
   before_action :authenticate_stage_user!, only: [:show]
-  before_action :authenticate_stage_manager!, only: [:update, :destroy]
-
-  def index
-    render json: Stage.all
-  end
+  before_action :authenticate_stage_manager!, only: [:create, :update, :destroy]
 
   def create
     stage = Stage.new(stage_params)
@@ -33,19 +30,27 @@ class StagesController < ApplicationController
 
   private
 
+  def board
+    @_board = Board.find(params[:board_id])
+  end
+
+  def flow
+    @_flow = board.flows.find(params[:flow_id])
+  end
+
   def stage
-    @_stage = Stage.find(params[:id])
+    @_stage = flow.stages.find(params[:id])
   end
 
   def stage_params
-    params.permit(:name, :subcomponents)
-  end
-
-  def authenticate_stage_manager!
-
+    params.permit(:flow_id, :name, :subcomponents)
   end
 
   def authenticate_stage_user!
-    
+    authenticate_item_user!(board)
+  end
+
+  def authenticate_stage_manager!
+    authenticate_item_manager!(board, 'You cannot change this stage!')
   end
 end

@@ -1,12 +1,7 @@
 class FlowsController < ApplicationController
-  before_action :authenticate_flow_manager!,  only: [:update, :destroy]
+  skip_before_action :authenticate_user!, only: [:show]
+  before_action :authenticate_flow_manager!,  only: [:create, :update, :destroy]
   before_action :authenticate_flow_user!, only: [:show]
-  after_action { pagy_headers_merge(@pagy) if @pagy }, only: [:index]
-
-  def index
-    @pagy, flows = pagy(Flow.all, items: 250)
-    render json: flows, include: []
-  end
 
   def create
     flow = Flow.new(flow_params)
@@ -35,23 +30,23 @@ class FlowsController < ApplicationController
 
   private
 
+  def board
+    @_board = Board.find(params[:board_id])
+  end
+
   def flow
-    @_flow = Flow.find(params[:id])
+    @_flow = board.flows.find(params[:id])
   end
 
   def flow_params
-    params.permit(:name)
+    params.permit(:board_id, :name)
   end
 
   def authenticate_flow_user!
-    unless  current_user.admin?
-            current_user == flow.owner
-
-        raise ActiveRecord::RecordNotFound
-    end
+    authenticate_item_user!(board)
   end
 
   def authenticate_flow_manager!
-    render_unauthorized "You cannot change this flow!" unless current_user.admin? || current_user == flow.owner
+    authenticate_item_manager!(board, 'You cannot change this flow!')
   end
 end

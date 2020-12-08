@@ -13,16 +13,15 @@ class Board < ActiveRecord::Base
 
   after_initialize :generate_slug
 
-  scope :available_boards, ->(user) {
+  scope :available, ->(user) {
     return Board.free if user.nil?
     return Board.all if user.admin?
     
-    available_boards = Board.free + Board.trivial
-    available_boards += Board.where(access_level: 'team', owner_id: user.team.owner.id) if user.approved?
-    available_boards += Board.where(owner_id: user.id)
-    available_boards += user.boards
+    available = Board.free.or(Board.trivial)
+    available = available.or(Board.where(access_level: 'team', owner_id: user.team.owner.id)) if user.approved?
+    available = available.or(Board.where(owner_id: user.id))
 
-    available_boards
+    available
   }
 
   def generate_slug
