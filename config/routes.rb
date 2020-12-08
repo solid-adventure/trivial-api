@@ -11,4 +11,12 @@ Rails.application.routes.draw do
   resources :users
 
   resource :profile, only: :show
+
+  resources :boards do
+    resources :flows, except: :index do
+      resources :stages, except: :index
+      resources :connections, except: :index
+    end
+  end
+
 end

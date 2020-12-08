@@ -9,4 +9,8 @@ class Team < ActiveRecord::Base
   def reset_team_members
     users.update_all(team_id: nil, role: 'member', approval: 'approved')
   end
+
+  def owner
+    users.team_manager.first
+  end
 end
