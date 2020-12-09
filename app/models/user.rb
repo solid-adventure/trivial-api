@@ -38,7 +38,7 @@ class User < ActiveRecord::Base
 
   def set_teammates_as_member
     if saved_changes[:role].present? && team_manager?
-      team.users.team_manager.where.not(id: id).member!
+      team.users.team_manager.where.not(id: id).update_all(role: "member")
     end
   end
 
