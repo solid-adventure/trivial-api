@@ -12,6 +12,8 @@ Rails.application.routes.draw do
 
   resource :profile, only: [:show, :update]
 
+  resources :members, only: [:index, :update, :show]
+
   resources :boards do
     resources :flows, except: :index do
       resources :stages, except: :index
