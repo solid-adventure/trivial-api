@@ -2,11 +2,11 @@ class MembersController < ApplicationController
   before_action :authenticate_team_manager!
 
   def index
-    render json: team.users.pending
+    render json: team.users.pending, include: []
   end
 
   def show
-    render json: team_member
+    render json: team_member, include: []
   end
 
   def update
@@ -28,10 +28,10 @@ class MembersController < ApplicationController
   end
 
   def team_member
-    @_team_member = team.users.find(id: params[:id])
+    @_team_member = team.users.find(params[:id])
   end
 
   def authenticate_team_manager!
-    render_unauthorized "You are not a team manager!"
+    render_unauthorized "You are not a team manager!" unless current_user.team_manager?
   end
 end
