@@ -10,7 +10,7 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resource :profile, only: :show
+  resource :profile, only: [:show, :update]
 
   resources :boards do
     resources :flows, except: :index do
