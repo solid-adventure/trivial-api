@@ -24,14 +24,38 @@ RSpec.configure do |config|
       paths: {},
       servers: [
         {
-          url: 'https://{defaultHost}',
+          url: '{defaultHost}',
           variables: {
             defaultHost: {
-              default: 'www.example.com'
+              default: 'https://trivial-api-staging.herokuapp.com/',
             }
           }
+        },
+      ],
+      components: {
+        securitySchemes: {
+          access_token: {
+            type: :apiKey,
+            name: 'access-token',
+            in: :header
+          },
+          client: {
+            type: :apiKey,
+            name: 'client',
+            in: :header
+          },
+          token_type: {
+            type: :apiKey,
+            name: 'token-type',
+            in: :header
+          },
+          uid: {
+            type: :apiKey,
+            name: 'uid',
+            in: :header
+          }
         }
-      ]
+      }
     }
   }
 
