@@ -5,17 +5,18 @@ class Connection < ActiveRecord::Base
   belongs_to :from, class_name: 'Stage', foreign_key: :from_id
   belongs_to :to,   class_name: 'Stage', foreign_key: :to_id
 
-  validate  :two_stages_must_be_on_the_same_flow
   validate  :two_stages_cannot_be_the_same
   validates :flow,      presence: true
   validates :from,      presence: true
   validates :to,        presence: true
   validates :transform, presence: true
+  validate  :two_stages_must_be_on_the_same_flow
 
   private
 
   def two_stages_must_be_on_the_same_flow
-    if Stage.find(self.from_id).flow != Flow.find(self.flow_id) || Stage.find(self.to_id).flow != Flow.find(self.flow_id)
+    if Stage.find_by_id(self.from_id) && Stage.find_by_id(self.from_id).flow != Flow.find_by_id(self.flow_id) ||
+       Stage.find_by_id(self.to_id) && Stage.find_by_id(self.to_id).flow != Flow.find_by_id(self.flow_id)
       errors.add(:flow, 'stages must be on the same flow!')
     end
   end

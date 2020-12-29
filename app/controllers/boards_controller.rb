@@ -27,7 +27,10 @@ class BoardsController < ApplicationController
      
   def update
     if board.update(board_params)
-      render json: board
+      render json: board, include: {
+        owner: [],
+        flows: [:stages, :connections]
+      }
     else
       render_bad_request board
     end
