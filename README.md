@@ -5,7 +5,8 @@
 
   
 
-This is the Rails back-end for Trivial.
+This is the Rails back-end for Trivial. API Documented here:
+https://trivial-api-staging.herokuapp.com/api-docs/index.html
 
   
 
