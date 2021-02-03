@@ -5,10 +5,14 @@
 
   
 
-This is the Rails back-end for Trivial. API Documented here:
+This is the Rails back-end for Trivial. 
+
+### Postman Collection
+https://gist.github.com/vgkids/2e75b84e0559ed0dcb51f2717f31889c
+  
+### Documentation
 https://trivial-api-staging.herokuapp.com/api-docs/index.html
 
-  
 
 ## Install
 
