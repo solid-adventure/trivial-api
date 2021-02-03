@@ -12,7 +12,10 @@ class BoardsController < ApplicationController
     board = Board.new(board_params)
     board.owner = current_user
     if board.save
-      render json: board, status: :created
+      render json: board, include: {
+        owner: [],
+        flows: [:stages, :connections]
+      }, status: :created
     else
       render_bad_request board
     end
