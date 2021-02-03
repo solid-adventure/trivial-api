@@ -6,5 +6,13 @@ class Flow < ActiveRecord::Base
   has_many  :connections, dependent: :destroy
 
   validates :board, presence: true
-  validates :name,  presence: true, length: { minimum: 3 }
+  # validates :name,  presence: true, length: { minimum: 3 }
+
+  after_create :check_stage
+
+  private
+
+  def check_stage
+    stages.create unless stages.present?
+  end
 end

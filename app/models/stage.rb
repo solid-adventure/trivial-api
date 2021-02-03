@@ -6,6 +6,6 @@ class Stage < ActiveRecord::Base
   has_one   :connection,    foreign_key: 'to_id',   dependent: :destroy
 
   validates :flow,  presence: true
-  validates :name,  presence: true, length: { minimum: 3 }
-  validates :subcomponents, presence: true
+  # validates :name,  presence: true, length: { minimum: 3 }
+  # validates :subcomponents, presence: true
 end

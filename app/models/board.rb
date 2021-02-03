@@ -13,6 +13,8 @@ class Board < ActiveRecord::Base
 
   after_initialize :generate_slug
 
+  after_create :check_flow
+
   scope :available, ->(user) {
     return Board.free if user.nil?
     return Board.all if user.admin?
@@ -27,5 +29,11 @@ class Board < ActiveRecord::Base
   def generate_slug
     self.slug = SecureRandom.hex if self.new_record?
     generate_slug if self.class.where.not(id: self.id).exists?(slug: slug)
+  end
+
+  private
+
+  def check_flow
+    flows.create unless flows.present?
   end
 end
