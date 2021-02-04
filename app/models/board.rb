@@ -12,7 +12,6 @@ class Board < ActiveRecord::Base
   validates :slug,  presence: true, length: { minimum: 5 }, uniqueness: true
 
   after_initialize :generate_slug
-
   after_create :check_flow
 
   scope :available, ->(user) {
@@ -26,12 +25,11 @@ class Board < ActiveRecord::Base
     available
   }
 
-  def generate_slug
-    self.slug = SecureRandom.hex if self.new_record?
-    generate_slug if self.class.where.not(id: self.id).exists?(slug: slug)
-  end
-
   private
+
+  def generate_slug
+    self.slug = SecureRandom.uuid if self.new_record?
+  end
 
   def check_flow
     flows.create unless flows.present?

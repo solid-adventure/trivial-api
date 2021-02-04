@@ -17,6 +17,10 @@ Rails.application.routes.draw do
   resources :members, only: [:index, :update, :show]
 
   resources :boards do
+    member do
+      post :clone
+    end
+
     resources :flows, except: :index do
       resources :stages, except: :index
       resources :connections, except: :index
