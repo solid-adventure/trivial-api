@@ -1,6 +1,6 @@
 class BoardsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :authenticate_board_manager!, only: [:update, :destroy]
+  before_action :authenticate_board_manager!, only: [:update, :destroy, :clone]
   after_action { pagy_headers_merge(@pagy) if @pagy }
 
   def index
@@ -41,6 +41,27 @@ class BoardsController < ApplicationController
 
   def destroy
     board.destroy
+  end
+
+  def clone
+    new_board = Board.new(board.dup.attributes.except("slug"))
+
+    board.flows.each do |flow|
+      new_flow = new_board.flows.build(flow.dup.attributes)
+
+      flow.stages.each do |stage|
+        new_flow.stages.build(stage.dup.attributes)
+      end
+    end
+
+    if new_board.save
+      render json: new_board, include: {
+        owner: [],
+        flows: [:stages, :connections]
+      }, status: :created
+    else
+      render_bad_request new_board
+    end
   end
 
   private
