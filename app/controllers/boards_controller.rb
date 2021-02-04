@@ -45,6 +45,7 @@ class BoardsController < ApplicationController
 
   def clone
     new_board = Board.new(board.dup.attributes.except("slug"))
+    new_board.owner = current_user
 
     board.flows.each do |flow|
       new_flow = new_board.flows.build(flow.dup.attributes)
