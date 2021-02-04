@@ -34,12 +34,12 @@ ActiveRecord::Schema.define(version: 2020_12_09_142227) do
   end
 
   create_table "connections", force: :cascade do |t|
-    t.bigint "from_id"
-    t.bigint "to_id"
     t.bigint "flow_id"
     t.string "transform"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "to_id"
+    t.bigint "from_id"
     t.index ["flow_id"], name: "index_connections_on_flow_id"
     t.index ["from_id"], name: "index_connections_on_from_id"
     t.index ["to_id"], name: "index_connections_on_to_id"
@@ -85,6 +85,4 @@ ActiveRecord::Schema.define(version: 2020_12_09_142227) do
   end
 
   add_foreign_key "boards", "users", column: "owner_id"
-  add_foreign_key "connections", "stages", column: "from_id"
-  add_foreign_key "connections", "stages", column: "to_id"
 end
