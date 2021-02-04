@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_04_195635) do
+ActiveRecord::Schema.define(version: 2020_12_09_142227) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,15 +34,15 @@ ActiveRecord::Schema.define(version: 2021_02_04_195635) do
   end
 
   create_table "connections", force: :cascade do |t|
+    t.bigint "from_id"
+    t.bigint "to_id"
     t.bigint "flow_id"
     t.string "transform"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "from_stage_id"
-    t.integer "to_stage_id"
-    t.string "from"
-    t.string "to"
     t.index ["flow_id"], name: "index_connections_on_flow_id"
+    t.index ["from_id"], name: "index_connections_on_from_id"
+    t.index ["to_id"], name: "index_connections_on_to_id"
   end
 
   create_table "flows", force: :cascade do |t|
@@ -85,4 +85,6 @@ ActiveRecord::Schema.define(version: 2021_02_04_195635) do
   end
 
   add_foreign_key "boards", "users", column: "owner_id"
+  add_foreign_key "connections", "stages", column: "from_id"
+  add_foreign_key "connections", "stages", column: "to_id"
 end
