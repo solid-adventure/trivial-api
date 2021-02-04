@@ -1,4 +1,14 @@
 namespace :tasks do
+  desc "Migrate the from and to stage ids"
+  task migrate_stages: :environment do
+    Connection.all.each do |connection|
+      connection.from_stage_id = connection.from_id
+      connection.to_stage_id = connection.to_id
+
+      connection.save
+    end
+  end
+
   desc "Seed from, to values in connections"
   task import_from_to: :environment do
     data = [
