@@ -5,7 +5,7 @@ namespace :tasks do
       connection.from_stage_id = connection.from_id
       connection.to_stage_id = connection.to_id
 
-      connection.save
+      connection.save(validate: false)
     end
   end
 
