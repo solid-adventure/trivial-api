@@ -19,7 +19,7 @@ class Board < ActiveRecord::Base
     return Board.all if user.admin?
     
     available = Board.free.or(Board.trivial)
-    available = available.or(Board.where(access_level: 'team', owner_id: user.team.owner.id)) if user.approved?
+    available = available.or(Board.where(access_level: 'team', owner_id: user.team.owner.id)) if user.approved? && user.team&.owner.present?
     available = available.or(Board.where(owner_id: user.id))
 
     available
