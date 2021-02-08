@@ -43,7 +43,7 @@ class ConnectionsController < ApplicationController
   end
 
   def connection_params
-    params.permit(:flow_id, :from_id, :to_id, :transform)
+    params.permit(:flow_id, :from, :to, :transform)
   end
 
   def board
