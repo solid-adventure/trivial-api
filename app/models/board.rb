@@ -28,7 +28,7 @@ class Board < ActiveRecord::Base
   private
 
   def generate_slug
-    self.slug = SecureRandom.uuid if self.new_record?
+    self.slug = SecureRandom.alphanumeric(17) if self.new_record?
   end
 
   def check_flow
