@@ -23,9 +23,10 @@ class FlowTest < ActiveSupport::TestCase
     @board.save!
     @flow = Flow.new
     @flow.board = @board
-    @flow.owner = @user
+    # @flow.owner = @user
     @flow.name = 'flow1'
     @flow.save!
+    @board.reload
   end
 
   test 'valid flow' do
@@ -37,20 +38,6 @@ class FlowTest < ActiveSupport::TestCase
     @flow.valid?
 
     assert_equal @flow.errors[:board], ['must exist', "can't be blank"]
-  end
-
-  test 'invalid owner' do
-    @flow.owner = nil
-    @flow.valid?
-
-    assert_equal @flow.errors[:owner], ['must exist', "can't be blank"]
-  end
-
-  test 'invalid name' do
-    @flow.name = nil
-    @flow.valid?
-
-    assert_equal @flow.errors[:name], ["can't be blank", 'is too short (minimum is 3 characters)']
   end
 
   test 'destroy board will destroy flows' do
@@ -65,9 +52,5 @@ class FlowTest < ActiveSupport::TestCase
     assert_equal Flow.count, 0
   end
 
-  test 'add user to flow.users will add flow to user.flows' do
-    @flow.users << @user
 
-    assert_equal @user.flows.count, 1
-  end
 end

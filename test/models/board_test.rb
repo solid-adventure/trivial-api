@@ -65,4 +65,27 @@ class BoardTest < ActiveSupport::TestCase
 
     assert_equal @user.boards.count, 1
   end
+
+  test 'owner can view secret board' do
+    @board.access_level = 'secret'
+    @board.save
+    assert Board.available(@user).exists?(id: @board.id), 'Secret board owned by user should be available to user, but is not'
+  end
+
+  test 'owner can view secret board, regardless of team' do
+    @board.access_level = 'secret'
+    @board.save
+    @user.team = nil
+    @user.save
+    assert Board.available(@user).exists?(id: @board.id), 'Secret board owned by user should be available to user with no team, but is not'
+  end
+
+  test 'guest cannot view secret board' do
+    guest = User.create(name: 'test', email: 'test@test.com', password: '12345678')
+    @board.access_level = 'secret'
+    @board.save
+    assert !Board.available(guest).exists?(id: @board.id), 'Secret board not owned by user should not be visible, but is not'
+  end
+
+
 end

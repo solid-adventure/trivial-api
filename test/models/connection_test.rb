@@ -23,17 +23,17 @@ class ConnectionTest < ActiveSupport::TestCase
     @board.save!
     @flow = Flow.new
     @flow.board = @board
-    @flow.owner = @user
+    # @flow.owner = @user
     @flow.name = 'flow1'
     @flow.save!
     @stage = Stage.new
-    @stage.owner = @user
+    # @stage.owner = @user
     @stage.flow = @flow
     @stage.name = 'stage1'
     @stage.subcomponents = "[{protocol:'html', content: '<div>Hello Stage!</div>'}]"
     @stage.save!
     @stage2 = Stage.new
-    @stage2.owner = @user
+    # @stage2.owner = @user
     @stage2.flow = @flow
     @stage2.name = 'stage2'
     @stage2.subcomponents = "[{protocol:'html', content: '<div>Hello Stage2!</div>'}]"
@@ -42,6 +42,7 @@ class ConnectionTest < ActiveSupport::TestCase
     @connection.flow = @flow
     @connection.from = @stage
     @connection.to = @stage2
+    @connection.transform = "default content"
     @connection.save!
   end
 
@@ -60,14 +61,14 @@ class ConnectionTest < ActiveSupport::TestCase
     @connection.from = nil
     @connection.valid?
 
-    assert_equal @connection.errors[:from], ['must exist', "can't be blank"]
+    assert_equal @connection.errors[:from], ["can't be blank"]
   end
 
   test 'invalid without to' do
     @connection.to = nil
     @connection.valid?
 
-    assert_equal @connection.errors[:to], ['must exist', "can't be blank"]
+    assert_equal @connection.errors[:to], ["can't be blank"]
   end
 
   test 'destroy flow will destroy connection' do
@@ -76,15 +77,5 @@ class ConnectionTest < ActiveSupport::TestCase
     assert_equal Connection.count, 0
   end
 
-  test 'destroy from(stage) will destroy connection' do
-    @stage.destroy
 
-    assert_equal Connection.count, 0
-  end
-
-  test 'destroy to(stage) will destroy connection' do
-    @stage2.destroy
-
-    assert_equal Connection.count, 0
-  end
 end
