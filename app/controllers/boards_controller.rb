@@ -76,7 +76,7 @@ class BoardsController < ApplicationController
   end
 
   def board_params
-    params.permit(:name, :access_level, :contents, :description, :slug)
+    params.permit(:name, :access_level, :contents, :description, :slug, :meta_description, :featured)
   end
 
   def authenticate_board_manager!
