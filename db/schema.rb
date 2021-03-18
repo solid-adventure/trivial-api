@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_12_004951) do
+ActiveRecord::Schema.define(version: 2021_03_17_220301) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,6 +24,8 @@ ActiveRecord::Schema.define(version: 2021_03_12_004951) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "contents"
     t.text "description"
+    t.string "meta_description"
+    t.boolean "featured"
     t.index ["owner_id"], name: "index_boards_on_owner_id"
   end
 
