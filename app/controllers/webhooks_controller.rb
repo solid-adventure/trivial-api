@@ -1,5 +1,6 @@
 class WebhooksController < ApplicationController
     def index
-        render json: webhook, include: []
+        webhooks = Webhook.all
+        render json: webhooks, include: []
     end
 end
