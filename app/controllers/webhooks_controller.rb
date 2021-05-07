@@ -15,8 +15,6 @@ class WebhooksController < ApplicationController
 
     def show
         render json: webhook
-        # webhooks = Webhook.all
-        # render json: webhooks, include: []
     end
 
     def update
