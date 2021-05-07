@@ -1,6 +1,7 @@
 class WebhooksController < ApplicationController
+    skip_before_action :authenticate_user!, only: [:show, :index, :create, :update]
     def index
-        render json: Webhook.where(app_id: params[:app_id])
+        render json: webhooks
     end
     
     def create
@@ -13,8 +14,9 @@ class WebhooksController < ApplicationController
     end
 
     def show
-        webhooks = Webhook.all
-        render json: webhooks, include: []
+        render json: webhook
+        # webhooks = Webhook.all
+        # render json: webhooks, include: []
     end
 
     def update
@@ -27,15 +29,15 @@ class WebhooksController < ApplicationController
 
     private
 
-    # def webhooks
-
-    # end
+    def webhook
+        @_webhook ||= Webhook.find(params[:id])
+    end
 
     def webhooks
-        @_webhook ||= Webhook.where(app_id: params[:app_id])
+        @_webhooks ||= Webhook.where(app_id: params[:app_id])
     end
 
     def webhook_params
-        params.permit(:app_id, :source)
+        params.permit(:app_id, :payload, :source, :topic)
     end
 end
