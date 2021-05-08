@@ -14,6 +14,8 @@ Rails.application.routes.draw do
 
   resources :webhooks
 
+  resources :manifests
+
   resource :profile, only: [:show, :update]
 
   resources :members, only: [:index, :update, :show]
