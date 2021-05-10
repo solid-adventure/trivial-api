@@ -99,7 +99,13 @@ rails db:setup
 
 It will set up the databases and run migrations and seed for the project.
 
-  
+
+###  Ensure tests are passing
+```shell
+rake test
+# Finished in 3.170946s, 10.7224 runs/s, 10.7224 assertions/s.
+# 34 runs, 34 assertions, 0 failures, 0 errors, 0 skips
+```
   
 
 ## Serve
