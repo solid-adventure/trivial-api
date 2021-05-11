@@ -5,7 +5,6 @@ class ManifestTest < ActiveSupport::TestCase
         @manifest = Manifest.new
         @manifest.app_id = 'BrownShirt'
         @manifest.content = '{"x":1}'
-        @manifest.user_id = 'Juan'
         @manifest.save!
     end
 
@@ -25,12 +24,5 @@ class ManifestTest < ActiveSupport::TestCase
         @manifest.valid?
 
         assert_equal @manifest.errors[:content], ["can't be blank"]
-    end
-
-    test 'invalid without user_id' do 
-        @manifest.user_id = nil
-        @manifest.valid?
-
-        assert_equal @manifest.errors[:user_id], ["can't be blank"]
     end
 end
