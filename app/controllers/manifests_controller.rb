@@ -1,12 +1,11 @@
 class ManifestsController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:show, :index, :create, :update]
-
     def index
         render json: manifests
     end
     
     def create
         manifest = Manifest.new(manifest_params)
+        manifest.user_id = current_user.id
         if manifest.save
             render json: manifest, status: :created
         else
@@ -29,15 +28,15 @@ class ManifestsController < ApplicationController
     private
 
     def manifest
-        @_manifest ||= Manifest.find(params[:id])
+        @_manifest ||= current_user.manifests.where(id: params[:id]).limit(1).first
     end
 
     def manifests
-        @_manifests ||= Manifest.where(app_id: params[:app_id])
+        @_manifests ||= current_user.manifests.where(app_id: params[:app_id])
     end
 
     def manifest_params
-        params.permit(:app_id, :content, :owner_id)
+        params.permit(:app_id, :content)
     end
 
 end

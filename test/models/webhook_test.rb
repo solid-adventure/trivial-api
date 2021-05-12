@@ -5,6 +5,7 @@ class WebhookTest < ActiveSupport::TestCase
         @webhook = Webhook.new
         @webhook.app_id = 'BrownShirt'
         @webhook.source = 'sample'
+        @webhook.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
         @webhook.save!
     end
 
@@ -24,5 +25,12 @@ class WebhookTest < ActiveSupport::TestCase
         @webhook.valid?
 
         assert_equal @webhook.errors[:source], ["can't be blank"]
+    end
+
+    test 'invalid without user_id' do 
+        @webhook.user_id = nil
+        @webhook.valid?
+
+        assert_equal @webhook.errors[:user_id], ["can't be blank"]
     end
 end
