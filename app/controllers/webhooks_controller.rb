@@ -36,6 +36,6 @@ class WebhooksController < ApplicationController
     end
 
     def webhook_params
-        params.permit(:app_id, :payload, :source, :topic)
+        params.permit(:app_id, :payload, :source, :topic, :status)
     end
 end
