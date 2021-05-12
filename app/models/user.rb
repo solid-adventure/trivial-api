@@ -10,6 +10,8 @@ class User < ActiveRecord::Base
   belongs_to :team, optional: true
   has_many   :board, foreign_key: 'owner_id', dependent: :destroy
   has_and_belongs_to_many :boards
+  has_many :manifests
+  has_many :webhooks
 
   enum role: %i[member team_manager admin]
   enum approval: %i[pending approved rejected]

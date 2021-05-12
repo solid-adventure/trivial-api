@@ -1,11 +1,11 @@
 class WebhooksController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:show, :index, :create, :update]
     def index
         render json: webhooks
     end
     
     def create
         webhook = Webhook.new(webhook_params)
+        webhook.user_id = current_user.id
         if webhook.save
             render json: webhook, status: :created
         else
@@ -28,11 +28,12 @@ class WebhooksController < ApplicationController
     private
 
     def webhook
-        @_webhook ||= Webhook.find(params[:id])
+        @_webhook ||= current_user.webhooks.where(id: params[:id]).limit(1).first
     end
 
     def webhooks
-        @_webhooks ||= Webhook.where(app_id: params[:app_id])
+        @_webhooks ||= current_user.webhooks.where(app_id: params[:app_id])
+        @_webhooks.reverse
     end
 
     def webhook_params
