@@ -1,6 +1,4 @@
 class ManifestsController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:show, :index, :create, :update]
-
     def index
         render json: manifests
     end

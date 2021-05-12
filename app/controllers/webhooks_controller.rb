@@ -1,5 +1,4 @@
 class WebhooksController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:show, :index, :create, :update]
     def index
         render json: webhooks
     end
