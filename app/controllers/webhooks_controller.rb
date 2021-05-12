@@ -33,6 +33,7 @@ class WebhooksController < ApplicationController
 
     def webhooks
         @_webhooks ||= current_user.webhooks.where(app_id: params[:app_id])
+        @_webhooks.reverse
     end
 
     def webhook_params
