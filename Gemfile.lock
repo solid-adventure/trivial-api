@@ -226,7 +226,7 @@ DEPENDENCIES
   pg
   puma (~> 4.1)
   rack-cors
-  rails (~> 6.0.3, >= 6.0.3.4)
+  rails (~> 6.0.3, >= 6.0.3.7)
   rspec-rails
   rswag
   securerandom
