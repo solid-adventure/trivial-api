@@ -6,7 +6,7 @@ class WebhooksController < ApplicationController
     
     def create
         webhook = Webhook.new(webhook_params)
-        webhook.user_id = current_user.id
+        webhook.user_id = Manifest.where(app_id: webhook_params[:app_id])&.last.user_id
         if webhook.save
             render json: webhook, status: :created
         else
