@@ -12,7 +12,11 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resources :webhooks
+  resources :webhooks do
+    collection do
+      get 'stats'
+    end 
+  end
 
   resources :manifests
 

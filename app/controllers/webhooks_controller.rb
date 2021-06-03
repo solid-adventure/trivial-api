@@ -1,5 +1,5 @@
 class WebhooksController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:create]
+    skip_before_action :authenticate_user!, only: [:create, :stats]
     def index
         render json: webhooks
     end
@@ -24,6 +24,10 @@ class WebhooksController < ApplicationController
         else
             render_bad_request webhook
         end
+    end
+
+    def stats
+        render json: Webhook.get_chart_stats(webhook_params[:app_id])
     end
 
     private
