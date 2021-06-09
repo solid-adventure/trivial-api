@@ -27,7 +27,7 @@ class WebhooksController < ApplicationController
     end
 
     def stats
-        render json: Webhook.get_chart_stats(webhook_params[:app_id])
+        render json: Webhook.chart_stats(webhook_params[:app_id], 7)
     end
 
     private
