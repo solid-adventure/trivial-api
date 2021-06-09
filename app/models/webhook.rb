@@ -6,7 +6,6 @@ class Webhook < ApplicationRecord
     belongs_to :user
     
     def self.chart_stats(app_id, number_of_days)
-        # TODO confirm stored timestamp timezone is same as generated timestamp here
         @_chart_stats = []
         self.get_chart_stats(app_id,number_of_days)
         self.format_chart_stats(number_of_days)
