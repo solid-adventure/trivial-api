@@ -23,7 +23,7 @@ class Webhook < ApplicationRecord
             count = self.webhook_by_date(i, stats, key)
             if count.empty?
                 chart_stats.push({
-                    date: Time.parse(key.to_s).strftime("%m/%d/%Y"),
+                    date: key.strftime("%m/%d/%Y"),
                     count: {}
                 })
             else
@@ -32,7 +32,7 @@ class Webhook < ApplicationRecord
                     count_concat[c.second] = count[c]
                 end
                 chart_stats.push({
-                    date: Time.parse(key.to_s).strftime("%m/%d/%Y"),
+                    date: key.strftime("%m/%d/%Y"),
                     count: count_concat
                 })
             end
@@ -43,7 +43,7 @@ class Webhook < ApplicationRecord
     def self.webhook_by_date(index, stats, key)
         count = stats.select{ |w|
             ws = w[0].strftime("%Y-%m-%d");
-            ks = Time.parse(key.to_s).strftime("%Y-%m-%d");
+            ks = key.strftime("%Y-%m-%d");
             ws == ks
         }
     end
