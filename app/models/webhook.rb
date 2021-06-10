@@ -22,7 +22,7 @@ class Webhook < ApplicationRecord
             webhook_logged = self.webhook_by_date(i)
             if webhook_logged
                 @_chart_stats.push({
-                    date: Time.parse(@_key.to_s).strftime("%Y-%m-%d"),
+                    date: Time.parse(@_key.to_s).strftime("%m/%d/%Y"),
                     count: {}
                 })
             else
@@ -31,7 +31,7 @@ class Webhook < ApplicationRecord
                     count_concat[c.second] = @_count[c]
                 end
                 @_chart_stats.push({
-                    date: Time.parse(@_key.to_s).strftime("%Y-%m-%d"),
+                    date: Time.parse(@_key.to_s).strftime("%m/%d/%Y"),
                     count: count_concat
                 })
             end
