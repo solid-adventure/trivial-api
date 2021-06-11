@@ -10,7 +10,7 @@ class Webhook < ApplicationRecord
 
     def app_uri
       uri = URI(base_webhook_url)
-      uri.hostname = "#{app_id}.#{uri.hostname}"
+      uri.hostname = "#{app_id.to_s.downcase}.#{uri.hostname}"
       uri
     end
 
