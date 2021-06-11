@@ -1,15 +1,30 @@
+require 'uri'
+require 'net/http'
+
 class Webhook < ApplicationRecord
     validates :app_id, presence: true
     validates :user_id, presence: true
     validates :source, presence: true
 
     belongs_to :user
-    
+
+    def app_uri
+      uri = URI(base_webhook_url)
+      uri.hostname = "#{app_id.to_s.downcase}.#{uri.hostname}"
+      uri
+    end
+
+    def resend
+      res = Net::HTTP.post app_uri, payload,
+        'Content-Type' => 'application/json',
+        'X-Trivial-Original-Id' => id.to_s
+    end
+
     def self.chart_stats(app_id, number_of_days)
         return self.get_chart_stats(app_id,number_of_days)
     end
 
-    private 
+    private
 
     def self.get_chart_stats(app_id, number_of_days)
         stats = Webhook.where("app_id = ? AND created_at > ?", app_id, number_of_days.days.ago).group("DATE_TRUNC('day', created_at)").group(:status).count(:all)
@@ -46,5 +61,9 @@ class Webhook < ApplicationRecord
             ks = key.strftime("%Y-%m-%d");
             ws == ks
         }
+    end
+
+    def base_webhook_url
+      ENV['BASE_WEBHOOK_URL'] || 'http://trivialapps.io/webhooks/receive'
     end
 end
