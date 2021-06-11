@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   resources :users
 
   resources :webhooks do
+    collection do
+      get 'stats'
+    end
     post 'resend', on: :member
   end
 
