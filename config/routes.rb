@@ -12,7 +12,9 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resources :webhooks
+  resources :webhooks do
+    post 'resend', on: :member
+  end
 
   resources :manifests
 

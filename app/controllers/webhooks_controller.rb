@@ -3,7 +3,7 @@ class WebhooksController < ApplicationController
     def index
         render json: webhooks
     end
-    
+
     def create
         webhook = Webhook.new(webhook_params)
         webhook.user_id = Manifest.where(app_id: webhook_params[:app_id])&.last.user_id
@@ -26,6 +26,11 @@ class WebhooksController < ApplicationController
         end
     end
 
+    def resend
+        res = webhook.resend
+        render json: {status: res.code.to_i, message: res.message}
+    end
+
     private
 
     def webhook
@@ -33,8 +38,7 @@ class WebhooksController < ApplicationController
     end
 
     def webhooks
-        @_webhooks ||= current_user.webhooks.where(app_id: params[:app_id])
-        @_webhooks.reverse
+        @_webhooks ||= current_user.webhooks.where(app_id: params[:app_id]).order(created_at: :desc)
     end
 
     def webhook_params
