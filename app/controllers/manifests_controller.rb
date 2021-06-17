@@ -2,7 +2,7 @@ class ManifestsController < ApplicationController
     def index
         render json: manifests
     end
-    
+
     def create
         manifest = Manifest.new(manifest_params)
         manifest.user_id = current_user.id
@@ -32,7 +32,7 @@ class ManifestsController < ApplicationController
     end
 
     def manifests
-        @_manifests ||= current_user.manifests.where(app_id: params[:app_id])
+        @_manifests ||= current_user.manifests.where(app_id: params[:app_id]).order(created_at: :desc)
     end
 
     def manifest_params
