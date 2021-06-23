@@ -2,6 +2,9 @@ require 'uri'
 require 'net/http'
 
 class Webhook < ApplicationRecord
+    POLL_DELAY = 2
+    MAX_POLL_TIME = 30
+
     validates :app_id, presence: true
     validates :user_id, presence: true
     validates :source, presence: true
@@ -18,6 +21,22 @@ class Webhook < ApplicationRecord
       res = Net::HTTP.post app_uri, payload,
         'Content-Type' => 'application/json',
         'X-Trivial-Original-Id' => id.to_s
+    end
+
+    def self.wait_for_newer(user, app_id, last_seen_id = nil)
+      matches = []
+      start = Time.now
+
+      while matches.empty? && Time.now - start < MAX_POLL_TIME
+        self.uncached do
+          query = self.select(:id).where(user_id: user.id, app_id: app_id)
+          query = query.where('id > ?', last_seen_id) if last_seen_id.present?
+          matches = query.order(created_at: :desc).to_a # run the query only once
+        end
+        sleep POLL_DELAY if matches.empty?
+      end
+
+      matches
     end
 
     def self.chart_stats(app_id, number_of_days)

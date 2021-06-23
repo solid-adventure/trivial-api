@@ -35,6 +35,10 @@ class WebhooksController < ApplicationController
         render json: Webhook.chart_stats(webhook_params[:app_id], 7)
     end
 
+    def subscribe
+      render json: Webhook.wait_for_newer(current_user, params[:app_id], params[:last_seen]).to_json
+    end
+
     private
 
     def webhook
