@@ -12,6 +12,7 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :boards
   has_many :manifests
   has_many :webhooks
+  has_many :apps
 
   enum role: %i[member team_manager admin]
   enum approval: %i[pending approved rejected]

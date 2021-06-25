@@ -12,6 +12,8 @@ Rails.application.routes.draw do
 
   resources :users
 
+  resources :apps, only: [:index, :create, :show]
+
   resources :webhooks do
     collection do
       get 'stats'
