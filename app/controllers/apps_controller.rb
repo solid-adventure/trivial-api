@@ -16,7 +16,7 @@ class AppsController < ApplicationController
   private
 
   def app
-    @app ||= current_user.apps.find(params[:id])
+    @app ||= current_user.apps.find_by_name!(params[:id])
   end
 
   def apps
