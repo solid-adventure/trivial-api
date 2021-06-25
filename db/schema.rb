@@ -10,10 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_03_214723) do
+ActiveRecord::Schema.define(version: 2021_06_25_141431) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "apps", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.integer "port", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["name"], name: "index_apps_on_name", unique: true
+    t.index ["port"], name: "index_apps_on_port", unique: true
+    t.index ["user_id"], name: "index_apps_on_user_id"
+  end
 
   create_table "boards", force: :cascade do |t|
     t.bigint "owner_id"
@@ -62,6 +73,8 @@ ActiveRecord::Schema.define(version: 2021_06_03_214723) do
     t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "internal_app_id"
+    t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
   end
 
   create_table "stages", force: :cascade do |t|
@@ -107,5 +120,7 @@ ActiveRecord::Schema.define(version: 2021_06_03_214723) do
     t.json "diagnostics"
   end
 
+  add_foreign_key "apps", "users"
   add_foreign_key "boards", "users", column: "owner_id"
+  add_foreign_key "manifests", "apps", column: "internal_app_id"
 end
