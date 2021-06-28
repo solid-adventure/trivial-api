@@ -4,7 +4,7 @@ class ManifestsController < ApplicationController
     end
 
     def create
-        manifest = Manifest.new(manifest_params)
+        manifest = Manifest.new(manifest_params.merge(app: app))
         manifest.user_id = current_user.id
         if manifest.save
             render json: manifest, status: :created
@@ -37,6 +37,10 @@ class ManifestsController < ApplicationController
 
     def manifest_params
         params.permit(:app_id, :content)
+    end
+
+    def app
+      @app ||= current_user.apps.find_by_name(params[:app_id])
     end
 
 end
