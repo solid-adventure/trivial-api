@@ -1,12 +1,14 @@
 class WebhooksController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:create, :stats]
+    skip_before_action :authenticate_user!, only: [:create]
+    before_action :authenticate_app_id!, only: [:stats]
+
     def index
         render json: webhooks
     end
 
     def create
         webhook = Webhook.new(webhook_params)
-        webhook.user_id = Manifest.where(app_id: webhook_params[:app_id])&.last.user_id
+        webhook.user_id = App.find_by_name!(params[:app_id]).user_id
         if webhook.save
             render json: webhook, status: :created
         else
@@ -49,7 +51,17 @@ class WebhooksController < ApplicationController
         @_webhooks ||= current_user.webhooks.where(app_id: params[:app_id]).order(created_at: :desc)
     end
 
+    def webhook_app_id
+        @_webhook_app ||= Webhook.find_by(app_id: params[:app_id])
+    end
+
     def webhook_params
         params.permit(:app_id, :payload, :source, :topic, :status, :diagnostics)
+    end
+
+    def authenticate_app_id!
+        unless current_user.id == webhook_app_id.user_id
+            render_unauthorized 'You do not have access to this webhook!'
+        end
     end
 end
