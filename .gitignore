@@ -34,6 +34,3 @@
 # Ignore .env file
 .env
 .env.*
-
-/vendor/*
-/vendor/bundle/*
