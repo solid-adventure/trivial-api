@@ -84,6 +84,8 @@ GEM
       devise (> 3.5.2, < 5)
       rails (>= 4.2.0, < 6.2)
     diff-lcs (1.4.4)
+    discard (1.2.0)
+      activerecord (>= 4.2, < 7)
     dotenv (2.7.6)
     dotenv-rails (2.7.6)
       dotenv (= 2.7.6)
@@ -230,6 +232,7 @@ DEPENDENCIES
   bootsnap (>= 1.4.2)
   byebug
   devise_token_auth
+  discard (~> 1.2)
   dotenv-rails
   listen (~> 3.2)
   pagy
