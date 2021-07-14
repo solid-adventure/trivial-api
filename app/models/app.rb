@@ -1,4 +1,5 @@
 class App < ApplicationRecord
+  include Discard::Model
 
   MINIMUM_PORT_NUMBER = 3001
 

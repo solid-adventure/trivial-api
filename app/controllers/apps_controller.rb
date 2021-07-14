@@ -13,14 +13,23 @@ class AppsController < ApplicationController
     render json: app
   end
 
+  def destroy
+    app.discard!
+    head :ok
+  end
+
   private
 
   def app
-    @app ||= current_user.apps.find_by_name!(params[:id])
+    @app ||= current_user.apps.kept.find_by_name!(params[:id])
   end
 
   def apps
-    @apps ||= current_user.apps.order(:name)
+    if params[:include_deleted].present?
+      @apps ||= current_user.apps.order(:name)
+    else
+      @apps ||= current_user.apps.kept.order(:name)
+    end
   end
 
 end

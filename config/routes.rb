@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resources :apps, only: [:index, :create, :show]
+  resources :apps, only: [:index, :create, :show, :destroy]
 
   resources :webhooks do
     collection do
