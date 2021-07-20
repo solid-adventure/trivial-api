@@ -23,6 +23,12 @@ class Webhook < ApplicationRecord
         'X-Trivial-Original-Id' => id.to_s
     end
 
+    def self.send_new(app, payload)
+      webhook = Webhook.new app_id: app.name
+      res = Net::HTTP.post webhook.app_uri, payload,
+        'Content-Type' => 'application/json'
+    end
+
     def self.wait_for_newer(user, app_id, last_seen_id = nil)
       matches = []
       start = Time.now
@@ -83,6 +89,6 @@ class Webhook < ApplicationRecord
     end
 
     def base_webhook_url
-      ENV['BASE_WEBHOOK_URL'] || 'http://trivialapps.io/webhooks/receive'
+      ENV['BASE_WEBHOOK_URL'] || 'https://trivialapps.io/webhooks/receive'
     end
 end

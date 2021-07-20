@@ -28,6 +28,12 @@ class WebhooksController < ApplicationController
         end
     end
 
+    def send_new
+      @app = current_user.apps.kept.find_by_name!(params[:id])
+      res = Webhook.send_new @app, params[:payload].to_json
+      render json: {status: res.code.to_i, message: res.message}
+    end
+
     def resend
         res = webhook.resend
         render json: {status: res.code.to_i, message: res.message}

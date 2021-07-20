@@ -19,7 +19,10 @@ Rails.application.routes.draw do
       get 'stats'
       get 'subscribe'
     end
-    post 'resend', on: :member
+    member do
+      post 'send', action: :send_new
+      post 'resend'
+    end
   end
 
   resources :manifests
