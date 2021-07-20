@@ -44,7 +44,7 @@ class WebhooksController < ApplicationController
     private
 
     def webhook
-        @_webhook ||= current_user.webhooks.where(id: params[:id]).limit(1).first
+        @_webhook ||= current_user.webhooks.find(params[:id])
     end
 
     def webhooks
