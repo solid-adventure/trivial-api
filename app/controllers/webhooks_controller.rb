@@ -30,7 +30,7 @@ class WebhooksController < ApplicationController
 
     def send_new
       @app = current_user.apps.kept.find_by_name!(params[:id])
-      res = Webhook.send_new @app, request.raw_post
+      res = Webhook.send_new @app, params[:payload].to_json
       render json: {status: res.code.to_i, message: res.message}
     end
 
