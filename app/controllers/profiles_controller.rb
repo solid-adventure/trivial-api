@@ -7,7 +7,7 @@ class ProfilesController < ApplicationController
   end
 
   def update
-    if current_user.update(profile_params)
+    if current_user.update_with_password(profile_params)
       render json: current_user
     else
       render_bad_request  current_user
@@ -17,7 +17,7 @@ class ProfilesController < ApplicationController
   private
 
   def profile_params
-    params.permit(:name, :password, :team_id, :color_theme)
+    params.permit(:name, :password, :team_id, :color_theme, :current_password)
   end
 
   def check_current_user!
