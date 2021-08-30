@@ -10,11 +10,32 @@ class App < ApplicationRecord
 
   before_validation :set_defaults
 
+  def url
+    base = URI(App.base_url)
+    base.hostname = "#{hostname}.#{domain}"
+    base.to_s
+  end
+
+  def self.default_domain
+    URI(App.base_url).hostname
+  end
+
+  def self.default_load_balancer
+    ENV['DEFAULT_LOAD_BALANCER'] || 'staging-lb'
+  end
+
+  def self.base_url
+    ENV['BASE_URL'] || 'https://staging.trivialapps.io'
+  end
+
   private
 
   def set_defaults
     self.name = random_name unless name.present?
     self.port = next_available_port unless port.present?
+    self.hostname = name.to_s.downcase unless hostname.present?
+    self.domain = App.default_domain unless domain.present?
+    self.load_balancer = App.default_load_balancer unless load_balancer.present?
   end
 
   def random_name
