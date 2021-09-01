@@ -7,7 +7,6 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :validatable, :recoverable
   include DeviseTokenAuth::Concerns::User
 
-  attr_accessor :current_password
   belongs_to :team, optional: true
   has_many   :board, foreign_key: 'owner_id', dependent: :destroy
   has_and_belongs_to_many :boards

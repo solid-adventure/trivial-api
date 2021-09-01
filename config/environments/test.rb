@@ -37,7 +37,7 @@ Rails.application.configure do
   config.active_storage.service = :test
 
   config.action_mailer.perform_caching = false
-  config.action_mailer.default_url_options = { host: "127.0.0.1", port: 3000 }
+  config.action_mailer.default_url_options = { host: ENV['DEFAULT_URL_HOST'] || "127.0.0.1", port: ENV['DEFAULT_URL_PORT'] || 3000 }
 
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
