@@ -2,32 +2,37 @@ require 'test_helper'
 
 class WebhookTest < ActiveSupport::TestCase
     def setup
+        @app = App.new
+        @app.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
+        @app.name = 'BrownShirt'
+        @app.save!
+
         @webhook = Webhook.new
         @webhook.app_id = 'BrownShirt'
         @webhook.source = 'sample'
-        @webhook.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
+        @webhook.user = @app.user
         @webhook.save!
     end
 
-    test 'valid webhook' do 
+    test 'valid webhook' do
         assert @webhook.valid?
     end
 
-    test 'invalid without app_id' do 
+    test 'invalid without app_id' do
         @webhook.app_id = nil
         @webhook.valid?
 
         assert_equal @webhook.errors[:app_id], ["can't be blank"]
     end
 
-    test 'invalid without source' do 
+    test 'invalid without source' do
         @webhook.source = nil
         @webhook.valid?
 
         assert_equal @webhook.errors[:source], ["can't be blank"]
     end
 
-    test 'invalid without user_id' do 
+    test 'invalid without user_id' do
         @webhook.user_id = nil
         @webhook.valid?
 

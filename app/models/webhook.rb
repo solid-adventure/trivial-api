@@ -10,11 +10,18 @@ class Webhook < ApplicationRecord
     validates :source, presence: true
 
     belongs_to :user
+    belongs_to :app, primary_key: :name
 
     def app_uri
-      uri = URI(base_webhook_url)
-      uri.hostname = "#{app_id.to_s.downcase}.#{uri.hostname}"
-      uri
+      uri = URI(app.url)
+      uri + webhook_path
+    end
+
+    def webhook_path
+      manifest = ActiveSupport::JSON.decode(
+        app.manifests.order(created_at: :desc).first.try(:content) || 'null'
+      )
+      manifest.try(:[], 'listen_at').try(:[], 'path') || '/webhooks/receive'
     end
 
     def resend
@@ -87,8 +94,4 @@ class Webhook < ApplicationRecord
             ws == ks
         }
     end
-
-    def base_webhook_url
-      ENV['BASE_WEBHOOK_URL'] || 'https://trivialapps.io/webhooks/receive'
-    end
-end
+  end
