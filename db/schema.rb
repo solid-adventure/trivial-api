@@ -111,7 +111,11 @@ ActiveRecord::Schema.define(version: 2021_08_30_140625) do
     t.integer "approval", default: 0, null: false
     t.string "color_theme"
     t.string "reset_password_token"
+<<<<<<< HEAD
+    t.datetime "reset_password_sent_at"
+=======
     t.datetime "reset_password_token_sent_at"
+>>>>>>> main
     t.boolean "allow_password_change", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

@@ -37,6 +37,7 @@ Rails.application.configure do
   config.active_storage.service = :test
 
   config.action_mailer.perform_caching = false
+  config.action_mailer.default_url_options = { host: ENV['DEFAULT_URL_HOST'] || "127.0.0.1", port: ENV['DEFAULT_URL_PORT'] || 3000 }
 
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
@@ -48,4 +49,13 @@ Rails.application.configure do
 
   # Raises error for missing translations.
   # config.action_view.raise_on_missing_translations = true
+  ActionMailer::Base.smtp_settings = {
+  :port           => ENV['MAILGUN_SMTP_PORT'],
+  :address        => ENV['MAILGUN_SMTP_SERVER'],
+  :user_name      => ENV['MAILGUN_SMTP_LOGIN'],
+  :password       => ENV['MAILGUN_SMTP_PASSWORD'],
+  :domain         => 'withtrivial.com',
+  :authentication => :plain,
+  }
+  ActionMailer::Base.delivery_method = :smtp
 end

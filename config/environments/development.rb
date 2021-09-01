@@ -34,6 +34,8 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = false
 
   config.action_mailer.perform_caching = false
+  config.action_mailer.default_options = { from: 'noreply@mycustomdomain.com' }
+  config.action_mailer.default_url_options = { host: ENV['DEFAULT_URL_HOST'] || "127.0.0.1", port: ENV['DEFAULT_URL_PORT'] || 3000 }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
@@ -50,4 +52,13 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  ActionMailer::Base.smtp_settings = {
+  :port           => ENV['MAILGUN_SMTP_PORT'],
+  :address        => ENV['MAILGUN_SMTP_SERVER'],
+  :user_name      => ENV['MAILGUN_SMTP_LOGIN'],
+  :password       => ENV['MAILGUN_SMTP_PASSWORD'],
+  :domain         => 'withtrivial.com',
+  :authentication => :plain,
+  }
+  ActionMailer::Base.delivery_method = :smtp
 end
