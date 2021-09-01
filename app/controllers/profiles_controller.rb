@@ -17,7 +17,7 @@ class ProfilesController < ApplicationController
   private
 
   def profile_params
-    params.permit(:name, :password, :team_id, :color_theme)
+    params.permit(:name, :team_id, :color_theme)
   end
 
   def check_current_user!
