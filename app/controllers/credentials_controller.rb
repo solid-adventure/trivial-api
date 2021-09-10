@@ -39,7 +39,8 @@ class CredentialsController < ApplicationController
     if has_credentials?
       aws_client.put_secret_value secret_id: secret_name, secret_string: payload
     else
-      aws_client.create_secret name: secret_name, secret_string: payload
+      res = aws_client.create_secret name: secret_name, secret_string: payload
+      add_credential_policy res.arn
     end
   end
 
@@ -48,6 +49,23 @@ class CredentialsController < ApplicationController
     true
   rescue Aws::SecretsManager::Errors::ResourceNotFoundException
     false
+  end
+
+  def add_credential_policy(arn)
+    policy = ActiveSupport::JSON.encode(default_policy(arn))
+    aws_client.put_resource_policy secret_id: secret_name, resource_policy: policy
+  end
+
+  def default_policy(arn)
+    {
+      Version: '2012-10-17',
+      Statement: [{
+        Effect: 'Allow',
+        Principal: {AWS: ENV['LAMBDA_ROLE']},
+        Action: 'secretsmanager:GetSecretValue',
+        Resource: arn
+      }]
+    }
   end
 
 end
