@@ -5,8 +5,12 @@ class AppsController < ApplicationController
   end
 
   def create
-    @app = App.create! user: current_user
-    render json: @app
+    @app = App.new(app_params)! user: current_user
+    if @app.save
+      render json: @app
+    else
+      render_bad_request app
+    end
   end
 
   def show
@@ -18,6 +22,9 @@ class AppsController < ApplicationController
     head :ok
   end
 
+  def name_suggestion
+    render json: Spicy::Proton.pair('_').camelize
+  end
   private
 
   def app
@@ -32,4 +39,7 @@ class AppsController < ApplicationController
     end
   end
 
+  def app_params
+    params.permit(:hostname)
+  end
 end
