@@ -12,7 +12,9 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resources :apps, only: [:index, :create, :show, :destroy]
+  resources :apps, only: [:index, :create, :show, :destroy] do
+    resource :credentials, only: [:show, :update]
+  end
 
   resources :webhooks do
     collection do
