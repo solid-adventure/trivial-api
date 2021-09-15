@@ -1,16 +1,16 @@
 class AppsController < ApplicationController
 
   def index
-    render json: apps.to_json
+    render json: apps.as_json(methods: [:aws_role])
   end
 
   def create
     @app = App.create! user: current_user
-    render json: @app
+    render json: @app.as_json(methods: [:aws_role])
   end
 
   def show
-    render json: app
+    render json: app.as_json(methods: [:aws_role])
   end
 
   def destroy

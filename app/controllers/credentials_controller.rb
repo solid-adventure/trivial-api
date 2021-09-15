@@ -61,7 +61,7 @@ class CredentialsController < ApplicationController
       Version: '2012-10-17',
       Statement: [{
         Effect: 'Allow',
-        Principal: {AWS: ENV['LAMBDA_ROLE']},
+        Principal: {AWS: app.aws_role},
         Action: 'secretsmanager:GetSecretValue',
         Resource: arn
       }]

@@ -16,6 +16,10 @@ class App < ApplicationRecord
     base.to_s
   end
 
+  def aws_role
+    user.ensure_aws_role!
+  end
+
   def self.default_domain
     URI(App.base_url).hostname
   end

@@ -70,6 +70,9 @@ GEM
       aws-partitions (~> 1, >= 1.239.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
+    aws-sdk-iam (1.60.0)
+      aws-sdk-core (~> 3, >= 3.120.0)
+      aws-sigv4 (~> 1.1)
     aws-sdk-secretsmanager (1.49.0)
       aws-sdk-core (~> 3, >= 3.120.0)
       aws-sigv4 (~> 1.1)
@@ -242,6 +245,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_model_serializers
+  aws-sdk-iam (~> 1)
   aws-sdk-secretsmanager (~> 1)
   bootsnap (>= 1.4.2)
   byebug
