@@ -1,6 +1,5 @@
 class UsersController < ApplicationController
   before_action :authenticate_admin!
-  before_action :validate_user_params!, only: [:update]
 
   def index
     render json: User.all
@@ -28,11 +27,7 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    if user.team_manager?
-      render_unprocessable 'You cannot delete a team manager!'
-    else
       user.destroy
-    end
   end
 
   private
@@ -42,16 +37,7 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.permit(:name, :email, :password, :team_id, :role, :approval)
+    params.permit(:name, :email, :password, :role, :approval)
   end
-
-  def validate_user_params!
-    if user.team_manager?
-      if user_params.key?(:team_id) && user_params[:team_id].to_i != user.team_id
-        render_errors ['You can not change team for a manager']
-      elsif user_params.key?(:role) && user_params[:role] != user.role
-        render_errors ['You can not change role for a manager']
-      end
-    end
-  end
+  
 end

@@ -4,27 +4,16 @@ require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
   def setup
-    @team = Team.new
-    @team.name = 'team3'
-    @team.save!
     @user = User.new
     @user.name = 'user'
     @user.email = 'user@email.com'
     @user.role = 'member'
     @user.password = '12345678'
-    @user.team = @team
     @user.approval = 'approved'
   end
 
   test 'valid user' do
     assert @user.valid?
-  end
-
-  test 'valid without team' do
-    @user.team = nil
-    @user.valid?
-
-    assert_equal @user.errors[:team], []
   end
 
   test 'invalid without password' do
@@ -60,11 +49,4 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
-  test 'delete team will change user team to nil' do
-    @user.save!
-    @team.users << @user
-    @team.destroy
-    @user.reload
-    assert_nil @user.team
-  end
 end

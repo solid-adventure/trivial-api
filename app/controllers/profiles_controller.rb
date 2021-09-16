@@ -1,5 +1,4 @@
 class ProfilesController < ApplicationController
-  before_action :check_current_user!, only: :update
   after_action  :make_pending, only: :update
 
   def show
@@ -17,13 +16,7 @@ class ProfilesController < ApplicationController
   private
 
   def profile_params
-    params.permit(:name, :team_id, :color_theme)
-  end
-
-  def check_current_user!
-    if params[:team_id].present? && current_user.team_id != params[:team_id] && !current_user.member?
-      render_unprocessable "You cannot change your team!"
-    end
+    params.permit(:name, :color_theme)
   end
 
   def make_pending
