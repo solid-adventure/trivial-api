@@ -7,11 +7,8 @@ class AppsController < ApplicationController
   def create
     @app = App.new(app_params)
     @app.user = current_user
-    if @app.save
-      render json: @app
-    else
-      render_bad_request app
-    end
+    @app.save!
+    render json: @app
   end
 
   def show
@@ -19,11 +16,8 @@ class AppsController < ApplicationController
   end
 
   def update 
-    if app.update(app_params)
-      render json: app
-    else
-      render_bad_request app
-    end
+    @app.update!(app_params)
+    render json: app
   end
 
   def destroy
@@ -32,7 +26,7 @@ class AppsController < ApplicationController
   end
 
   def name_suggestion
-    render plain: Spicy::Proton.pair('_').camelize
+    render json: {suggestion: Spicy::Proton.pair('_').camelize}
   end
   private
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_14_185617) do
+ActiveRecord::Schema.define(version: 2021_09_15_145314) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(version: 2021_09_14_185617) do
     t.string "hostname", null: false
     t.string "domain", null: false
     t.string "load_balancer", null: false
-    t.string "descriptive_name"
+    t.string "descriptive_name", null: false
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true
@@ -114,6 +114,7 @@ ActiveRecord::Schema.define(version: 2021_09_14_185617) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.boolean "allow_password_change", default: false
+    t.string "aws_role"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
