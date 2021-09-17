@@ -16,7 +16,7 @@ class AppsController < ApplicationController
   end
 
   def update 
-    @app.update!(app_params)
+    app.update!(app_params)
     render json: app
   end
 
