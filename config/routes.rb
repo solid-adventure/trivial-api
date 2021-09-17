@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resources :apps, only: [:index, :create, :show, :destroy] do
+  resources :apps, only: [:index, :create, :update, :show, :destroy] do
     collection do
       get 'name_suggestion' 
     end

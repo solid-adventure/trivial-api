@@ -18,6 +18,14 @@ class AppsController < ApplicationController
     render json: app
   end
 
+  def update 
+    if app.update(app_params)
+      render json: app
+    else
+      render_bad_request app
+    end
+  end
+
   def destroy
     app.discard!
     head :ok
