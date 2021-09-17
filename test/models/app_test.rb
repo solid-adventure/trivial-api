@@ -3,6 +3,7 @@ require 'test_helper'
 class AppTest < ActiveSupport::TestCase
     def setup
       @user = User.create!(name: 'test', email: 'test@example.test', password: 'password')
+      @user2 = User.create!(name: 'test2', email: 'test2@example.test', password: 'password2')
       @existing = App.create!(user: @user)
       @app = App.new(user: @user)
     end
@@ -34,5 +35,12 @@ class AppTest < ActiveSupport::TestCase
     test 'invalid with duplicate port' do
       @app.port = @existing.port
         assert ! @app.valid?
+    end
+
+    test 'assigns different roles to apps under different users' do
+      Role.stub :create!, -> (n) { Role.new(name: n[:name], arn: "arn:x:#{n[:name]}") } do
+        @other_app = App.new(user: @user2)
+        assert_not_equal @app.aws_role, @other_app.aws_role
+      end
     end
   end
