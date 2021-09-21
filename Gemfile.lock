@@ -63,6 +63,21 @@ GEM
       zeitwerk (~> 2.2, >= 2.2.2)
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
+    aws-eventstream (1.2.0)
+    aws-partitions (1.498.0)
+    aws-sdk-core (3.121.0)
+      aws-eventstream (~> 1, >= 1.0.2)
+      aws-partitions (~> 1, >= 1.239.0)
+      aws-sigv4 (~> 1.1)
+      jmespath (~> 1.0)
+    aws-sdk-iam (1.60.0)
+      aws-sdk-core (~> 3, >= 3.120.0)
+      aws-sigv4 (~> 1.1)
+    aws-sdk-secretsmanager (1.49.0)
+      aws-sdk-core (~> 3, >= 3.120.0)
+      aws-sigv4 (~> 1.1)
+    aws-sigv4 (1.4.0)
+      aws-eventstream (~> 1, >= 1.0.2)
     bcrypt (3.1.16)
     bindata (2.4.10)
     bootsnap (1.7.5)
@@ -96,6 +111,7 @@ GEM
       activesupport (>= 4.2.0)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
+    jmespath (1.4.0)
     json-schema (2.8.1)
       addressable (>= 2.4)
     jsonapi-renderer (0.2.2)
@@ -229,6 +245,8 @@ PLATFORMS
 
 DEPENDENCIES
   active_model_serializers
+  aws-sdk-iam (~> 1)
+  aws-sdk-secretsmanager (~> 1)
   bootsnap (>= 1.4.2)
   byebug
   devise_token_auth

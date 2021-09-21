@@ -1,7 +1,7 @@
 class AppsController < ApplicationController
 
   def index
-    render json: apps.to_json
+    render json: apps.as_json(methods: [:aws_role]).to_json
   end
 
   def create
@@ -12,7 +12,7 @@ class AppsController < ApplicationController
   end
 
   def show
-    render json: app
+    render json: app.as_json(methods: [:aws_role])
   end
 
   def update 

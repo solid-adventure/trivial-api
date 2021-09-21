@@ -16,6 +16,14 @@ class App < ApplicationRecord
     base.to_s
   end
 
+  def aws_role
+    user.ensure_aws_role!
+  end
+
+  def credentials
+    @credentials ||= Credentials.find_or_build_by_app_and_name self, credentials_name
+  end
+
   def self.default_domain
     URI(App.base_url).hostname
   end
@@ -29,6 +37,10 @@ class App < ApplicationRecord
   end
 
   private
+
+  def credentials_name
+    "credentials/#{name}"
+  end
 
   def set_defaults
     self.name = random_name unless name.present?
