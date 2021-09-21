@@ -7,7 +7,7 @@ class App < ApplicationRecord
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
 
   validates :name, :port, presence: true, uniqueness: true
-
+  validates :descriptive_name, presence: true, length: {minimum:3}, uniqueness: true
   before_validation :set_defaults
 
   def url

@@ -25,6 +25,8 @@ ActiveRecord::Schema.define(version: 2021_09_15_145314) do
     t.string "hostname", null: false
     t.string "domain", null: false
     t.string "load_balancer", null: false
+    t.string "descriptive_name", null: false
+    t.index ["descriptive_name"], name: "index_apps_on_descriptive_name", unique: true
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true

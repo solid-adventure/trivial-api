@@ -5,12 +5,19 @@ class AppsController < ApplicationController
   end
 
   def create
-    @app = App.create! user: current_user
-    render json: @app.as_json(methods: [:aws_role])
+    @app = App.new(app_params)
+    @app.user = current_user
+    @app.save!
+    render json: @app
   end
 
   def show
     render json: app.as_json(methods: [:aws_role])
+  end
+
+  def update 
+    app.update!(app_params)
+    render json: app
   end
 
   def destroy
@@ -18,6 +25,9 @@ class AppsController < ApplicationController
     head :ok
   end
 
+  def name_suggestion
+    render json: {suggestion: Spicy::Proton.pair('_').camelize}
+  end
   private
 
   def app
@@ -32,4 +42,7 @@ class AppsController < ApplicationController
     end
   end
 
+  def app_params
+    params.permit(:descriptive_name)
+  end
 end
