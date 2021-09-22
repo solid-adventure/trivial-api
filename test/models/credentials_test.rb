@@ -3,7 +3,7 @@ require 'test_helper'
 class CredentialsTest < ActiveSupport::TestCase
   def setup
     @user = User.create!(name: 'test', email: 'test@example.test', password: 'password')
-    @app = App.create!(user: @user)
+    @app = App.create!(user: @user, descriptive_name: 'App')
   end
 
   test 'grants permission to the app\'s role' do

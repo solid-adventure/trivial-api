@@ -4,8 +4,8 @@ class AppTest < ActiveSupport::TestCase
     def setup
       @user = User.create!(name: 'test', email: 'test@example.test', password: 'password')
       @user2 = User.create!(name: 'test2', email: 'test2@example.test', password: 'password2')
-      @existing = App.create!(user: @user)
-      @app = App.new(user: @user)
+      @existing = App.create!(user: @user, descriptive_name: 'Existing App')
+      @app = App.new(user: @user, descriptive_name: 'New App')
     end
 
     test 'passes validation with all required files' do
@@ -37,9 +37,16 @@ class AppTest < ActiveSupport::TestCase
         assert ! @app.valid?
     end
 
+    test 'invalid without descriptive name' do
+      @app.descriptive_name = nil
+      @app.valid?
+
+      assert_equal @app.errors[:descriptive_name], ["can't be blank", 'is too short (minimum is 3 characters)']
+    end
+
     test 'assigns different roles to apps under different users' do
       Role.stub :create!, -> (n) { Role.new(name: n[:name], arn: "arn:x:#{n[:name]}") } do
-        @other_app = App.new(user: @user2)
+        @other_app = App.new(user: @user2, descriptive_name: 'Other App')
         assert_not_equal @app.aws_role, @other_app.aws_role
       end
     end
