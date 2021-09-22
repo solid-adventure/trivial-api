@@ -5,6 +5,7 @@ class WebhookTest < ActiveSupport::TestCase
         @app = App.new
         @app.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
         @app.name = 'BrownShirt'
+        @app.descriptive_name = 'Brown Shirt'
         @app.save!
 
         @webhook = Webhook.new
