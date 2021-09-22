@@ -8,14 +8,14 @@ class AppsController < ApplicationController
     @app = App.new(app_params)
     @app.user = current_user
     @app.save!
-    render json: @app
+    render json: @app.as_json(methods: [:aws_role])
   end
 
   def show
     render json: app.as_json(methods: [:aws_role])
   end
 
-  def update 
+  def update
     app.update!(app_params)
     render json: app
   end
