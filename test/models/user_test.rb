@@ -37,6 +37,13 @@ class UserTest < ActiveSupport::TestCase
     assert_equal @user.errors[:name], ["can't be blank", 'is too short (minimum is 3 characters)']
   end
 
+  test 'invalid without descriptive name' do
+    @user.descriptive_name = nil
+    @user.valid?
+
+    assert_equal @user.errors[:descriptive_name], ["can't be blank", 'is too short (minimum is 3 characters)']
+  end
+
   test 'invalid role input fails' do
     assert_raises(ArgumentError) do
       @user.role = 'abc'

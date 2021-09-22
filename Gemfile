@@ -45,6 +45,7 @@ gem 'spicy-proton'
 
 gem 'discard', '~> 1.2'
 
+gem 'aws-sdk-iam', '~> 1'
 gem 'aws-sdk-secretsmanager', '~> 1'
 
 group :development, :test do

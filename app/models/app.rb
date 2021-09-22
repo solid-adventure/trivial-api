@@ -7,13 +7,21 @@ class App < ApplicationRecord
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
 
   validates :name, :port, presence: true, uniqueness: true
-
+  validates :descriptive_name, presence: true, length: {minimum:3}, uniqueness: true
   before_validation :set_defaults
 
   def url
     base = URI(App.base_url)
     base.hostname = "#{hostname}.#{domain}"
     base.to_s
+  end
+
+  def aws_role
+    user.ensure_aws_role!
+  end
+
+  def credentials
+    @credentials ||= Credentials.find_or_build_by_app_and_name self, credentials_name
   end
 
   def self.default_domain
@@ -29,6 +37,10 @@ class App < ApplicationRecord
   end
 
   private
+
+  def credentials_name
+    "credentials/#{name}"
+  end
 
   def set_defaults
     self.name = random_name unless name.present?
