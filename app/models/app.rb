@@ -1,5 +1,6 @@
 class App < ApplicationRecord
   include Discard::Model
+  include Suggestable
 
   MINIMUM_PORT_NUMBER = 3001
 
@@ -53,7 +54,7 @@ class App < ApplicationRecord
   end
 
   def random_name
-    Spicy::Proton.pair('_').camelize
+    name_suggestion
   end
 
   def next_available_port
