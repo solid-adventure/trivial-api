@@ -54,7 +54,8 @@ class App < ApplicationRecord
   end
 
   def random_name
-    name_suggestion
+    proposed = SecureRandom.hex(7)
+    App.where(name: proposed).size > 0 ? random_name : proposed
   end
 
   def next_available_port

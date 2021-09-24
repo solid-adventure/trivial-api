@@ -1,5 +1,9 @@
 class AppsController < ApplicationController
 
+
+  # TEMP -- DO NOT COMMIT
+  skip_before_action :authenticate_user!, only: [:name_suggestion]
+
   def index
     render json: apps.as_json(methods: [:aws_role]).to_json
   end

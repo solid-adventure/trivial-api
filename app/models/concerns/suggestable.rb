@@ -2,10 +2,10 @@ module Suggestable
 	extend ActiveSupport::Concern
 
 	def name_suggestion
-		"#{positive_adjectives.sample.capitalize} #{inspirational_nouns.sample.capitalize}"
+		"#{PositiveAdjectives.sample} #{InspirationalNouns.sample}".titleize
 	end
 
-	def positive_adjectives
+	PositiveAdjectives =
 		%w(
 			admirable
 			amazing
@@ -90,14 +90,13 @@ module Suggestable
 			swanky
 			terrific
 			tremendous
-			very good
+			very\ good
 			wild
 			wonderful
 			wondrous
 		)
-	end
 
-	def inspirational_nouns
+	InspirationalNouns =
 		%w(
 			accomplishment
 			accord
@@ -268,6 +267,5 @@ module Suggestable
 			Wisdom
 			world
 		)
-	end
 
 end
