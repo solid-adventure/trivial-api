@@ -41,6 +41,8 @@ gem 'rswag'
 
 gem 'rspec-rails'
 
+gem 'spicy-proton'
+
 gem 'discard', '~> 1.2'
 
 gem 'aws-sdk-iam', '~> 1'
