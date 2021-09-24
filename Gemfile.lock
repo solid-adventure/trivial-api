@@ -79,7 +79,6 @@ GEM
     aws-sigv4 (1.4.0)
       aws-eventstream (~> 1, >= 1.0.2)
     bcrypt (3.1.16)
-    bindata (2.4.10)
     bootsnap (1.7.5)
       msgpack (~> 1.0)
     builder (3.2.4)
@@ -213,8 +212,6 @@ GEM
       actionpack (>= 3.1, < 7.0)
       railties (>= 3.1, < 7.0)
     securerandom (0.1.0)
-    spicy-proton (2.1.11)
-      bindata (~> 2.3)
     spring (2.1.1)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -261,7 +258,6 @@ DEPENDENCIES
   rspec-rails
   rswag
   securerandom
-  spicy-proton
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data
