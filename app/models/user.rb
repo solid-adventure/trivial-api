@@ -26,7 +26,7 @@ class User < ActiveRecord::Base
 
   def active_for_authentication?
     ensure_aws_role!
-    true
+    super
   end
 
   private
