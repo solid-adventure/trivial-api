@@ -69,7 +69,7 @@ module Suggestable
 			proud
 			radiant
 			remarkable
-			respendent
+			resplendent
 			sensational
 			Simple
 			skillful
