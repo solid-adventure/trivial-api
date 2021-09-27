@@ -24,6 +24,11 @@ class User < ActiveRecord::Base
     aws_role
   end
 
+  def active_for_authentication?
+    ensure_aws_role!
+    true
+  end
+
   private
 
   def set_values_for_individual
