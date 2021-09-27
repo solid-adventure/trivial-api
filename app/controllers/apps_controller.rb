@@ -26,7 +26,7 @@ class AppsController < ApplicationController
   end
 
   def name_suggestion
-    render json: {suggestion: Spicy::Proton.pair('_').camelize}
+    render json: {suggestion: App.new.name_suggestion}
   end
   private
 
