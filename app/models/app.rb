@@ -40,7 +40,15 @@ class App < ApplicationRecord
   end
 
   def self.hourly_stats(user)
-    period_stats user, 'minute', 1.hour.ago
+    period_stats user, 'minute', 1.hour.ago.beginning_of_minute, Time.now.utc.beginning_of_minute
+  end
+
+  def self.daily_stats(user)
+    period_stats user, 'hour', 1.day.ago.beginning_of_hour, Time.now.utc.beginning_of_hour
+  end
+
+  def self.weekly_stats(user)
+    period_stats user, 'day', 1.week.ago.beginning_of_day, Time.now.utc.beginning_of_day
   end
 
   private
@@ -66,7 +74,7 @@ class App < ApplicationRecord
     App.maximum(:port).try(:next) || MINIMUM_PORT_NUMBER
   end
 
-  def self.period_stats(user, interval_name, since_time)
+  def self.period_stats(user, interval_name, since_time, until_time)
     rows = connection.exec_query(<<-SQL)
     SELECT
       a.id,
@@ -79,7 +87,8 @@ class App < ApplicationRecord
     FROM apps a
     LEFT OUTER JOIN webhooks w ON
       w.app_id=a.name
-      AND w.created_at >= #{connection.quote since_time}
+      AND date_trunc(#{connection.quote interval_name}, w.created_at) >= #{connection.quote since_time}
+      AND date_trunc(#{connection.quote interval_name}, w.created_at) <= #{connection.quote until_time}
     WHERE
       a.user_id = #{connection.quote user.id}
       AND a.discarded_at IS NULL
@@ -108,7 +117,7 @@ class App < ApplicationRecord
       } unless row['period'].nil?
     end
 
-    {start_range: since_time, end_range: Time.now.utc, stats: out}
+    {start_range: since_time, end_range: until_time, stats: out}
   end
 
 end

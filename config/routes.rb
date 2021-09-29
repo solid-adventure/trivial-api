@@ -17,6 +17,8 @@ Rails.application.routes.draw do
     collection do
       get 'name_suggestion'
       get 'stats/hourly'
+      get 'stats/daily'
+      get 'stats/weekly'
     end
   end
 
