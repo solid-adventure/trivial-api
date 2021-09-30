@@ -66,8 +66,6 @@ class WebhooksController < ApplicationController
     end
 
     def authenticate_app_id!
-        unless current_user.id == webhook_app_id.user_id
-            render_unauthorized 'You do not have access to this webhook!'
-        end
+      current_user.apps.kept.find_by_name!(webhook_params[:app_id])
     end
 end

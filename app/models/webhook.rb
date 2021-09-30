@@ -3,7 +3,7 @@ require 'net/http'
 
 class Webhook < ApplicationRecord
     POLL_DELAY = 2
-    MAX_POLL_TIME = 30
+    MAX_POLL_TIME = 28
 
     validates :app_id, presence: true
     validates :user_id, presence: true
