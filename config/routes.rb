@@ -14,6 +14,9 @@ Rails.application.routes.draw do
     resource :credentials, only: [:show, :update]
     collection do
       get 'name_suggestion'
+      get 'stats/hourly'
+      get 'stats/daily'
+      get 'stats/weekly'
     end
   end
 
