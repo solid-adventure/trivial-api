@@ -8,8 +8,6 @@ Rails.application.routes.draw do
     sessions: 'overrides/sessions'
   }, skip: [:token_validations]
 
-  resources :teams
-
   resources :users
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
@@ -37,18 +35,5 @@ Rails.application.routes.draw do
   resources :manifests
 
   resource :profile, only: [:show, :update]
-
-  resources :members, only: [:index, :update, :show]
-
-  resources :boards do
-    member do
-      post :clone
-    end
-
-    resources :flows, except: :index do
-      resources :stages, except: :index
-      resources :connections, except: :index
-    end
-  end
 
 end
