@@ -56,8 +56,8 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "api_production"
 
   config.action_mailer.perform_caching = true
-  config.action_mailer.default_options = { from: 'noreply@mycustomdomain.com' }
-  config.action_mailer.default_url_options = { host: "https://withtrivial.com"}
+  config.action_mailer.default_options = { from: 'noreply@mg.trivialapps.io' }
+  config.action_mailer.default_url_options = { host: "https://trivial-api-production.herokuapp.com" }
 
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -112,7 +112,7 @@ Rails.application.configure do
   :address        => ENV['MAILGUN_SMTP_SERVER'],
   :user_name      => ENV['MAILGUN_SMTP_LOGIN'],
   :password       => ENV['MAILGUN_SMTP_PASSWORD'],
-  :domain         => 'withtrivial.com',
+  :domain         => 'mg.trivialapps.io',
   :authentication => :plain,
   }
   ActionMailer::Base.delivery_method = :smtp
