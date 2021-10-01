@@ -36,9 +36,9 @@ class AppsController < ApplicationController
 
   def apps
     if params[:include_deleted].present?
-      @apps ||= current_user.apps.order(:name)
+      @apps ||= current_user.apps.order(:descriptive_name)
     else
-      @apps ||= current_user.apps.kept.order(:name)
+      @apps ||= current_user.apps.kept.order(:descriptive_name)
     end
   end
 
