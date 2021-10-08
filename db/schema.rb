@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_16_225706) do
+ActiveRecord::Schema.define(version: 2021_10_06_185846) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,6 +31,22 @@ ActiveRecord::Schema.define(version: 2021_09_16_225706) do
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
+  end
+
+  create_table "manifest_drafts", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "app_id", null: false
+    t.bigint "manifest_id", null: false
+    t.jsonb "content"
+    t.string "action"
+    t.uuid "token", null: false
+    t.datetime "expires_at", precision: 6, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["app_id"], name: "index_manifest_drafts_on_app_id"
+    t.index ["manifest_id"], name: "index_manifest_drafts_on_manifest_id"
+    t.index ["token"], name: "index_manifest_drafts_on_token", unique: true
+    t.index ["user_id"], name: "index_manifest_drafts_on_user_id"
   end
 
   create_table "manifests", force: :cascade do |t|
@@ -77,5 +93,8 @@ ActiveRecord::Schema.define(version: 2021_09_16_225706) do
   end
 
   add_foreign_key "apps", "users"
+  add_foreign_key "manifest_drafts", "apps"
+  add_foreign_key "manifest_drafts", "manifests"
+  add_foreign_key "manifest_drafts", "users"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
 end

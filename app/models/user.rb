@@ -10,6 +10,7 @@ class User < ActiveRecord::Base
   has_many :manifests
   has_many :webhooks
   has_many :apps
+  has_many :manifest_drafts
 
   enum role: %i[member admin]
   enum approval: %i[pending approved rejected]

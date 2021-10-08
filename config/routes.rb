@@ -32,7 +32,14 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :manifests
+  resources :manifests do
+    resources :drafts, only: [:create, :update, :show], controller: :manifest_drafts do
+      member do
+        get 'credentials'
+        put 'credentials', action: :update_credentials
+      end
+    end
+  end
 
   resource :profile, only: [:show, :update]
 
