@@ -34,7 +34,19 @@ class ManifestDraftsController < ApplicationController
   end
 
   def manifest_draft_params
-    params.require(:manifest_draft).permit(:action, content: {})
+    # This should be as easy as:
+    #
+    #   params.require(:manifest_draft).permit(:action, content: {})
+    #
+    # However, in that approach, strong parameters strips nested
+    # arrays from the 'content' parameter. That effectively removes
+    # all of the transformation steps from the manifest, so the
+    # following permits the entire manifest without altering it.
+    draft = params.require(:manifest_draft)
+    {
+      action: draft[:action],
+      content: ActiveSupport::JSON::decode(draft[:content].to_json)
+    }
   end
 
 end
