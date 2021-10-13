@@ -55,6 +55,21 @@ class Credentials
     end
   end
 
+  def drafts
+    secret_value['$drafts'] || {}
+  end
+
+  def draft_by_token(token)
+    draft = drafts[token] || {'value' => {}}
+    draft['value']
+  end
+
+  def add_draft(token, expires, value)
+    all_drafts = drafts
+    all_drafts[token] = {'expires' => expires.to_i, 'value' => value}
+    secret_value['$drafts'] = all_drafts
+  end
+
   def self.exists?(criteria = {})
     criteria = criteria.stringify_keys
     aws_client.describe_secret secret_id: criteria['name']
@@ -69,7 +84,7 @@ class Credentials
       app: app,
       name: secret.name,
       arn: secret.arn,
-      secret_value: ActiveSupport::JSON.decode(secret.secret_string)
+      secret_value: prune_drafts(ActiveSupport::JSON.decode(secret.secret_string))
     )
   end
 
@@ -82,7 +97,7 @@ class Credentials
   private
 
   def secret_value_json
-    secret_value.to_json
+    self.class.prune_drafts(secret_value).to_json
   end
 
   def aws_client
@@ -91,6 +106,14 @@ class Credentials
 
   def self.aws_client
     @aws_client ||= Aws::SecretsManager::Client.new
+  end
+
+  def self.prune_drafts(secret)
+    if secret.has_key?('$drafts')
+      secret['$drafts'] = secret['$drafts'].filter{|k,v| v['expires'] > Time.now.to_i}
+      secret.delete('$drafts') if secret['$drafts'].empty?
+    end
+    secret
   end
 
 end
