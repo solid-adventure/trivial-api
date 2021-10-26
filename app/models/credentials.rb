@@ -105,7 +105,7 @@ class Credentials
   end
 
   def self.aws_client
-    @aws_client ||= Aws::SecretsManager::Client.new
+    Aws::SecretsManager::Client.new
   end
 
   def self.prune_drafts(secret)

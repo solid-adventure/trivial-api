@@ -1,6 +1,6 @@
 require 'swagger_helper'
 
-describe 'Auth API' do
+describe 'Auth API', skip: true do
 
   path '/auth' do
 
@@ -113,7 +113,7 @@ describe 'Auth API' do
   end
 
   path '/auth/sign_out' do
-    
+
     delete 'Sign out a user' do
       tags 'Auth'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
@@ -151,10 +151,10 @@ describe 'Auth API' do
 
 end
 
-describe 'Teams API' do
+describe 'Teams API', skip: true do
 
   path '/teams' do
-    
+
     get 'Show the list of the teams' do
       tags 'Team'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
@@ -173,7 +173,7 @@ describe 'Teams API' do
       tags 'Team'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :team, in: :body, schema: {
         type: :object,
         properties: {
@@ -247,8 +247,8 @@ describe 'Teams API' do
   end
 end
 
-describe 'Profiles API' do
-  
+describe 'Profiles API', skip: true do
+
   path '/profiles' do
     get 'Show user profile' do
       tags 'Profile'
@@ -277,7 +277,7 @@ describe 'Profiles API' do
       tags 'Profile'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       response '200', 'update profile' do
         run_test!
       end
@@ -294,9 +294,9 @@ describe 'Profiles API' do
 
 end
 
-describe 'Users API' do
+describe 'Users API', skip: true do
   path '/users' do
-    
+
     get 'Show the list of the users' do
       tags 'User'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
@@ -319,7 +319,7 @@ describe 'Users API' do
       tags 'User'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :user, in: :body, schema: {
         type: :object,
         properties: {
@@ -414,9 +414,9 @@ describe 'Users API' do
   end
 end
 
-describe 'Members API' do
+describe 'Members API', skip: true do
   path '/members' do
-    
+
     get 'Show the list of the members' do
       tags 'Member'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
@@ -442,7 +442,7 @@ describe 'Members API' do
       tags 'Member'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: "userId", in: :path, type: :string
 
       response '200', 'show member' do
@@ -462,8 +462,8 @@ describe 'Members API' do
       tags 'Member'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
-      parameter name: :member, in: :body, schema: { 
+
+      parameter name: :member, in: :body, schema: {
         type: :object,
         properties: {
           name: { type: :string },
@@ -487,14 +487,14 @@ describe 'Members API' do
   end
 end
 
-describe 'Boards API' do
+describe 'Boards API', skip: true do
   path '/boards' do
-    
+
     get 'Show the list of the boards' do
       tags 'Board'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
 
       response '200', 'boards listed' do
         run_test!
@@ -513,7 +513,7 @@ describe 'Boards API' do
       tags 'Board'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :board, in: :body, schema: {
         type: :object,
         properties: {
@@ -544,7 +544,7 @@ describe 'Boards API' do
       tags 'Board'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: "boardId", in: :path, type: :string
 
       response '200', 'show board' do
@@ -564,7 +564,7 @@ describe 'Boards API' do
       tags 'Board'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :board, in: :body, schema: {
         type: :object,
         properties: {
@@ -591,7 +591,7 @@ describe 'Boards API' do
       tags 'Board'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
 
       response '204', 'board deleted' do
         run_test!
@@ -608,14 +608,14 @@ describe 'Boards API' do
   end
 end
 
-describe 'Flows API' do
+describe 'Flows API', skip: true do
   path '/flows' do
-    
+
     post 'Create a flow' do
       tags 'Flow'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :flow, in: :body, schema: {
         type: :object,
         properties: {
@@ -646,7 +646,7 @@ describe 'Flows API' do
       tags 'Flow'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: "flowId", in: :path, type: :string
 
       response '200', 'show flow' do
@@ -666,7 +666,7 @@ describe 'Flows API' do
       tags 'Flow'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :flow, in: :body, schema: {
         type: :object,
         properties: {
@@ -693,7 +693,7 @@ describe 'Flows API' do
       tags 'Flow'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       response '204', 'flow deleted' do
         run_test!
       end
@@ -709,14 +709,14 @@ describe 'Flows API' do
   end
 end
 
-describe 'Stages API' do
+describe 'Stages API', skip: true do
   path '/stages' do
-    
+
     post 'Create a stage' do
       tags 'Stage'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :stage, in: :body, schema: {
         type: :object,
         properties: {
@@ -747,7 +747,7 @@ describe 'Stages API' do
       tags 'Stage'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: "stageId", in: :path, type: :string
 
       response '200', 'show stage' do
@@ -767,7 +767,7 @@ describe 'Stages API' do
       tags 'Stage'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :stage, in: :body, schema: {
         type: :object,
         properties: {
@@ -794,7 +794,7 @@ describe 'Stages API' do
       tags 'Stage'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
 
       response '204', 'stage deleted' do
         run_test!
@@ -811,14 +811,14 @@ describe 'Stages API' do
   end
 end
 
-describe 'Connections API' do
+describe 'Connections API', skip: true do
   path '/connections' do
-    
+
     post 'Create a connection' do
       tags 'Connection'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :connection, in: :body, schema: {
         type: :object,
         properties: {
@@ -849,7 +849,7 @@ describe 'Connections API' do
       tags 'Connection'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: "connectionId", in: :path, type: :string
 
       response '200', 'show connection' do
@@ -869,7 +869,7 @@ describe 'Connections API' do
       tags 'Connection'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
-      
+
       parameter name: :connection, in: :body, schema: {
         type: :object,
         properties: {
@@ -896,7 +896,7 @@ describe 'Connections API' do
     delete 'Destroy the team with connectionId' do
       tags 'Connection'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
-      consumes 'application/json'      
+      consumes 'application/json'
 
       response '204', 'connection deleted' do
         run_test!
