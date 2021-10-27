@@ -90,7 +90,7 @@ fSwN61FgeWoGIBn4CSVgmkr8kVYUgjPv5jNvRXxHBolRqYRjNXMhsRU=
 -----END RSA PRIVATE KEY-----"
 ```
 
-You will then need to update lupin to use your public key instead of the public key for staging. You can generate the public key on the command line:
+If you need to verify an API key signature in another application (currently no other applications need this), you will need to provide them with your public key during development. You can generate the public key on the command line:
 
 ```shell
 pbpaste | openssl rsa -pubout -outform PEM
