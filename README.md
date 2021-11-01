@@ -16,7 +16,11 @@ https://trivial-api-staging.herokuapp.com/api-docs/index.html
 
 ## Install
 
-  
+### STOP
+
+First, verify that you need to configure this repository locally. Most development can be done with a local copy of lupin pointed at the staging API server. You should only need to install this Rails application if you will be making changes to the API itself.
+
+If you are certain you need to set up this app, follow the instructions below.
 
 ### Clone the repository
 
@@ -45,7 +49,7 @@ ruby -v
 
   
 
-The ouput should start with something like `ruby 2.6.3p62`
+The output should start with something like `ruby 2.6.3p62`
 
   
 
@@ -70,8 +74,33 @@ Copy `.env.example` in the project and rename it to `.env`
 
 Edit `username` and `password` for Postgres in `.env`
 
-  
-  
+Create a new private key for signing app API tokens:
+
+```shell
+openssl genrsa 2048 | pbcopy
+```
+
+The above command creates a new key and copies it to the clipboard. Paste the copied key into `.env` for `JWT_PRIVATE_KEY`. It is a multiline value, which is legal in env files if the value is surrounded by double quotes:
+
+```
+JWT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEAxG3mvjgpfKopKqG4ESlbkheXmw2Oa8QxDwJNUlTCI2Zzhzkc
+...
+fSwN61FgeWoGIBn4CSVgmkr8kVYUgjPv5jNvRXxHBolRqYRjNXMhsRU=
+-----END RSA PRIVATE KEY-----"
+```
+
+If you need to verify an API key signature in another application (currently no other applications need this), you will need to provide them with your public key during development. You can generate the public key on the command line:
+
+```shell
+pbpaste | openssl rsa -pubout -outform PEM
+```
+
+or, perhaps more simply, from the Rails console once you have configured `JWT_PRIVATE_KEY` (launch the console with the command `bundle exec rails c`):
+
+```ruby
+puts OpenSSL::PKey::RSA.new(ENV['JWT_PRIVATE_KEY']).public_key.to_pem
+```
 
 ### Install dependencies
 
@@ -106,7 +135,12 @@ rake test
 # Finished in 3.170946s, 10.7224 runs/s, 10.7224 assertions/s.
 # 34 runs, 34 assertions, 0 failures, 0 errors, 0 skips
 ```
-  
+
+```shell
+bundle exec rspec
+# Finished in 4.63 seconds (files took 2.34 seconds to load)
+# 112 examples, 0 failures, 101 pending
+```
 
 ## Serve
 

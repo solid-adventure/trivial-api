@@ -27,6 +27,10 @@ class App < ApplicationRecord
     @credentials ||= Credentials.find_or_build_by_app_and_name self, credentials_name
   end
 
+  def api_keys
+    @api_keys ||= ApiKeys.new(app: self)
+  end
+
   def self.default_domain
     URI(App.base_url).hostname
   end

@@ -44,15 +44,20 @@ RSpec.configure do |config|
             name: 'client',
             in: :header
           },
-          token_type: {
+          expiry: {
             type: :apiKey,
-            name: 'token-type',
+            name: 'expiry',
             in: :header
           },
           uid: {
             type: :apiKey,
             name: 'uid',
             in: :header
+          },
+          app_api_key: {
+            type: :http,
+            scheme: :bearer,
+            bearerFormat: 'JWT'
           }
         }
       }
