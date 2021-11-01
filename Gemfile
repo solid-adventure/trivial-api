@@ -37,7 +37,8 @@ gem 'pagy'
 
 gem 'securerandom'
 
-gem 'rswag'
+gem 'rswag-api'
+gem 'rswag-ui'
 
 gem 'discard', '~> 1.2'
 gem 'aws-sdk-iam', '~> 1'
@@ -61,6 +62,7 @@ group :test do
   gem 'rspec'
   gem 'rspec-rails'
   gem 'factory_bot_rails'
+  gem 'rswag-specs'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
