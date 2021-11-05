@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_06_185846) do
+ActiveRecord::Schema.define(version: 2021_11_05_225600) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -19,18 +19,13 @@ ActiveRecord::Schema.define(version: 2021_10_06_185846) do
     t.bigint "user_id", null: false
     t.string "name", null: false
     t.integer "port", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.datetime "discarded_at"
     t.string "hostname", null: false
     t.string "domain", null: false
     t.string "load_balancer", null: false
     t.string "descriptive_name", null: false
-    t.index ["descriptive_name"], name: "index_apps_on_descriptive_name", unique: true
-    t.index ["discarded_at"], name: "index_apps_on_discarded_at"
-    t.index ["name"], name: "index_apps_on_name", unique: true
-    t.index ["port"], name: "index_apps_on_port", unique: true
-    t.index ["user_id"], name: "index_apps_on_user_id"
   end
 
   create_table "manifest_drafts", force: :cascade do |t|
@@ -40,23 +35,18 @@ ActiveRecord::Schema.define(version: 2021_10_06_185846) do
     t.jsonb "content"
     t.string "action"
     t.uuid "token", null: false
-    t.datetime "expires_at", precision: 6, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["app_id"], name: "index_manifest_drafts_on_app_id"
-    t.index ["manifest_id"], name: "index_manifest_drafts_on_manifest_id"
-    t.index ["token"], name: "index_manifest_drafts_on_token", unique: true
-    t.index ["user_id"], name: "index_manifest_drafts_on_user_id"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "manifests", force: :cascade do |t|
     t.string "app_id"
-    t.json "content"
+    t.jsonb "content"
     t.integer "user_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "internal_app_id"
-    t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -66,8 +56,8 @@ ActiveRecord::Schema.define(version: 2021_10_06_185846) do
     t.string "name"
     t.string "email"
     t.text "tokens"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer "role", default: 0, null: false
     t.integer "approval", default: 0, null: false
     t.string "color_theme"
@@ -75,26 +65,23 @@ ActiveRecord::Schema.define(version: 2021_10_06_185846) do
     t.datetime "reset_password_sent_at"
     t.boolean "allow_password_change", default: false
     t.string "aws_role"
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-    t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
   end
 
   create_table "webhooks", force: :cascade do |t|
     t.string "app_id"
-    t.json "payload"
+    t.jsonb "payload"
     t.string "source"
     t.string "topic"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer "user_id"
     t.string "status"
-    t.json "diagnostics"
+    t.jsonb "diagnostics"
   end
 
-  add_foreign_key "apps", "users"
-  add_foreign_key "manifest_drafts", "apps"
-  add_foreign_key "manifest_drafts", "manifests"
-  add_foreign_key "manifest_drafts", "users"
-  add_foreign_key "manifests", "apps", column: "internal_app_id"
+  add_foreign_key "apps", "users", name: "apps_user_id_fkey"
+  add_foreign_key "manifest_drafts", "apps", name: "manifest_drafts_app_id_fkey"
+  add_foreign_key "manifest_drafts", "manifests", name: "manifest_drafts_manifest_id_fkey"
+  add_foreign_key "manifest_drafts", "users", name: "manifest_drafts_user_id_fkey"
+  add_foreign_key "manifests", "apps", column: "internal_app_id", name: "manifests_internal_app_id_fkey"
 end
