@@ -62,7 +62,7 @@ class WebhooksController < ApplicationController
     end
 
     def webhook_params
-        params.require(:webhook).permit(:app_id, :payload, :source, :topic, :status, :diagnostics).tap do |whitelisted|
+        params.require(:webhook).permit(:app_id, :source, :topic, :status).tap do |whitelisted|
             whitelisted[:payload] = request.params[:payload]
             whitelisted[:diagnostics] = request.params[:diagnostics]
         end

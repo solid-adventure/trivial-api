@@ -36,7 +36,9 @@ class ManifestsController < ApplicationController
     end
 
     def manifest_params
-        params.permit(:app_id, :content)
+        params.require(:manifest).permit(:app_id).tap do |whitelisted|
+            whitelisted[:content] = request.params[:content]
+        end
     end
 
     def app
