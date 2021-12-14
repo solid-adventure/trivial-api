@@ -1,4 +1,6 @@
 class CredentialsController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:patch]
+  before_action :authenticate_app!, only: [:patch]
 
   def show
     render json: {credentials: app.credentials.secret_value}
@@ -12,6 +14,14 @@ class CredentialsController < ApplicationController
       app.credentials.save!
     end
     render json: {ok: true}
+  end
+
+  def patch
+    current_app.credentials.patch_path! params[:path], params[:current_value], params[:new_value]
+    render json: {ok: true}
+  rescue => e
+    logger.error "Failed to patch credentials: #{e}"
+    render status: 400, json: {ok: false, error: e.message}
   end
 
   private

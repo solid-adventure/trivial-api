@@ -62,4 +62,23 @@ describe ApiKeys do
     end
   end
 
+  describe '#assert_valid!' do
+    let(:key) { app.api_keys.issue! }
+    let(:result) { ApiKeys.assert_valid!(key) }
+
+    context 'called with a valid key' do
+      it 'returns the app identifier' do
+        expect(result).to eq app.name
+      end
+    end
+
+    context 'called with an invalid or expired key' do
+      let(:key) { JWT.encode({app: app.name}, nil, 'none') }
+
+      it 'raises an error' do
+        expect{ result }.to raise_error JWT::DecodeError
+      end
+    end
+  end
+
 end
