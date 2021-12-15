@@ -17,7 +17,11 @@ class CredentialsController < ApplicationController
   end
 
   def patch
-    current_app.credentials.patch_path! params[:path], params[:current_value], params[:new_value]
+    current_app.credentials.patch_path!(
+      params[:path],
+      params[:credentials][:current_value],
+      params[:credentials][:new_value]
+    )
     render json: {ok: true}
   rescue => e
     logger.error "Failed to patch credentials: #{e}"

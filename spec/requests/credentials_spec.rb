@@ -13,11 +13,14 @@ describe 'Credentials API' do
         type: :object,
         properties: {
           path: { type: :array, items: { type: :string } },
-          current_value: { type: :string },
-          new_value: { type: :string }
+          credentials: { type: :object,
+            properties: {
+              current_value: { type: :string },
+              new_value: { type: :string }
+            }
+          }
         }
       }
-      parameter name: :foo, in: :body
       security [{app_api_key: []}]
       consumes 'application/json'
       produces 'application/json'
@@ -30,10 +33,15 @@ describe 'Credentials API' do
       let(:current_value) { 'secret' }
       let(:stored_value) { current_value }
       let(:new_value) { 'new secret' }
-      let(:patch_request) { {path: path, current_value: current_value, new_value: new_value} }
       let(:stored_credentials) {
         "{\"1\":{\"1\":{\"code_grant\":{\"access_token\":\"#{stored_value}\"}}}}"
       }
+      let(:patch_request) { {
+        path: path,
+        credentials: {
+          current_value: current_value, new_value: new_value
+        }
+      } }
 
       response '200', 'Single credential value updated' do
         schema type: :object, properties: {
