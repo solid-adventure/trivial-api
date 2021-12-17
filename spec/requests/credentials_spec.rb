@@ -29,12 +29,12 @@ describe 'Credentials API' do
       let(:Authorization) { "Bearer #{key}" }
       let(:key) { calling_app.api_keys.issue! }
       let(:calling_app) { FactoryBot.create(:app) }
-      let(:path) { ['1', '1', 'code_grant', 'access_token'] }
+      let(:path) { ['1', '1', 'access_token'] }
       let(:current_value) { 'secret' }
       let(:stored_value) { current_value }
       let(:new_value) { 'new secret' }
       let(:stored_credentials) {
-        "{\"1\":{\"1\":{\"code_grant\":{\"access_token\":\"#{stored_value}\"}}}}"
+        "{\"1\":{\"1\":{\"access_token\":\"#{stored_value}\"}}}"
       }
       let(:patch_request) { {
         path: path,
