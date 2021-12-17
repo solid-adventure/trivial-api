@@ -1,7 +1,7 @@
 class Credentials
 
   ALLOWED_PATCH_PATHS = [
-    %w(* * code_grant *)
+    %w(* * *)
   ].freeze
 
   attr_accessor :app, :name, :arn, :secret_value
