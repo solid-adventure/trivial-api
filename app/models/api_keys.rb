@@ -23,6 +23,15 @@ class ApiKeys
     new_key
   end
 
+  def assert_valid!(key)
+    payload, header = JWT.decode key, public_key, true, {algorithm: ALGORITHM}
+    payload['app']
+  end
+
+  def self.assert_valid!(key)
+    ApiKeys.new.assert_valid!(key)
+  end
+
   private
 
   def payload

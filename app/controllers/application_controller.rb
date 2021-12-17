@@ -46,4 +46,21 @@ class ApplicationController < ActionController::API
   def render_errors(errors, status: :bad_request)
     render json: { errors: errors }, status: status
   end
+
+  def auth_key
+    auth = request.headers['Authorization']
+    match = /^Bearer\s+(\S+)/i.match(auth)
+    match.try(:[], 1)
+  end
+
+  def authenticate_app!
+    @current_app_id =  ApiKeys.assert_valid!(auth_key)
+  rescue => e
+    logger.error "Could not authorize API key: #{e}"
+    render_unauthorized
+  end
+
+  def current_app
+    @current_app = App.find_by_name!(@current_app_id)
+  end
 end

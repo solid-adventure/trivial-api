@@ -11,7 +11,10 @@ Rails.application.routes.draw do
   resources :users
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
-    resource :credentials, only: [:show, :update]
+    resource :credentials, only: [:show] do
+      put '', action: :update
+      patch '', action: :patch
+    end
     resource :api_key, only: [:create, :update]
     collection do
       get 'name_suggestion'

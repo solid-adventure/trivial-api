@@ -24,10 +24,4 @@ class ApiKeysController < ApplicationController
     end
   end
 
-  def auth_key
-    auth = request.headers['Authorization']
-    match = /^Bearer\s+(\S+)/i.match(auth)
-    match.try(:[], 1)
-  end
-
 end
