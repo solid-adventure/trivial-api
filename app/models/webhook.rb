@@ -30,6 +30,10 @@ class Webhook < ApplicationRecord
         'X-Trivial-Original-Id' => id.to_s
     end
 
+    def publish_receipt!
+      Webhook.redis_client.publish "#{app_id}.webhook", id if Webhook.publish_enabled?
+    end
+
     def self.send_new(app, payload)
       webhook = Webhook.new app_id: app.name
       res = Net::HTTP.post webhook.app_uri, payload,
@@ -94,4 +98,12 @@ class Webhook < ApplicationRecord
             ws == ks
         }
     end
-  end
+
+    def self.publish_enabled?
+      ENV.has_key?('REDIS_URL')
+    end
+
+    def self.redis_client
+      @redis_client ||= publish_enabled? ? Redis.new : nil
+    end
+end

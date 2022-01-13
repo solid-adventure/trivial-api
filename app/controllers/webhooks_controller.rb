@@ -10,6 +10,7 @@ class WebhooksController < ApplicationController
         webhook = Webhook.new(webhook_params)
         webhook.user_id = App.find_by_name!(params[:app_id]).user_id
         if webhook.save
+            webhook.publish_receipt!
             render json: webhook, status: :created
         else
             render_bad_request webhook
