@@ -169,6 +169,15 @@ describe 'Credential Sets API' do
       end
 
     end
+
+    delete 'Delete the credential set and its credential data' do
+      security [{access_token: [], client: [], expiry: [], uid: []}]
+      produces 'application/json'
+
+      response '200', 'Credentials deleted' do
+        run_test!
+      end
+    end
   end
 
 end

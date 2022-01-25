@@ -28,6 +28,12 @@ class CredentialSetsController < ApplicationController
     render json: {credential_set: credential_set}
   end
 
+  def destroy
+    credential_set.credentials.destroy!
+    credential_set.destroy!
+    render status: :ok
+  end
+
   private
 
   def credential_set
