@@ -6,6 +6,10 @@ class ApplicationController < ActionController::API
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :authenticate_user!, unless: :devise_controller?
+
+  rescue_from ActiveRecord::RecordInvalid, with: :render_invalid_record
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+
   protected
 
   def configure_permitted_parameters
@@ -46,6 +50,15 @@ class ApplicationController < ActionController::API
   def render_errors(errors, status: :bad_request)
     render json: { errors: errors }, status: status
   end
+
+  def render_invalid_record(err)
+    render json: { errors: err.record.errors.full_messages }, status: :unprocessable_entity
+  end
+
+  def render_not_found(err)
+    render status: :not_found
+  end
+
 
   def auth_key
     auth = request.headers['Authorization']

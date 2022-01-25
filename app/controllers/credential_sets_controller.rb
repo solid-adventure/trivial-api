@@ -1,6 +1,4 @@
 class CredentialSetsController < ApplicationController
-  rescue_from ActiveRecord::RecordInvalid, with: :invalid_record
-  rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def index
     render json: {credential_sets: current_user.credential_sets.order(:id)}
@@ -44,14 +42,6 @@ class CredentialSetsController < ApplicationController
 
   def credential_set_params
     params.require(:credential_set).permit(:name, :credential_type)
-  end
-
-  def invalid_record(err)
-    render json: { errors: err.record.errors.full_messages }, status: :unprocessable_entity
-  end
-
-  def not_found(err)
-    render status: :not_found
   end
 
 end
