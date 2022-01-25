@@ -4,15 +4,69 @@ describe 'Credential Sets API' do
 
   include_context 'aws_credentials'
 
+  let(:user) { FactoryBot.create(:user, :logged_in) }
+  let('access-token') { user.tokens[client]['token_unhashed'] }
+  let(:client) { user.tokens.keys.first }
+  let(:expiry) { user.tokens[client]['expiry'] }
+  let(:uid) { user.uid }
+
+  let!(:existing_credential) { FactoryBot.create(:credential_set, user: user) }
+
+  def self.credential_definition_schema
+    {
+      type: :object,
+      properties: {
+        credential_set: credential_set_input_object_type,
+        credentials: { type: :object }
+      },
+      required: ['credential_set']
+    }
+  end
+
+  def self.credential_update_schema
+    {
+      type: :object,
+      properties: {
+        credential_set: credential_set_input_object_type,
+        credentials: { type: :object }
+      }
+    }
+  end
+
+  def self.credential_set_input_object_type
+    {
+      type: :object,
+      properties: {
+        name: { type: :string },
+        credential_type: { type: :string }
+      },
+      required: ['name', 'credential_type']
+    }
+  end
+
+  def self.credential_set_response_schema
+    {
+      type: :object,
+      properties: {
+        credential_set: credential_set_response_object_type
+      },
+      required: ['credential_set']
+    }
+  end
+
+  def self.credential_set_response_object_type
+    {
+      type: :object,
+      properties: {
+        id: { type: :integer },
+        name: { type: :string },
+        credential_type: { type: :string }
+      },
+      required: ['id', 'name', 'credential_type']
+    }
+  end
+
   path '/credential_sets' do
-
-    let(:user) { FactoryBot.create(:user, :logged_in) }
-    let('access-token') { user.tokens[client]['token_unhashed'] }
-    let(:client) { user.tokens.keys.first }
-    let(:expiry) { user.tokens[client]['expiry'] }
-    let(:uid) { user.uid }
-
-    let!(:existing_credential) { FactoryBot.create(:credential_set, user: user) }
 
     get 'Return a list of credential sets for the account' do
       security [{access_token: [], client: [], expiry: [], uid: []}]
@@ -22,15 +76,7 @@ describe 'Credential Sets API' do
         schema type: :object, properties: {
           credential_sets: {
             type: :array,
-            items: {
-              type: :object,
-              properties: {
-                id: { type: :integer },
-                name: { type: :string },
-                credential_type: { type: :string }
-              },
-              required: ['id', 'name', 'credential_type']
-            }
+            items: credential_set_response_object_type
           }
         },
         required: ['credential_sets']
@@ -43,23 +89,7 @@ describe 'Credential Sets API' do
     end
 
     post 'Create a new credential set' do
-      parameter name: :credential_set, in: :body, schema: {
-        type: :object,
-        properties: {
-          credential_set: {
-            type: :object,
-            properties: {
-              name: { type: :string },
-              credential_type: { type: :string }
-            },
-            required: ['name', 'credential_type']
-          },
-          credentials: {
-            type: :object
-          }
-        },
-        required: ['credential_set']
-      }
+      parameter name: :credential_set, in: :body, schema: credential_definition_schema
       security [{access_token: [], client: [], expiry: [], uid: []}]
       consumes 'application/json'
       produces 'application/json'
@@ -76,18 +106,7 @@ describe 'Credential Sets API' do
       } }
 
       response '200', 'Credential set created' do
-        schema type: :object, properties: {
-          credential_set: {
-            type: :object,
-            properties: {
-              id: { type: :integer },
-              name: { type: :string },
-              credential_type: { type: :string }
-            },
-            required: ['id', 'name', 'credential_type']
-          }
-        },
-        required: ['credential_set']
+        schema credential_set_response_schema
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data['credential_set']['name']).to eq credential_name
@@ -96,6 +115,60 @@ describe 'Credential Sets API' do
       end
     end
 
+  end
+
+  path '/credential_sets/{set_id}' do
+    parameter name: :set_id, in: :path, type: :string
+
+    let(:set_id) { existing_credential.id }
+    let(:stored_credentials) {
+      "{\"account_sid\":\"fa8f7fa53659d6de\",\"auth_token\":\"Whe8Y5poyQo=\"}"
+    }
+
+    get 'Access the credential data for a set' do
+      security [{access_token: [], client: [], expiry: [], uid: []}]
+      produces 'application/json'
+
+      response '200', 'Credential data returned for set' do
+        schema type: :object, properties: {
+          credentials: { type: :object }
+        },
+        required: ['credentials']
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['credentials']).to eq JSON.parse(stored_credentials)
+        end
+      end
+
+    end
+
+    put 'Update the credential set and/or its credential data' do
+      parameter name: :credential_set, in: :body, schema: credential_update_schema
+      security [{access_token: [], client: [], expiry: [], uid: []}]
+      consumes 'application/json'
+      produces 'application/json'
+
+      let(:credential_name) { 'New Name' }
+      let(:credential_type) { existing_credential.credential_type }
+      let(:credentials) { {account_sid: 'fa8f7fa53659d6de', auth_token: 'Whe8Y5poyQo='} }
+      let(:credential_set) { {
+        credential_set: {
+          name: credential_name,
+          credential_type: credential_type
+        },
+        credentials: credentials
+      } }
+
+      response '200', 'Credentials updated' do
+        schema credential_set_response_schema
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['credential_set']['name']).to eq credential_name
+          expect(data['credential_set']['credential_type']).to eq credential_type
+        end
+      end
+
+    end
   end
 
 end
