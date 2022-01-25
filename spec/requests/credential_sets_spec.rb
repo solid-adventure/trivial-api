@@ -113,6 +113,11 @@ describe 'Credential Sets API' do
           expect(data['credential_set']['credential_type']).to eq credential_type
         end
       end
+
+      response '422', 'Invalid credential set body' do
+        let(:credential_name) { nil }
+        run_test!
+      end
     end
 
   end
@@ -140,6 +145,10 @@ describe 'Credential Sets API' do
         end
       end
 
+      response '404', 'Incorrect id' do
+        let(:set_id) { 'invalid' }
+        run_test!
+      end
     end
 
     put 'Update the credential set and/or its credential data' do
@@ -168,6 +177,15 @@ describe 'Credential Sets API' do
         end
       end
 
+      response '422', 'Invalid credential set body' do
+        let(:credential_name) { nil }
+        run_test!
+      end
+
+      response '404', 'Incorrect id' do
+        let(:set_id) { 'invalid' }
+        run_test!
+      end
     end
 
     delete 'Delete the credential set and its credential data' do
@@ -175,6 +193,11 @@ describe 'Credential Sets API' do
       produces 'application/json'
 
       response '200', 'Credentials deleted' do
+        run_test!
+      end
+
+      response '404', 'Incorrect id' do
+        let(:set_id) { 'invalid' }
         run_test!
       end
     end
