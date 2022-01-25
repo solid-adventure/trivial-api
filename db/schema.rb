@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_06_185846) do
+ActiveRecord::Schema.define(version: 2022_01_25_153646) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,6 +31,15 @@ ActiveRecord::Schema.define(version: 2021_10_06_185846) do
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
+  end
+
+  create_table "credential_sets", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "credential_type", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_credential_sets_on_user_id"
   end
 
   create_table "manifest_drafts", force: :cascade do |t|
@@ -93,6 +102,7 @@ ActiveRecord::Schema.define(version: 2021_10_06_185846) do
   end
 
   add_foreign_key "apps", "users"
+  add_foreign_key "credential_sets", "users"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifest_drafts", "users"
