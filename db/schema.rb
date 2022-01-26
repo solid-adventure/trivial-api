@@ -34,11 +34,13 @@ ActiveRecord::Schema.define(version: 2022_01_25_153646) do
   end
 
   create_table "credential_sets", force: :cascade do |t|
+    t.uuid "external_id", null: false
     t.bigint "user_id", null: false
     t.string "name", null: false
     t.string "credential_type", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
     t.index ["user_id"], name: "index_credential_sets_on_user_id"
   end
 

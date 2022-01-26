@@ -58,7 +58,7 @@ describe 'Credential Sets API' do
     {
       type: :object,
       properties: {
-        id: { type: :integer },
+        id: { type: :string },
         name: { type: :string },
         credential_type: { type: :string }
       },
@@ -83,7 +83,7 @@ describe 'Credential Sets API' do
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data['credential_sets'].length).to eq 1
-          expect(data['credential_sets'].first['id']).to eq existing_credential.id
+          expect(data['credential_sets'].first['id']).to eq existing_credential.external_id
         end
       end
     end
@@ -125,7 +125,7 @@ describe 'Credential Sets API' do
   path '/credential_sets/{set_id}' do
     parameter name: :set_id, in: :path, type: :string
 
-    let(:set_id) { existing_credential.id }
+    let(:set_id) { existing_credential.external_id }
     let(:stored_credentials) {
       "{\"account_sid\":\"fa8f7fa53659d6de\",\"auth_token\":\"Whe8Y5poyQo=\"}"
     }

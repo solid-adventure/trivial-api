@@ -1,7 +1,7 @@
 class CredentialSetsController < ApplicationController
 
   def index
-    render json: {credential_sets: current_user.credential_sets.order(:id)}
+    render json: {credential_sets: current_user.credential_sets.order(:id).map(&:api_attrs)}
   end
 
   def create
@@ -10,7 +10,7 @@ class CredentialSetsController < ApplicationController
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
     end
-    render json: {credential_set: @credential_set}
+    render json: {credential_set: @credential_set.api_attrs}
   end
 
   def show
@@ -25,7 +25,7 @@ class CredentialSetsController < ApplicationController
       credential_set.credentials.secret_value = params[:credentials]
       credential_set.credentials.save!
     end
-    render json: {credential_set: credential_set}
+    render json: {credential_set: credential_set.api_attrs}
   end
 
   def destroy
@@ -37,7 +37,7 @@ class CredentialSetsController < ApplicationController
   private
 
   def credential_set
-    @credential_set ||= current_user.credential_sets.find(params[:id])
+    @credential_set ||= current_user.credential_sets.find_by_external_id!(params[:id])
   end
 
   def credential_set_params
