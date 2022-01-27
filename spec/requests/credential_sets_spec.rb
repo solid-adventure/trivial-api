@@ -136,9 +136,10 @@ describe 'Credential Sets API' do
 
       response '200', 'Credential data returned for set' do
         schema type: :object, properties: {
+          credential_set: credential_set_response_object_type,
           credentials: { type: :object }
         },
-        required: ['credentials']
+        required: ['credential_set', 'credentials']
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data['credentials']).to eq JSON.parse(stored_credentials)

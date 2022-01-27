@@ -14,7 +14,10 @@ class CredentialSetsController < ApplicationController
   end
 
   def show
-    render json: {credentials: credential_set.credentials.secret_value}
+    render json: {
+      credential_set: credential_set.api_attrs,
+      credentials: credential_set.credentials.secret_value
+    }
   end
 
   def update
