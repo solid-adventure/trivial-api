@@ -1,39 +1,15 @@
-class Credentials
+class Credentials < CredentialsBase
 
   ALLOWED_PATCH_PATHS = [
     %w(* * *)
   ].freeze
 
-  attr_accessor :app, :name, :arn, :secret_value
+  attr_accessor :app
 
   def initialize(attrs = nil)
+    super(attrs)
     attrs = (attrs || {}).stringify_keys
     @app = attrs['app']
-    @name = attrs['name']
-    @arn = attrs['arn']
-    @secret_value = attrs['secret_value']
-  end
-
-  def new_record?
-    arn.blank?
-  end
-
-  def save!
-    if new_record?
-      create!
-    else
-      update!
-    end
-  end
-
-  def create!
-    res = aws_client.create_secret name: name, secret_string: secret_value_json
-    @arn = res.arn
-    add_credential_policy!
-  end
-
-  def add_credential_policy!
-    aws_client.put_resource_policy secret_id: name, resource_policy: default_policy.to_json
   end
 
   def default_policy
@@ -48,16 +24,6 @@ class Credentials
     }
   end
 
-
-  def update!
-    aws_client.put_secret_value secret_id: name, secret_string: secret_value_json
-  end
-
-  def destroy!
-    unless new_record?
-      aws_client.delete_secret secret_id: name, force_delete_without_recovery: true
-    end
-  end
 
   def drafts
     secret_value['$drafts'] || {}
@@ -86,14 +52,6 @@ class Credentials
     save!
   end
 
-  def self.exists?(criteria = {})
-    criteria = criteria.stringify_keys
-    aws_client.describe_secret secret_id: criteria['name']
-    true
-  rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-    false
-  end
-
   def self.find_by_app_and_name!(app, name)
     secret = aws_client.get_secret_value secret_id: name
     self.new(
@@ -110,14 +68,10 @@ class Credentials
     self.new app: app, name: name, secret_value: {}
   end
 
-  private
+  protected
 
   def secret_value_json
     self.class.prune_drafts(secret_value).to_json
-  end
-
-  def aws_client
-    @aws_client ||= Aws::SecretsManager::Client.new
   end
 
   def path_matches?(spec, path)
@@ -135,10 +89,6 @@ class Credentials
   def set_value_at_path(obj, path, val)
     parent = value_at_path(obj, path[0..-2])
     parent.try(:[]=, path[-1], val)
-  end
-
-  def self.aws_client
-    Aws::SecretsManager::Client.new
   end
 
   def self.prune_drafts(secret)

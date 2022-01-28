@@ -47,4 +47,6 @@ Rails.application.routes.draw do
 
   resource :profile, only: [:show, :update]
 
+  resources :credential_sets
+
 end
