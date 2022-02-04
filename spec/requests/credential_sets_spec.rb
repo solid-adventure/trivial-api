@@ -189,6 +189,56 @@ describe 'Credential Sets API' do
       end
     end
 
+    patch 'Update a single value within the credential data for a set' do
+      parameter name: :credential_set, in: :body, schema: {
+        type: :object,
+        properties: {
+          path: { type: :array, items: :string },
+          credentials: {
+            type: :object,
+            properties: {
+              current_value: { type: :string },
+              new_value: { type: :string }
+            },
+            required: ['current_value', 'new_value']
+          }
+        },
+        required: ['path', 'credentials']
+      }
+      consumes 'application/json'
+      produces 'application/json'
+
+      let(:path) { ['code_grant', 'access_token'] }
+      let(:current_value) { 'Whe8Y5poyQo=' }
+      let(:new_value) { 'zTeYlkd9yzo=' }
+      let(:stored_value) { current_value }
+      let(:stored_credentials) {
+        "{\"code_grant\":{\"access_token\":\"#{stored_value}\"}}"
+      }
+      let(:credential_set) { {
+        path: path,
+        credentials: {
+          current_value: current_value,
+          new_value: new_value
+        }
+      } }
+
+      response '200', 'Credentials updated' do
+        schema({type: :object, properties: { ok: {type: :boolean} }, required: ['ok']})
+        run_test!
+      end
+
+      response '422', 'Invalid path or current value' do
+        let(:stored_value) { 'somethingelse' }
+        run_test!
+      end
+
+      response '404', 'Incorrect id' do
+        let(:set_id) { 'invalid' }
+        run_test!
+      end
+    end
+
     delete 'Delete the credential set and its credential data' do
       security [{access_token: [], client: [], expiry: [], uid: []}]
       produces 'application/json'

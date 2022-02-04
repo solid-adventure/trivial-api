@@ -1,4 +1,5 @@
 class CredentialSetsController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:patch]
 
   def index
     render json: {credential_sets: current_user.credential_sets.order(:id).map(&:api_attrs)}
@@ -29,6 +30,18 @@ class CredentialSetsController < ApplicationController
       credential_set.credentials.save!
     end
     render json: {credential_set: credential_set.api_attrs}
+  end
+
+  def patch
+    CredentialSet.find_by_external_id!(params[:id]).credentials.patch_path!(
+      params[:path],
+      params[:credentials][:current_value],
+      params[:credentials][:new_value]
+    )
+    render json: {ok: true}
+  rescue CredentialsBase::InvalidPatch => e
+    logger.error "Failed to patch credential set credentials #{e}"
+    render status: 422, json: {ok: false, error: e.message}
   end
 
   def destroy

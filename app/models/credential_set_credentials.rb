@@ -36,4 +36,12 @@ class CredentialSetCredentials < CredentialsBase
     self.new user: user, name: name, secret_value: {}
   end
 
+  protected
+
+  def allowed_patch_paths
+    [
+      ['code_grant', 'access_token']
+    ]
+  end
+
 end
