@@ -1,5 +1,6 @@
 class CredentialSetsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:patch]
+  before_action :authenticate_app!, only: [:patch]
 
   def index
     render json: {credential_sets: current_user.credential_sets.order(:id).map(&:api_attrs)}
@@ -33,7 +34,7 @@ class CredentialSetsController < ApplicationController
   end
 
   def patch
-    CredentialSet.find_by_external_id!(params[:id]).credentials.patch_path!(
+    patchable_credential_set.credentials.patch_path!(
       params[:path],
       params[:credentials][:current_value],
       params[:credentials][:new_value]
@@ -54,6 +55,10 @@ class CredentialSetsController < ApplicationController
 
   def credential_set
     @credential_set ||= current_user.credential_sets.find_by_external_id!(params[:id])
+  end
+
+  def patchable_credential_set
+    @credential_set ||= current_app.user.credential_sets.find_by_external_id!(params[:id])
   end
 
   def credential_set_params

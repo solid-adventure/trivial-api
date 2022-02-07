@@ -2,6 +2,7 @@ require 'swagger_helper'
 
 describe 'Credential Sets API' do
 
+  include_context "jwt"
   include_context 'aws_credentials'
 
   let(:user) { FactoryBot.create(:user, :logged_in) }
@@ -205,9 +206,13 @@ describe 'Credential Sets API' do
         },
         required: ['path', 'credentials']
       }
+      security [{app_api_key: []}]
       consumes 'application/json'
       produces 'application/json'
 
+      let(:Authorization) { "Bearer #{key}" }
+      let(:key) { user_app.api_keys.issue! }
+      let(:user_app) { FactoryBot.create(:app, user: user) }
       let(:path) { ['code_grant', 'access_token'] }
       let(:current_value) { 'Whe8Y5poyQo=' }
       let(:new_value) { 'zTeYlkd9yzo=' }
@@ -235,6 +240,11 @@ describe 'Credential Sets API' do
 
       response '404', 'Incorrect id' do
         let(:set_id) { 'invalid' }
+        run_test!
+      end
+
+      response '401', 'Invalid or missing API key' do
+        let(:key) { 'eyJhbGciOiJub25lIn0.eyJhcHAiOiJhZjE3YTY1MjE0YWFiYSJ9.' }
         run_test!
       end
     end
