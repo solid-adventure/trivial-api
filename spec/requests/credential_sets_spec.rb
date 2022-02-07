@@ -264,4 +264,46 @@ describe 'Credential Sets API' do
     end
   end
 
+  path '/credential_sets/{set_id}/api_key' do
+    parameter name: :set_id, in: :path, type: :string
+
+    let(:set_id) { existing_credential.external_id }
+
+    put 'Refresh an expired API key' do
+      parameter name: :stored_path, in: :body, schema: {
+        type: :object, properties: {
+          path: { type: :string }
+        }
+      }
+      security [{app_api_key: []}]
+      consumes 'application/json'
+      produces 'application/json'
+
+      let(:Authorization) { "Bearer #{key}" }
+      let(:key) { user_app.api_keys.issue! }
+      let(:user_app) { FactoryBot.create(:app, user: user) }
+      let(:stored_path) { {path: 'api_key'} }
+      let(:stored_key) { key }
+      let(:stored_credentials) { "{\"api_key\":\"#{stored_key}\"}" }
+
+      response '200', 'New API key issued and stored in credentials' do
+        schema type: :object, properties: {
+          api_key: { type: :string },
+          required: ['api_key']
+        }
+        run_test!
+      end
+
+      response '401', 'Authentication failed' do
+        let(:key) { 'eyJhbGciOiJub25lIn0.eyJhcHAiOiJhZjE3YTY1MjE0YWFiYSJ9.' }
+        run_test!
+      end
+
+      response '409', 'API key does not match key stored in credentials' do
+        let(:stored_key) { 'x.y.z' }
+        run_test!
+      end
+    end
+  end
+
 end

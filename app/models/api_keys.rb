@@ -23,13 +23,29 @@ class ApiKeys
     new_key
   end
 
+  def refresh_in_credential_set!(credential_set, key, path)
+    assert_was_valid_for_app!(key)
+    new_key = issue!
+    update_credential_set!(credential_set, key, path, new_key)
+    new_key
+  end
+
   def assert_valid!(key)
     payload, header = JWT.decode key, public_key, true, {algorithm: ALGORITHM}
     payload['app']
   end
 
+  def decode_ignore_expiration(key)
+    JWT.decode key, public_key, true, {verify_expiration: false, algorithm: ALGORITHM}
+  end
+
   def self.assert_valid!(key)
     ApiKeys.new.assert_valid!(key)
+  end
+
+  def self.for_key!(key)
+    payload, header = ApiKeys.new.decode_ignore_expiration(key)
+    ApiKeys.new(app: App.find_by_name!(payload['app']))
   end
 
   private
@@ -52,12 +68,20 @@ class ApiKeys
     credentials.save!
   end
 
+  # allows updating the value in a credential set if the correct current value is provided
+  def update_credential_set!(credential_set, old_key, path, new_key)
+    credentials = credential_set.credentials
+    raise OutdatedKeyError if credentials.secret_value[path] != old_key
+    credentials.secret_value[path] = new_key
+    credentials.save!
+  end
+
   def assert_valid_path!(path)
     raise "Invalid credentials path" unless /^[0-9A-Za-z]+\.[0-9A-Za-z]+$/.match?(path)
   end
 
   def assert_was_valid_for_app!(key)
-    payload, header = JWT.decode key, public_key, true, {verify_expiration: false, algorithm: ALGORITHM}
+    payload, header = decode_ignore_expiration(key)
     raise "Invalid app id" unless payload['app'] == app.name
   end
 

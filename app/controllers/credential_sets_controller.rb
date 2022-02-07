@@ -1,5 +1,5 @@
 class CredentialSetsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:patch]
+  skip_before_action :authenticate_user!, only: [:patch, :update_api_key]
   before_action :authenticate_app!, only: [:patch]
 
   def index
@@ -49,6 +49,19 @@ class CredentialSetsController < ApplicationController
     credential_set.credentials.destroy!
     credential_set.destroy!
     render status: :ok
+  end
+
+  def update_api_key
+    @keys = ApiKeys.for_key!(auth_key)
+    @credential_set = @keys.app.user.credential_sets.find_by_external_id!(params[:id])
+    render json: {
+      api_key: @keys.refresh_in_credential_set!(@credential_set, auth_key, params[:path])
+    }
+  rescue ApiKeys::OutdatedKeyError
+    render status: :conflict
+  rescue => e
+    logger.error "API key refresh failed - #{e}: #{e.backtrace.join("\n")}"
+    render status: :unauthorized
   end
 
   private
