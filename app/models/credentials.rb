@@ -40,18 +40,6 @@ class Credentials < CredentialsBase
     secret_value['$drafts'] = all_drafts
   end
 
-  def can_patch_path?(path, current_value)
-    return false unless ALLOWED_PATCH_PATHS.any?{|p| path_matches?(p, path)}
-    return false unless current_value == value_at_path(secret_value, path)
-    true
-  end
-
-  def patch_path!(path, current_value, new_value)
-    raise "Incorrect value or path" unless can_patch_path?(path, current_value)
-    set_value_at_path(secret_value, path, new_value)
-    save!
-  end
-
   def self.find_by_app_and_name!(app, name)
     secret = aws_client.get_secret_value secret_id: name
     self.new(
@@ -70,25 +58,12 @@ class Credentials < CredentialsBase
 
   protected
 
+  def allowed_patch_paths
+    ALLOWED_PATCH_PATHS
+  end
+
   def secret_value_json
     self.class.prune_drafts(secret_value).to_json
-  end
-
-  def path_matches?(spec, path)
-    return false unless spec.length == path.length
-    for i in 0..spec.length-1
-      return false unless spec[i] == '*' || spec[i] == path[i]
-    end
-    true
-  end
-
-  def value_at_path(obj, path)
-    path.inject(obj){|obj, step| obj.try(:[], step)}
-  end
-
-  def set_value_at_path(obj, path, val)
-    parent = value_at_path(obj, path[0..-2])
-    parent.try(:[]=, path[-1], val)
   end
 
   def self.prune_drafts(secret)

@@ -2,6 +2,7 @@ require 'swagger_helper'
 
 describe 'Credential Sets API' do
 
+  include_context "jwt"
   include_context 'aws_credentials'
 
   let(:user) { FactoryBot.create(:user, :logged_in) }
@@ -189,6 +190,65 @@ describe 'Credential Sets API' do
       end
     end
 
+    patch 'Update a single value within the credential data for a set' do
+      parameter name: :credential_set, in: :body, schema: {
+        type: :object,
+        properties: {
+          path: { type: :array, items: :string },
+          credentials: {
+            type: :object,
+            properties: {
+              current_value: { type: :string },
+              new_value: { type: :string }
+            },
+            required: ['current_value', 'new_value']
+          }
+        },
+        required: ['path', 'credentials']
+      }
+      security [{app_api_key: []}]
+      consumes 'application/json'
+      produces 'application/json'
+
+      let(:Authorization) { "Bearer #{key}" }
+      let(:key) { user_app.api_keys.issue! }
+      let(:user_app) { FactoryBot.create(:app, user: user) }
+      let(:path) { ['code_grant', 'access_token'] }
+      let(:current_value) { 'Whe8Y5poyQo=' }
+      let(:new_value) { 'zTeYlkd9yzo=' }
+      let(:stored_value) { current_value }
+      let(:stored_credentials) {
+        "{\"code_grant\":{\"access_token\":\"#{stored_value}\"}}"
+      }
+      let(:credential_set) { {
+        path: path,
+        credentials: {
+          current_value: current_value,
+          new_value: new_value
+        }
+      } }
+
+      response '200', 'Credentials updated' do
+        schema({type: :object, properties: { ok: {type: :boolean} }, required: ['ok']})
+        run_test!
+      end
+
+      response '422', 'Invalid path or current value' do
+        let(:stored_value) { 'somethingelse' }
+        run_test!
+      end
+
+      response '404', 'Incorrect id' do
+        let(:set_id) { 'invalid' }
+        run_test!
+      end
+
+      response '401', 'Invalid or missing API key' do
+        let(:key) { 'eyJhbGciOiJub25lIn0.eyJhcHAiOiJhZjE3YTY1MjE0YWFiYSJ9.' }
+        run_test!
+      end
+    end
+
     delete 'Delete the credential set and its credential data' do
       security [{access_token: [], client: [], expiry: [], uid: []}]
       produces 'application/json'
@@ -199,6 +259,48 @@ describe 'Credential Sets API' do
 
       response '404', 'Incorrect id' do
         let(:set_id) { 'invalid' }
+        run_test!
+      end
+    end
+  end
+
+  path '/credential_sets/{set_id}/api_key' do
+    parameter name: :set_id, in: :path, type: :string
+
+    let(:set_id) { existing_credential.external_id }
+
+    put 'Refresh an expired API key' do
+      parameter name: :stored_path, in: :body, schema: {
+        type: :object, properties: {
+          path: { type: :string }
+        }
+      }
+      security [{app_api_key: []}]
+      consumes 'application/json'
+      produces 'application/json'
+
+      let(:Authorization) { "Bearer #{key}" }
+      let(:key) { user_app.api_keys.issue! }
+      let(:user_app) { FactoryBot.create(:app, user: user) }
+      let(:stored_path) { {path: 'api_key'} }
+      let(:stored_key) { key }
+      let(:stored_credentials) { "{\"api_key\":\"#{stored_key}\"}" }
+
+      response '200', 'New API key issued and stored in credentials' do
+        schema type: :object, properties: {
+          api_key: { type: :string },
+          required: ['api_key']
+        }
+        run_test!
+      end
+
+      response '401', 'Authentication failed' do
+        let(:key) { 'eyJhbGciOiJub25lIn0.eyJhcHAiOiJhZjE3YTY1MjE0YWFiYSJ9.' }
+        run_test!
+      end
+
+      response '409', 'API key does not match key stored in credentials' do
+        let(:stored_key) { 'x.y.z' }
         run_test!
       end
     end

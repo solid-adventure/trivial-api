@@ -47,6 +47,12 @@ Rails.application.routes.draw do
 
   resource :profile, only: [:show, :update]
 
-  resources :credential_sets
+  get 'credential_sets', to: 'credential_sets#index'
+  post 'credential_sets', to: 'credential_sets#create'
+  get 'credential_sets/:id', to: 'credential_sets#show'
+  put 'credential_sets/:id', to: 'credential_sets#update'
+  patch 'credential_sets/:id', to: 'credential_sets#patch'
+  delete 'credential_sets/:id', to: 'credential_sets#destroy'
+  put 'credential_sets/:id/api_key', to: 'credential_sets#update_api_key'
 
 end

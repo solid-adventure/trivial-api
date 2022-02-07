@@ -1,5 +1,11 @@
 class CredentialsBase
 
+  class InvalidPatch < StandardError
+    def initialize
+      super("Incorrect value or path")
+    end
+  end
+
   attr_accessor :name, :arn, :secret_value
 
   def initialize(attrs = nil)
@@ -45,6 +51,18 @@ class CredentialsBase
     end
   end
 
+  def can_patch_path?(path, current_value)
+    return false unless allowed_patch_paths.any?{|p| path_matches?(p, path)}
+    return false unless current_value == value_at_path(secret_value, path)
+    true
+  end
+
+  def patch_path!(path, current_value, new_value)
+    raise InvalidPatch unless can_patch_path?(path, current_value)
+    set_value_at_path(secret_value, path, new_value)
+    save!
+  end
+
   def self.exists?(criteria = {})
     criteria = criteria.stringify_keys
     aws_client.describe_secret secret_id: criteria['name']
@@ -57,6 +75,27 @@ class CredentialsBase
 
   def secret_value_json
     secret_value.to_json
+  end
+
+  def allowed_patch_paths
+    []
+  end
+
+  def path_matches?(spec, path)
+    return false unless spec.length == path.length
+    for i in 0..spec.length-1
+      return false unless spec[i] == '*' || spec[i] == path[i]
+    end
+    true
+  end
+
+  def value_at_path(obj, path)
+    path.inject(obj){|obj, step| obj.try(:[], step)}
+  end
+
+  def set_value_at_path(obj, path, val)
+    parent = value_at_path(obj, path[0..-2])
+    parent.try(:[]=, path[-1], val)
   end
 
   def aws_client
