@@ -4,6 +4,61 @@ info:
   title: API V1
   version: v1
 paths:
+  "/apps/{id}/api_key":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      summary: Obtain a new API key
+      tags:
+      - API Keys
+      security:
+      - access_token: []
+        client: []
+        expiry: []
+        uid: []
+      responses:
+        '200':
+          description: API key issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+    put:
+      summary: Refresh an expired API key
+      tags:
+      - API Keys
+      parameters: []
+      security:
+      - app_api_key: []
+      responses:
+        '200':
+          description: New API key issued and stored in credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+        '401':
+          description: Authentication failed
+        '409':
+          description: API key does not match key stored in credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
   "/auth":
     post:
       summary: Register a user
@@ -13,28 +68,9 @@ paths:
       responses:
         '200':
           description: user created
-          examples:
-            application/json:
-              status: success
-              data:
-                id: 7
-                provider: email
-                uid: test215@email.com
-                name: test15
-                email: test215@email.com
-                created_at: '2020-12-15T14:39:13.393Z'
-                updated_at: '2020-12-15T14:39:13.461Z'
-                team_id: 3
-                role: member
-                approval: approved
-          content: {}
-        '400':
-          description: bad request - wrong format of parameters
-          content: {}
         '422':
           description: unprocessable entity - email taken; name, email, password blank
             or too short!
-          content: {}
       requestBody:
         content:
           application/json:
@@ -47,8 +83,6 @@ paths:
                   type: string
                 name:
                   type: string
-                team_id:
-                  type: integer
               required:
               - email
               - password
@@ -62,13 +96,8 @@ paths:
       responses:
         '200':
           description: user logged in
-          content: {}
-        '400':
-          description: bad request - wrong format of request data
-          content: {}
         '401':
-          description: unauthorized - email or password is wonrg
-          content: {}
+          description: unauthorized - email or password is wrong
       requestBody:
         content:
           application/json:
@@ -95,10 +124,341 @@ paths:
       responses:
         '200':
           description: user signed out
-          content: {}
+        '404':
+          description: unauthorized - invalid login credentials in the header
+  "/credential_sets":
+    get:
+      summary: Return a list of credential sets for the account
+      tags:
+      - Credential Sets
+      security:
+      - access_token: []
+        client: []
+        expiry: []
+        uid: []
+      responses:
+        '200':
+          description: Credential sets returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credential_sets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        credential_type:
+                          type: string
+                      required:
+                      - id
+                      - name
+                      - credential_type
+                required:
+                - credential_sets
+    post:
+      summary: Create a new credential set
+      tags:
+      - Credential Sets
+      parameters: []
+      security:
+      - access_token: []
+        client: []
+        expiry: []
+        uid: []
+      responses:
+        '200':
+          description: Credential set created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credential_set:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      credential_type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - credential_type
+                required:
+                - credential_set
+        '422':
+          description: Invalid credential set body
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                credential_set:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    credential_type:
+                      type: string
+                  required:
+                  - name
+                  - credential_type
+                credentials:
+                  type: object
+              required:
+              - credential_set
+  "/credential_sets/{set_id}":
+    parameters:
+    - name: set_id
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Access the credential data for a set
+      tags:
+      - Credential Sets
+      security:
+      - access_token: []
+        client: []
+        expiry: []
+        uid: []
+      responses:
+        '200':
+          description: Credential data returned for set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credential_set:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      credential_type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - credential_type
+                  credentials:
+                    type: object
+                required:
+                - credential_set
+                - credentials
+        '404':
+          description: Incorrect id
+    put:
+      summary: Update the credential set and/or its credential data
+      tags:
+      - Credential Sets
+      parameters: []
+      security:
+      - access_token: []
+        client: []
+        expiry: []
+        uid: []
+      responses:
+        '200':
+          description: Credentials updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credential_set:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      credential_type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - credential_type
+                required:
+                - credential_set
+        '422':
+          description: Invalid credential set body
+        '404':
+          description: Incorrect id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                credential_set:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    credential_type:
+                      type: string
+                  required:
+                  - name
+                  - credential_type
+                credentials:
+                  type: object
+    patch:
+      summary: Update a single value within the credential data for a set
+      tags:
+      - Credential Sets
+      parameters: []
+      security:
+      - app_api_key: []
+      responses:
+        '200':
+          description: Credentials updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                required:
+                - ok
+        '422':
+          description: Invalid path or current value
+        '404':
+          description: Incorrect id
         '401':
-          description: unauthrorized - invalid login credentials in the header
-          content: {}
+          description: Invalid or missing API key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: array
+                  items: string
+                credentials:
+                  type: object
+                  properties:
+                    current_value:
+                      type: string
+                    new_value:
+                      type: string
+                  required:
+                  - current_value
+                  - new_value
+              required:
+              - path
+              - credentials
+    delete:
+      summary: Delete the credential set and its credential data
+      tags:
+      - Credential Sets
+      security:
+      - access_token: []
+        client: []
+        expiry: []
+        uid: []
+      responses:
+        '200':
+          description: Credentials deleted
+        '404':
+          description: Incorrect id
+  "/credential_sets/{set_id}/api_key":
+    parameters:
+    - name: set_id
+      in: path
+      required: true
+      schema:
+        type: string
+    put:
+      summary: Refresh an expired API key
+      tags:
+      - Credential Sets
+      parameters: []
+      security:
+      - app_api_key: []
+      responses:
+        '200':
+          description: New API key issued and stored in credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+                  required:
+                  - api_key
+        '401':
+          description: Authentication failed
+        '409':
+          description: API key does not match key stored in credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+  "/apps/{id}/credentials":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    patch:
+      summary: Refresh an expired API key
+      tags:
+      - App Credentials
+      parameters: []
+      security:
+      - app_api_key: []
+      responses:
+        '200':
+          description: Single credential value updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        '401':
+          description: Authentication failed
+        '400':
+          description: Invalid path or incorrect stored value
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: array
+                  items:
+                    type: string
+                credentials:
+                  type: object
+                  properties:
+                    current_value:
+                      type: string
+                    new_value:
+                      type: string
   "/teams":
     get:
       summary: Show the list of the teams
@@ -112,10 +472,8 @@ paths:
       responses:
         '200':
           description: team listed - only for admin
-          content: {}
         '401':
           description: unauthorized - not logged in or not admin
-          content: {}
     post:
       summary: Create a team
       tags:
@@ -129,13 +487,10 @@ paths:
       responses:
         '201':
           description: team created
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -165,7 +520,6 @@ paths:
       responses:
         '200':
           description: show team
-          content: {}
     put:
       summary: Update the team with teamId
       tags:
@@ -178,13 +532,10 @@ paths:
       responses:
         '200':
           description: team updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     delete:
       summary: Destroy the team with teamId
       tags:
@@ -197,13 +548,10 @@ paths:
       responses:
         '204':
           description: team deleted
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
   "/profiles":
     get:
       summary: Show user profile
@@ -217,16 +565,12 @@ paths:
       responses:
         '200':
           description: show profile
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
         '422':
           description: unprocessable entity - when user try to change the team
-          content: {}
     put:
       summary: Update user profile
       tags:
@@ -239,13 +583,10 @@ paths:
       responses:
         '200':
           description: update profile
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
   "/users":
     get:
       summary: Show the list of the users
@@ -259,13 +600,10 @@ paths:
       responses:
         '200':
           description: users listed
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     post:
       summary: Create a user
       tags:
@@ -279,13 +617,10 @@ paths:
       responses:
         '201':
           description: user created
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -327,7 +662,6 @@ paths:
       responses:
         '200':
           description: show user
-          content: {}
     put:
       summary: Update the User with userId
       tags:
@@ -341,13 +675,10 @@ paths:
       responses:
         '200':
           description: user updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -382,16 +713,12 @@ paths:
       responses:
         '204':
           description: user deleted
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
         '422':
           description: unprocessable entity - when try to delete team manager
-          content: {}
   "/members":
     get:
       summary: Show the list of the members
@@ -405,13 +732,10 @@ paths:
       responses:
         '200':
           description: members listed
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
   "/members/{userId}":
     get:
       summary: Show the member with userId
@@ -431,13 +755,10 @@ paths:
       responses:
         '200':
           description: show member
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     put:
       summary: Update the Member with userId
       tags:
@@ -451,13 +772,10 @@ paths:
       responses:
         '200':
           description: member updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -483,13 +801,10 @@ paths:
       responses:
         '200':
           description: boards listed
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     post:
       summary: Create a board
       tags:
@@ -503,13 +818,10 @@ paths:
       responses:
         '201':
           description: board created
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -543,13 +855,10 @@ paths:
       responses:
         '200':
           description: show board
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     put:
       summary: Update the Board with boardId
       tags:
@@ -563,13 +872,10 @@ paths:
       responses:
         '200':
           description: member updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -594,13 +900,10 @@ paths:
       responses:
         '204':
           description: board deleted
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
   "/flows":
     post:
       summary: Create a flow
@@ -615,13 +918,10 @@ paths:
       responses:
         '201':
           description: flow created
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -655,13 +955,10 @@ paths:
       responses:
         '200':
           description: show flow
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     put:
       summary: Update the User with flowId
       tags:
@@ -675,13 +972,10 @@ paths:
       responses:
         '200':
           description: flow updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -706,13 +1000,10 @@ paths:
       responses:
         '204':
           description: flow deleted
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
   "/stages":
     post:
       summary: Create a stage
@@ -727,13 +1018,10 @@ paths:
       responses:
         '201':
           description: stage created
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -767,13 +1055,10 @@ paths:
       responses:
         '200':
           description: show stage
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     put:
       summary: Update the User with stageId
       tags:
@@ -787,13 +1072,10 @@ paths:
       responses:
         '200':
           description: stage updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -818,13 +1100,10 @@ paths:
       responses:
         '204':
           description: stage deleted
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
   "/connections":
     post:
       summary: Create a connection
@@ -839,13 +1118,10 @@ paths:
       responses:
         '201':
           description: connection created
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -879,13 +1155,10 @@ paths:
       responses:
         '200':
           description: show connection
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
     put:
       summary: Update the User with connectionId
       tags:
@@ -899,13 +1172,10 @@ paths:
       responses:
         '200':
           description: connection updated
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
       requestBody:
         content:
           application/json:
@@ -932,13 +1202,10 @@ paths:
       responses:
         '204':
           description: connection deleted
-          content: {}
         '400':
           description: bad request
-          content: {}
         '401':
           description: unauthorized
-          content: {}
 servers:
 - url: "{defaultHost}"
   variables:
@@ -954,11 +1221,15 @@ components:
       type: apiKey
       name: client
       in: header
-    token_type:
+    expiry:
       type: apiKey
-      name: token-type
+      name: expiry
       in: header
     uid:
       type: apiKey
       name: uid
       in: header
+    app_api_key:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

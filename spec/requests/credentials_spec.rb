@@ -9,6 +9,7 @@ describe 'Credentials API' do
     parameter name: :id, in: :path, type: :string
 
     patch 'Refresh an expired API key' do
+      tags 'App Credentials'
       parameter name: :patch_request, in: :body, schema: {
         type: :object,
         properties: {

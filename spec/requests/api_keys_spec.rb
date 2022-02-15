@@ -13,6 +13,7 @@ describe 'API Key API' do
     let(:user) { FactoryBot.create(:user, :logged_in) }
 
     post 'Obtain a new API key' do
+      tags 'API Keys'
       security [{access_token: [], client: [], expiry: [], uid: []}]
       produces 'application/json'
 
@@ -30,6 +31,7 @@ describe 'API Key API' do
     end
 
     put 'Refresh an expired API key' do
+      tags 'API Keys'
       parameter name: :stored_path, in: :body, schema: {
         type: :object, properties: {
           path: { type: :string }
