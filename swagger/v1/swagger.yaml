@@ -26,7 +26,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIyZTMwNWVkMmYwYTIyNCIsImV4cCI6MTY0NTU1ODE2Mn0.lj2IhreiS-3Ff7OyY3sYzUHPC8XGGomYmTRzWO1vRKG0eSGuJ1qm88xTGjE6tJOj98Sketv0dyh1j5viBZhfQWGqgA6B7HZ9NL9WsLzF36osjFfp4CZyLlhDlHf9Mv3cJpI4MM3Icizf5tIzLJLy03e9drhQ_J_XnmKQ25s_NSOBUW2JBI9xZ_-f3G9-me1l-KdhrMFwkg8mQ99bVSDkZzBRhopWeBhsfZNAT3n1ZjqhFu4V3_Hb2qXLR8wsIhGlmY6FHoKmPxyi9MvxtxwyQgMwqAB9BK9fsziMihGY0r_RfnjzHL4cX2DLbXLStx_1sRu5L5bSV1LzCOnNhb9-gg
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIzYjA1MmNiNDliY2FjMiIsImV4cCI6MTY0NTU2MjEzMn0.LXyLBTIctJDDGgpsBebrWw3JiMPFzKAHwS7JR2m7F_0q59ZJC-ESaXTVtfSGUlBEl2vB7du6emo0DNAiIIoNDRE0fUllteeMmUojAz8f2e3CGY7ZN4YFt12uM4mTuCmJd7vWVMXDT2LGIPQjE8Z6BFPzncZdQczktDCV98O6TfQwGd-MXV0BSICTbvCE6Ue4MaMtQ8VWFQzRdzSvoB2NARCMpV8XhCvoVem3sF5j-1dLsI5_YQiPfyS30ek_9Tt6A82L6QmeXbaoNMSfrvR-XfPv4sQSWgLKSF_Ap0V8CN8MirxBrBd11zv4WxNetUzvYYLdVNd3pduJUeQOj3XQTA
               schema:
                 type: object
                 properties:
@@ -45,7 +45,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIwNGQ1YmIwNWQzYzA2YiIsImV4cCI6MTY0NTU1ODE2M30.AbrEuEKEtTg_EL3_eRtwwqIGeXcRes3MjK8sJT9ynxCVhUxb29ipa5kt01njIMIF1OwhsqzNv-ws9q2aNdPo3MTYqyWyvdnhZylGfkftFs6SBVFI1kEMmUQlh-6CMHmb-Ivv1b0CTHfapPxHDBm9UrXGQX3-hJTagwQGPFkGgOxm4yZd_rtwc0ka2RJ5w1cWwblYxudmv5ZIRRvJy_lwXQV0LHExD5x4E8v4kMAMsdpB8YSOY5RFPxSK0WlEY7CPU-Aj_dfzs3Rg0BIWIi2p4WVjNaWDI5RUv1PMEBFt9R4BIuyuIPJrodkVIgLHL89bTkva_NNqUw3MMqkOgrKQqQ
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIxOTdiMmE3M2E3MDQ2ZCIsImV4cCI6MTY0NTU2MjEzMn0.C34faCneNhXZPPV3ypUzWQu9ytP64ws3nUd58Xq82rm4imdDv-pVXe10yH2awt2GESX1aVrEop016K5dzhI95q0o6GcyvryZsEuzmvGcZVWFswAAXAP58SPGbpwPW1a02RAsO1T8KFrfGJnEY8Fn4dQMRgw_0RJ6P6ULhV6Vn-tc0vCYPl4gbtJCml5WWDgYlAnxl881RAY3cqvOVJB9N-xwNTdotPjZWK2M94d-yYPngrG90uvBLPv8HoSDd7i0gMRQo3rHpLx8mFLXpNjxX5xF4JotO_Dzqke4FMtl1MTlQOG2rxEFHQgAB-SNcdSxqIZc9P5lHe_H7mx3GAZ3eg
               schema:
                 type: object
                 properties:
@@ -79,13 +79,13 @@ paths:
               example:
                 status: success
                 data:
-                  id: 932
+                  id: 1162
                   provider: email
                   uid: jane.doe@example.test
                   name: Jane Doe
                   email: jane.doe@example.test
-                  created_at: '2022-02-15T19:29:24.316Z'
-                  updated_at: '2022-02-15T19:29:24.321Z'
+                  created_at: '2022-02-15T20:35:34.310Z'
+                  updated_at: '2022-02-15T20:35:34.316Z'
                   role: member
                   approval: approved
                   color_theme:
@@ -149,7 +149,7 @@ paths:
             application/json:
               example:
                 data:
-                  id: 933
+                  id: 1163
                   aws_role: testlambda-ex-1
                   email: user5@example.test
                   provider: email
@@ -225,11 +225,11 @@ paths:
             application/json:
               example:
                 credential_sets:
-                - id: 898de2a4-da17-4ac5-9f7c-80c87dc517b1
+                - id: 58d468dd-8c7f-4ada-9c21-ca2f71ef2e33
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T19:29:26.844Z'
-                  updated_at: '2022-02-15T19:29:26.844Z'
+                  created_at: '2022-02-15T20:35:36.779Z'
+                  updated_at: '2022-02-15T20:35:36.779Z'
               schema:
                 type: object
                 properties:
@@ -267,11 +267,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: ae2946b8-2a11-4bd8-bd00-479704243a98
+                  id: 38f7ec24-6e36-44ec-b50f-98d95cd7253b
                   name: Mailgun
                   credential_type: MailgunCredentials
-                  created_at: '2022-02-15T19:29:27.203Z'
-                  updated_at: '2022-02-15T19:29:27.203Z'
+                  created_at: '2022-02-15T20:35:37.156Z'
+                  updated_at: '2022-02-15T20:35:37.156Z'
               schema:
                 type: object
                 properties:
@@ -347,11 +347,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: fe30ddeb-a11a-4636-a214-11e808ce4157
+                  id: fee34caa-a9a3-488b-950c-1b8220a80287
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T19:29:28.060Z'
-                  updated_at: '2022-02-15T19:29:28.060Z'
+                  created_at: '2022-02-15T20:35:37.903Z'
+                  updated_at: '2022-02-15T20:35:37.903Z'
                 credentials:
                   account_sid: fa8f7fa53659d6de
                   auth_token: Whe8Y5poyQo=
@@ -395,11 +395,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: dcbddbd4-41cd-45d8-aaaf-aa77cadf3109
+                  id: 54d83931-145e-491a-9ff9-d60f03b719e6
                   name: New Name
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T19:29:28.752Z'
-                  updated_at: '2022-02-15T19:29:28.768Z'
+                  created_at: '2022-02-15T20:35:38.679Z'
+                  updated_at: '2022-02-15T20:35:38.694Z'
               schema:
                 type: object
                 properties:
@@ -552,7 +552,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIzNzcyNjU5NGY5NmNjYiIsImV4cCI6MTY0NTU1ODE3Mn0.b0xrlztNTZhGg2oMkMfzF7rJmmzrcR60TgotqdOKuo9Qqs9be-tf4_DC6iuVI-nxj2p3_RhGlptX9F3Tk-CNIID6KDnY78MZ9XsSvfFzwmBBdQAKKxooA3OD8mUNLZN8UPVrdHmT8sUFI_K-71W7MyKuINL0wfax7G-8G3hamdspXWlKl3XccPnWwPc4tN2rBzoPApt0qOBro37UszCWyDo9rIOQpjpwmXY96kpihUSrFTUS6Oqjaf-FSB3aJ2Zd09Shg0Q1c8PE5DRxXuxoK2-tHoQJYSyETU7XVGjTgqUHPW0KzLi6bH97k569_TSPvuyJuh7DCQrQwa_mxs1wYA
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIxNWU3OWM2OTI1OTk2ZiIsImV4cCI6MTY0NTU2MjE0Mn0.NdVCMLJlavdQtZANc8L8PKG0SOPHC31MZT-S0LFNEZVCg-zuAnUYuw_ZZjj35mu1kwYG44PGK1XofSiz_l7KhfNHfVUAUfkBG45t9vBMyMrScSD3iuKSW8ZIpTilXGkYmRp7IRKWBNlwun3Qiv1sEQWn0vgX9m9WyANzeIjvdEy8ITJk1dzeu2Tx_97hG8DPiFYqmEyTW3utwjmKM3OEBfS9DzsY9gyiXIPRk5pswUnocJ0NQd3JgwEt4y_6ndeNARcqjyPkGg1yi7Kvj3K8r2R_zguXSSOWsrueEsVxRCbAqAf-20H859l-jK2unrG9SeMFvK2275OkjOl2hoOfVw
               schema:
                 type: object
                 properties:
@@ -639,99 +639,6 @@ paths:
                 credentials:
                   current_value: secret
                   new_value: new secret
-  "/teams":
-    get:
-      summary: Show the list of the teams
-      tags:
-      - Team
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '200':
-          description: team listed - only for admin
-        '401':
-          description: unauthorized - not logged in or not admin
-    post:
-      summary: Create a team
-      tags:
-      - Team
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '201':
-          description: team created
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-              required:
-              - name
-  "/teams/{teamId}":
-    get:
-      summary: Show the team with teamId
-      tags:
-      - Team
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters:
-      - name: teamId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: show team
-    put:
-      summary: Update the team with teamId
-      tags:
-      - Team
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '200':
-          description: team updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-    delete:
-      summary: Destroy the team with teamId
-      tags:
-      - Team
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '204':
-          description: team deleted
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
   "/profiles":
     get:
       summary: Show user profile
@@ -780,10 +687,24 @@ paths:
       responses:
         '200':
           description: users listed
-        '400':
-          description: bad request
+          content:
+            application/json:
+              example:
+                users:
+                - id: 1186
+                  name: Test User
+                  email: user28@example.test
+                  role: admin
+                  approval: pending
+                  color_theme:
+                  created_at: '2022-02-15T20:35:43.994Z'
         '401':
-          description: unauthorized
+          description: unauthorized or not an admin user
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
     post:
       summary: Create a user
       tags:
@@ -797,10 +718,31 @@ paths:
       responses:
         '201':
           description: user created
+          content:
+            application/json:
+              example:
+                user:
+                  id: 1189
+                  name: Jane Doe
+                  email: jane.doe@example.test
+                  role: member
+                  approval: approved
+                  color_theme:
+                  created_at: '2022-02-15T20:35:44.824Z'
         '400':
           description: bad request
+          content:
+            application/json:
+              example:
+                errors:
+                - Email can't be blank
         '401':
           description: unauthorized
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
       requestBody:
         content:
           application/json:
@@ -813,8 +755,6 @@ paths:
                   type: string
                 password:
                   type: string
-                team_id:
-                  type: integer
                 role:
                   type: string
                 approval:
@@ -823,6 +763,12 @@ paths:
               - email
               - password
               - name
+              example:
+                name: Jane Doe
+                email: jane.doe@example.test
+                password: supersecret
+                role: member
+                approval: approved
   "/users/{userId}":
     get:
       summary: Show the user with userId
@@ -842,85 +788,30 @@ paths:
       responses:
         '200':
           description: show user
+          content:
+            application/json:
+              example:
+                user:
+                  id: 1192
+                  name: Test User
+                  email: user33@example.test
+                  role: member
+                  approval: approved
+                  color_theme:
+                  created_at: '2022-02-15T20:35:45.896Z'
+        '404':
+          description: No user found with that id
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
     put:
       summary: Update the User with userId
       tags:
       - User
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '200':
-          description: user updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-                team_id:
-                  type: integer
-                role:
-                  type: string
-                approval:
-                  type: string
-              required:
-              - email
-              - password
-              - name
-    delete:
-      summary: Destroy the team with userId
-      tags:
-      - User
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '204':
-          description: user deleted
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-        '422':
-          description: unprocessable entity - when try to delete team manager
-  "/members":
-    get:
-      summary: Show the list of the members
-      tags:
-      - Member
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '200':
-          description: members listed
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-  "/members/{userId}":
-    get:
-      summary: Show the member with userId
-      tags:
-      - Member
       security:
       - access_token: []
         client: []
@@ -934,28 +825,35 @@ paths:
           type: string
       responses:
         '200':
-          description: show member
+          description: user updated
+          content:
+            application/json:
+              example:
+                user:
+                  id: 1197
+                  name: New Name
+                  email: user38@example.test
+                  role: member
+                  approval: approved
+                  color_theme:
+                  created_at: '2022-02-15T20:35:47.271Z'
         '400':
           description: bad request
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
+                - Name is too short (minimum is 3 characters)
+        '404':
+          description: No user found with that id
         '401':
           description: unauthorized
-    put:
-      summary: Update the Member with userId
-      tags:
-      - Member
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '200':
-          description: member updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
       requestBody:
         content:
           application/json:
@@ -963,429 +861,44 @@ paths:
               type: object
               properties:
                 name:
+                  type: string
+                email:
                   type: string
                 password:
                   type: string
+                role:
+                  type: string
                 approval:
                   type: string
-  "/boards":
-    get:
-      summary: Show the list of the boards
+              example:
+                name: New Name
+    delete:
+      summary: Destroy the team with userId
       tags:
-      - Board
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '200':
-          description: boards listed
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-    post:
-      summary: Create a board
-      tags:
-      - Board
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '201':
-          description: board created
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                access_level:
-                  type: string
-                contents:
-                  type: string
-              required:
-              - name
-  "/boards/{boardId}":
-    get:
-      summary: Show the board with boardId
-      tags:
-      - Board
+      - User
       security:
       - access_token: []
         client: []
         uid: []
         token_type: []
       parameters:
-      - name: boardId
+      - name: userId
         in: path
         required: true
         schema:
           type: string
       responses:
-        '200':
-          description: show board
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-    put:
-      summary: Update the Board with boardId
-      tags:
-      - Board
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '200':
-          description: member updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                access_level:
-                  type: string
-                contents:
-                  type: string
-    delete:
-      summary: Destroy the board with boardId
-      tags:
-      - Board
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
         '204':
-          description: board deleted
-        '400':
-          description: bad request
+          description: user deleted
+        '404':
+          description: No user found with that id
         '401':
           description: unauthorized
-  "/flows":
-    post:
-      summary: Create a flow
-      tags:
-      - Flow
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '201':
-          description: flow created
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                access_level:
-                  type: string
-                contents:
-                  type: string
-              required:
-              - name
-  "/flows/{flowId}":
-    get:
-      summary: Show the flow with flowId
-      tags:
-      - Flow
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters:
-      - name: flowId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: show flow
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-    put:
-      summary: Update the User with flowId
-      tags:
-      - Flow
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '200':
-          description: flow updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                access_level:
-                  type: string
-                contents:
-                  type: string
-    delete:
-      summary: Destroy the team with flowId
-      tags:
-      - Flow
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '204':
-          description: flow deleted
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-  "/stages":
-    post:
-      summary: Create a stage
-      tags:
-      - Stage
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '201':
-          description: stage created
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                subcomponents:
-                  type: string
-                contents:
-                  type: string
-              required:
-              - name
-  "/stages/{stageId}":
-    get:
-      summary: Show the stage with stageId
-      tags:
-      - Stage
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters:
-      - name: stageId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: show stage
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-    put:
-      summary: Update the User with stageId
-      tags:
-      - Stage
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '200':
-          description: stage updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                access_level:
-                  type: string
-                contents:
-                  type: string
-    delete:
-      summary: Destroy the team with stageId
-      tags:
-      - Stage
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '204':
-          description: stage deleted
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-  "/connections":
-    post:
-      summary: Create a connection
-      tags:
-      - Connection
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '201':
-          description: connection created
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                form_id:
-                  type: integer
-                to_id:
-                  type: integer
-                transform:
-                  type: string
-              required:
-              - name
-  "/connections/{connectionId}":
-    get:
-      summary: Show the connection with connectionId
-      tags:
-      - Connection
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters:
-      - name: connectionId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: show connection
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-    put:
-      summary: Update the User with connectionId
-      tags:
-      - Connection
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '200':
-          description: connection updated
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                form_id:
-                  type: integer
-                to_id:
-                  type: integer
-                transform:
-                  type: string
-              required:
-              - name
-    delete:
-      summary: Destroy the team with connectionId
-      tags:
-      - Connection
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      responses:
-        '204':
-          description: connection deleted
-        '400':
-          description: bad request
-        '401':
-          description: unauthorized
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
 servers:
 - url: "{defaultHost}"
   variables:

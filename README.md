@@ -151,3 +151,9 @@ bundle exec rspec
 rails s
 
 ```
+
+## Re-generate API docs from tests
+
+```shell
+RAILS_ENV=test bundle exec rake rswag
+```
