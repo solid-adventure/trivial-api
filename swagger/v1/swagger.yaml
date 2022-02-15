@@ -26,7 +26,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIzYjA1MmNiNDliY2FjMiIsImV4cCI6MTY0NTU2MjEzMn0.LXyLBTIctJDDGgpsBebrWw3JiMPFzKAHwS7JR2m7F_0q59ZJC-ESaXTVtfSGUlBEl2vB7du6emo0DNAiIIoNDRE0fUllteeMmUojAz8f2e3CGY7ZN4YFt12uM4mTuCmJd7vWVMXDT2LGIPQjE8Z6BFPzncZdQczktDCV98O6TfQwGd-MXV0BSICTbvCE6Ue4MaMtQ8VWFQzRdzSvoB2NARCMpV8XhCvoVem3sF5j-1dLsI5_YQiPfyS30ek_9Tt6A82L6QmeXbaoNMSfrvR-XfPv4sQSWgLKSF_Ap0V8CN8MirxBrBd11zv4WxNetUzvYYLdVNd3pduJUeQOj3XQTA
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJkOTMyMmUyMjdiYjk1OCIsImV4cCI6MTY0NTU2NDA3MX0.D6r33NKVT58FnzSmF8R1o41SJd6ailNbgzOgCqf0tBhgqgyhePKkYfBcz1qyJ8uC8Wnc0EtgEuTWeqIyXf_VrU6V9ytGzouvpbbZLBIdEZ14CCcadnj89EQrVIZ0WB_thp7cCgCAlkirwMgX0NAM-12o0yNjijqCa4JHxWpSCmEiCo7Tan0IQW7e_gTfgv0bmFZLpAArDBWWsuk7qOji8_pf9SF-6NlwwengCs3P0VwyhpipIsu038Lwr0fV_O8VMLY0K_9G3LJ3YfybdVOznyJE1E7nr313pRwISTq1tbSnYNSR9fVzjyXuQfMw1xoNd9tGYT43L2qXYLNxHMTZ2w
               schema:
                 type: object
                 properties:
@@ -45,7 +45,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIxOTdiMmE3M2E3MDQ2ZCIsImV4cCI6MTY0NTU2MjEzMn0.C34faCneNhXZPPV3ypUzWQu9ytP64ws3nUd58Xq82rm4imdDv-pVXe10yH2awt2GESX1aVrEop016K5dzhI95q0o6GcyvryZsEuzmvGcZVWFswAAXAP58SPGbpwPW1a02RAsO1T8KFrfGJnEY8Fn4dQMRgw_0RJ6P6ULhV6Vn-tc0vCYPl4gbtJCml5WWDgYlAnxl881RAY3cqvOVJB9N-xwNTdotPjZWK2M94d-yYPngrG90uvBLPv8HoSDd7i0gMRQo3rHpLx8mFLXpNjxX5xF4JotO_Dzqke4FMtl1MTlQOG2rxEFHQgAB-SNcdSxqIZc9P5lHe_H7mx3GAZ3eg
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJlN2VhMTYzY2UwNjQyNiIsImV4cCI6MTY0NTU2NDA3MX0.ewnlzNL8EwTLDESEWtrL_ixbt_nw7SkhazgexaWSgcrafnh-rVTO0PsEqZ_7L5rnf0HbErwcYVYsJs7sDD80zI0g4z9mxAyaqD2CmV8YW3hk7h6BQsyr0vYNV5gIvt_xYfnbRyQoELQ3K8781gO-W39US5MEqH1_JP7uo5PYrpBpXc6kPT9d4fZQr9jefjVuB3TeEekSuJKXlPUI_J6AUHSemX88s_K2hFOmXqU-UICqUJg2geNaxhODUj36F-8CNExTxt3TCm_93hLJFayICK3lmouzO1f7wX5WA6sH7LxG-Xe_xb-kFWQOnpJj_qNtdqivdRlE6gD3dxYNssNj3w
               schema:
                 type: object
                 properties:
@@ -79,13 +79,13 @@ paths:
               example:
                 status: success
                 data:
-                  id: 1162
+                  id: 1415
                   provider: email
                   uid: jane.doe@example.test
                   name: Jane Doe
                   email: jane.doe@example.test
-                  created_at: '2022-02-15T20:35:34.310Z'
-                  updated_at: '2022-02-15T20:35:34.316Z'
+                  created_at: '2022-02-15T21:07:53.072Z'
+                  updated_at: '2022-02-15T21:07:53.076Z'
                   role: member
                   approval: approved
                   color_theme:
@@ -149,7 +149,7 @@ paths:
             application/json:
               example:
                 data:
-                  id: 1163
+                  id: 1416
                   aws_role: testlambda-ex-1
                   email: user5@example.test
                   provider: email
@@ -225,11 +225,11 @@ paths:
             application/json:
               example:
                 credential_sets:
-                - id: 58d468dd-8c7f-4ada-9c21-ca2f71ef2e33
+                - id: 6128da2a-35fa-4fa7-8f96-e58920f4fdea
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T20:35:36.779Z'
-                  updated_at: '2022-02-15T20:35:36.779Z'
+                  created_at: '2022-02-15T21:07:55.638Z'
+                  updated_at: '2022-02-15T21:07:55.638Z'
               schema:
                 type: object
                 properties:
@@ -267,11 +267,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 38f7ec24-6e36-44ec-b50f-98d95cd7253b
+                  id: 24fdef5f-ac40-4702-a7b2-2011cfbee82b
                   name: Mailgun
                   credential_type: MailgunCredentials
-                  created_at: '2022-02-15T20:35:37.156Z'
-                  updated_at: '2022-02-15T20:35:37.156Z'
+                  created_at: '2022-02-15T21:07:55.968Z'
+                  updated_at: '2022-02-15T21:07:55.968Z'
               schema:
                 type: object
                 properties:
@@ -347,11 +347,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: fee34caa-a9a3-488b-950c-1b8220a80287
+                  id: c879eff3-1f98-4db2-8a2d-4ba971455c71
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T20:35:37.903Z'
-                  updated_at: '2022-02-15T20:35:37.903Z'
+                  created_at: '2022-02-15T21:07:56.668Z'
+                  updated_at: '2022-02-15T21:07:56.668Z'
                 credentials:
                   account_sid: fa8f7fa53659d6de
                   auth_token: Whe8Y5poyQo=
@@ -395,11 +395,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 54d83931-145e-491a-9ff9-d60f03b719e6
+                  id: 4cb41d0f-3e0e-4c27-b87b-6cdb51dbf44b
                   name: New Name
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T20:35:38.679Z'
-                  updated_at: '2022-02-15T20:35:38.694Z'
+                  created_at: '2022-02-15T21:07:57.416Z'
+                  updated_at: '2022-02-15T21:07:57.430Z'
               schema:
                 type: object
                 properties:
@@ -552,7 +552,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIxNWU3OWM2OTI1OTk2ZiIsImV4cCI6MTY0NTU2MjE0Mn0.NdVCMLJlavdQtZANc8L8PKG0SOPHC31MZT-S0LFNEZVCg-zuAnUYuw_ZZjj35mu1kwYG44PGK1XofSiz_l7KhfNHfVUAUfkBG45t9vBMyMrScSD3iuKSW8ZIpTilXGkYmRp7IRKWBNlwun3Qiv1sEQWn0vgX9m9WyANzeIjvdEy8ITJk1dzeu2Tx_97hG8DPiFYqmEyTW3utwjmKM3OEBfS9DzsY9gyiXIPRk5pswUnocJ0NQd3JgwEt4y_6ndeNARcqjyPkGg1yi7Kvj3K8r2R_zguXSSOWsrueEsVxRCbAqAf-20H859l-jK2unrG9SeMFvK2275OkjOl2hoOfVw
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiI1OGFkNDYxN2VlM2E1ZiIsImV4cCI6MTY0NTU2NDA4MH0.Do2b5JOZ7tRTbE32WxsmTHC31CJWCcb1HGjYwyMuZYQEFM0w4c6p87AOc8ceDjps8eS6-idfBs1cJfECEfpTH0jx1DXoFbjcpjzR-vBiWGz0EECjyjjmXOCKhSXojj3oSP6e_HlCY3o_vkr16Wr-CWfZ5okToyAnSrqsp-5ojqTdloN_rMIz6rw3uaAWgyZSosp4uon3WoMuw3WAYesvU53vLDgt-XGCEmT8ffPVZhUvVE38NEP_PM0JjSW8KzsAoOOjLmzDSfOO-8YuqCZ8we1T1W_fPMCQbRzB8iYmkqpHj6Q4X-AVrnzOrJmNczjJh1X1_rXd5gbvNP5OnK34Bg
               schema:
                 type: object
                 properties:
@@ -639,9 +639,9 @@ paths:
                 credentials:
                   current_value: secret
                   new_value: new secret
-  "/profiles":
+  "/profile":
     get:
-      summary: Show user profile
+      summary: Show the logged in user's profile
       tags:
       - Profile
       security:
@@ -651,15 +651,27 @@ paths:
         token_type: []
       responses:
         '200':
-          description: show profile
-        '400':
-          description: bad request
+          description: Current profile
+          content:
+            application/json:
+              example:
+                user:
+                  id: 1439
+                  name: Test User
+                  email: user28@example.test
+                  role: admin
+                  approval: pending
+                  color_theme:
+                  created_at: '2022-02-15T21:08:02.700Z'
         '401':
-          description: unauthorized
-        '422':
-          description: unprocessable entity - when user try to change the team
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
     put:
-      summary: Update user profile
+      summary: Update the logged in user's profile
       tags:
       - Profile
       security:
@@ -667,13 +679,49 @@ paths:
         client: []
         uid: []
         token_type: []
+      parameters: []
       responses:
         '200':
-          description: update profile
+          description: Profile updated
+          content:
+            application/json:
+              example:
+                user:
+                  id: 1441
+                  name: My New Name
+                  email: user30@example.test
+                  role: admin
+                  approval: pending
+                  color_theme: Light
+                  created_at: '2022-02-15T21:08:03.271Z'
         '400':
-          description: bad request
+          description: Bad request
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
+                - Name is too short (minimum is 3 characters)
         '401':
-          description: unauthorized
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color_theme:
+                  type: string
+              example:
+                name: My New Name
+                color_theme: Light
   "/users":
     get:
       summary: Show the list of the users
@@ -691,13 +739,13 @@ paths:
             application/json:
               example:
                 users:
-                - id: 1186
+                - id: 1444
                   name: Test User
-                  email: user28@example.test
+                  email: user33@example.test
                   role: admin
                   approval: pending
                   color_theme:
-                  created_at: '2022-02-15T20:35:43.994Z'
+                  created_at: '2022-02-15T21:08:04.088Z'
         '401':
           description: unauthorized or not an admin user
           content:
@@ -722,13 +770,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1189
+                  id: 1447
                   name: Jane Doe
                   email: jane.doe@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-02-15T20:35:44.824Z'
+                  created_at: '2022-02-15T21:08:04.905Z'
         '400':
           description: bad request
           content:
@@ -792,13 +840,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1192
+                  id: 1450
                   name: Test User
-                  email: user33@example.test
+                  email: user38@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-02-15T20:35:45.896Z'
+                  created_at: '2022-02-15T21:08:05.961Z'
         '404':
           description: No user found with that id
         '401':
@@ -830,13 +878,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1197
+                  id: 1455
                   name: New Name
-                  email: user38@example.test
+                  email: user43@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-02-15T20:35:47.271Z'
+                  created_at: '2022-02-15T21:08:07.344Z'
         '400':
           description: bad request
           content:
