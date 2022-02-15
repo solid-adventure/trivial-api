@@ -25,6 +25,8 @@ paths:
           description: API key issued
           content:
             application/json:
+              example:
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIyZTMwNWVkMmYwYTIyNCIsImV4cCI6MTY0NTU1ODE2Mn0.lj2IhreiS-3Ff7OyY3sYzUHPC8XGGomYmTRzWO1vRKG0eSGuJ1qm88xTGjE6tJOj98Sketv0dyh1j5viBZhfQWGqgA6B7HZ9NL9WsLzF36osjFfp4CZyLlhDlHf9Mv3cJpI4MM3Icizf5tIzLJLy03e9drhQ_J_XnmKQ25s_NSOBUW2JBI9xZ_-f3G9-me1l-KdhrMFwkg8mQ99bVSDkZzBRhopWeBhsfZNAT3n1ZjqhFu4V3_Hb2qXLR8wsIhGlmY6FHoKmPxyi9MvxtxwyQgMwqAB9BK9fsziMihGY0r_RfnjzHL4cX2DLbXLStx_1sRu5L5bSV1LzCOnNhb9-gg
               schema:
                 type: object
                 properties:
@@ -42,6 +44,8 @@ paths:
           description: New API key issued and stored in credentials
           content:
             application/json:
+              example:
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIwNGQ1YmIwNWQzYzA2YiIsImV4cCI6MTY0NTU1ODE2M30.AbrEuEKEtTg_EL3_eRtwwqIGeXcRes3MjK8sJT9ynxCVhUxb29ipa5kt01njIMIF1OwhsqzNv-ws9q2aNdPo3MTYqyWyvdnhZylGfkftFs6SBVFI1kEMmUQlh-6CMHmb-Ivv1b0CTHfapPxHDBm9UrXGQX3-hJTagwQGPFkGgOxm4yZd_rtwc0ka2RJ5w1cWwblYxudmv5ZIRRvJy_lwXQV0LHExD5x4E8v4kMAMsdpB8YSOY5RFPxSK0WlEY7CPU-Aj_dfzs3Rg0BIWIi2p4WVjNaWDI5RUv1PMEBFt9R4BIuyuIPJrodkVIgLHL89bTkva_NNqUw3MMqkOgrKQqQ
               schema:
                 type: object
                 properties:
@@ -59,6 +63,8 @@ paths:
               properties:
                 path:
                   type: string
+              example:
+                path: '1.1'
   "/auth":
     post:
       summary: Register a user
@@ -68,9 +74,48 @@ paths:
       responses:
         '200':
           description: user created
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  id: 932
+                  provider: email
+                  uid: jane.doe@example.test
+                  name: Jane Doe
+                  email: jane.doe@example.test
+                  created_at: '2022-02-15T19:29:24.316Z'
+                  updated_at: '2022-02-15T19:29:24.321Z'
+                  role: member
+                  approval: approved
+                  color_theme:
+                  allow_password_change: false
+                  aws_role:
         '422':
           description: unprocessable entity - email taken; name, email, password blank
             or too short!
+          content:
+            application/json:
+              example:
+                status: error
+                data:
+                  id:
+                  provider: email
+                  uid: ''
+                  name: Jane Doe
+                  email: jane.doe@example.test
+                  created_at:
+                  updated_at:
+                  role: member
+                  approval: pending
+                  color_theme:
+                  allow_password_change: false
+                  aws_role:
+                errors:
+                  password:
+                  - can't be blank
+                  full_messages:
+                  - Password can't be blank
       requestBody:
         content:
           application/json:
@@ -87,6 +132,10 @@ paths:
               - email
               - password
               - name
+              example:
+                email: jane.doe@example.test
+                password: supersecret
+                name: Jane Doe
   "/auth/sign_in":
     post:
       summary: Sign in a user
@@ -96,8 +145,28 @@ paths:
       responses:
         '200':
           description: user logged in
+          content:
+            application/json:
+              example:
+                data:
+                  id: 933
+                  aws_role: testlambda-ex-1
+                  email: user5@example.test
+                  provider: email
+                  name: Test User
+                  uid: user5@example.test
+                  role: member
+                  approval: approved
+                  color_theme:
+                  allow_password_change: false
         '401':
           description: unauthorized - email or password is wrong
+          content:
+            application/json:
+              example:
+                success: false
+                errors:
+                - Invalid login credentials. Please try again.
       requestBody:
         content:
           application/json:
@@ -111,6 +180,9 @@ paths:
               required:
               - email
               - password
+              example:
+                email: user5@example.test
+                password: insecure
   "/auth/sign_out":
     delete:
       summary: Sign out a user
@@ -124,8 +196,18 @@ paths:
       responses:
         '200':
           description: user signed out
+          content:
+            application/json:
+              example:
+                success: true
         '404':
           description: unauthorized - invalid login credentials in the header
+          content:
+            application/json:
+              example:
+                success: false
+                errors:
+                - User was not found or was not logged in.
   "/credential_sets":
     get:
       summary: Return a list of credential sets for the account
@@ -141,6 +223,13 @@ paths:
           description: Credential sets returned
           content:
             application/json:
+              example:
+                credential_sets:
+                - id: 898de2a4-da17-4ac5-9f7c-80c87dc517b1
+                  name: Twilio
+                  credential_type: TwilioCredentials
+                  created_at: '2022-02-15T19:29:26.844Z'
+                  updated_at: '2022-02-15T19:29:26.844Z'
               schema:
                 type: object
                 properties:
@@ -176,6 +265,13 @@ paths:
           description: Credential set created
           content:
             application/json:
+              example:
+                credential_set:
+                  id: ae2946b8-2a11-4bd8-bd00-479704243a98
+                  name: Mailgun
+                  credential_type: MailgunCredentials
+                  created_at: '2022-02-15T19:29:27.203Z'
+                  updated_at: '2022-02-15T19:29:27.203Z'
               schema:
                 type: object
                 properties:
@@ -196,6 +292,11 @@ paths:
                 - credential_set
         '422':
           description: Invalid credential set body
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
       requestBody:
         content:
           application/json:
@@ -216,6 +317,13 @@ paths:
                   type: object
               required:
               - credential_set
+              example:
+                credential_set:
+                  name: Mailgun
+                  credential_type: MailgunCredentials
+                credentials:
+                  api_key: "+7Ucdca1LUQ="
+                  domain: example.test
   "/credential_sets/{set_id}":
     parameters:
     - name: set_id
@@ -237,6 +345,16 @@ paths:
           description: Credential data returned for set
           content:
             application/json:
+              example:
+                credential_set:
+                  id: fe30ddeb-a11a-4636-a214-11e808ce4157
+                  name: Twilio
+                  credential_type: TwilioCredentials
+                  created_at: '2022-02-15T19:29:28.060Z'
+                  updated_at: '2022-02-15T19:29:28.060Z'
+                credentials:
+                  account_sid: fa8f7fa53659d6de
+                  auth_token: Whe8Y5poyQo=
               schema:
                 type: object
                 properties:
@@ -275,6 +393,13 @@ paths:
           description: Credentials updated
           content:
             application/json:
+              example:
+                credential_set:
+                  id: dcbddbd4-41cd-45d8-aaaf-aa77cadf3109
+                  name: New Name
+                  credential_type: TwilioCredentials
+                  created_at: '2022-02-15T19:29:28.752Z'
+                  updated_at: '2022-02-15T19:29:28.768Z'
               schema:
                 type: object
                 properties:
@@ -295,6 +420,11 @@ paths:
                 - credential_set
         '422':
           description: Invalid credential set body
+          content:
+            application/json:
+              example:
+                errors:
+                - Name can't be blank
         '404':
           description: Incorrect id
       requestBody:
@@ -315,6 +445,13 @@ paths:
                   - credential_type
                 credentials:
                   type: object
+              example:
+                credential_set:
+                  name: New Name
+                  credential_type: TwilioCredentials
+                credentials:
+                  account_sid: fa8f7fa53659d6de
+                  auth_token: Whe8Y5poyQo=
     patch:
       summary: Update a single value within the credential data for a set
       tags:
@@ -327,6 +464,8 @@ paths:
           description: Credentials updated
           content:
             application/json:
+              example:
+                ok: true
               schema:
                 type: object
                 properties:
@@ -336,10 +475,20 @@ paths:
                 - ok
         '422':
           description: Invalid path or current value
+          content:
+            application/json:
+              example:
+                ok: false
+                error: Incorrect value or path
         '404':
           description: Incorrect id
         '401':
           description: Invalid or missing API key
+          content:
+            application/json:
+              example:
+                errors:
+                - Unauthorized!
       requestBody:
         content:
           application/json:
@@ -362,6 +511,13 @@ paths:
               required:
               - path
               - credentials
+              example:
+                path:
+                - code_grant
+                - access_token
+                credentials:
+                  current_value: Whe8Y5poyQo=
+                  new_value: zTeYlkd9yzo=
     delete:
       summary: Delete the credential set and its credential data
       tags:
@@ -395,6 +551,8 @@ paths:
           description: New API key issued and stored in credentials
           content:
             application/json:
+              example:
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIzNzcyNjU5NGY5NmNjYiIsImV4cCI6MTY0NTU1ODE3Mn0.b0xrlztNTZhGg2oMkMfzF7rJmmzrcR60TgotqdOKuo9Qqs9be-tf4_DC6iuVI-nxj2p3_RhGlptX9F3Tk-CNIID6KDnY78MZ9XsSvfFzwmBBdQAKKxooA3OD8mUNLZN8UPVrdHmT8sUFI_K-71W7MyKuINL0wfax7G-8G3hamdspXWlKl3XccPnWwPc4tN2rBzoPApt0qOBro37UszCWyDo9rIOQpjpwmXY96kpihUSrFTUS6Oqjaf-FSB3aJ2Zd09Shg0Q1c8PE5DRxXuxoK2-tHoQJYSyETU7XVGjTgqUHPW0KzLi6bH97k569_TSPvuyJuh7DCQrQwa_mxs1wYA
               schema:
                 type: object
                 properties:
@@ -414,6 +572,8 @@ paths:
               properties:
                 path:
                   type: string
+              example:
+                path: api_key
   "/apps/{id}/credentials":
     parameters:
     - name: id
@@ -433,6 +593,8 @@ paths:
           description: Single credential value updated
           content:
             application/json:
+              example:
+                ok: true
               schema:
                 type: object
                 properties:
@@ -440,8 +602,18 @@ paths:
                     type: boolean
         '401':
           description: Authentication failed
+          content:
+            application/json:
+              example:
+                errors:
+                - Unauthorized!
         '400':
           description: Invalid path or incorrect stored value
+          content:
+            application/json:
+              example:
+                ok: false
+                error: Incorrect value or path
       requestBody:
         content:
           application/json:
@@ -459,6 +631,14 @@ paths:
                       type: string
                     new_value:
                       type: string
+              example:
+                path:
+                - '1'
+                - '1'
+                - access_token
+                credentials:
+                  current_value: secret
+                  new_value: new secret
   "/teams":
     get:
       summary: Show the list of the teams

@@ -47,7 +47,7 @@ describe 'API Key API' do
       let(:stored_key) { key }
       let(:stored_credentials) { "{\"1\":{\"1\":\"#{stored_key}\"}}" }
 
-      response '200', 'New API key issued and stored in credentials' do
+      response '200', 'New API key issued and stored in credentials', save_request_example: :stored_path do
         schema type: :object, properties: {
           api_key: { type: :string }
         }

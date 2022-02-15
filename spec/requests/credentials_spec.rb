@@ -44,7 +44,7 @@ describe 'Credentials API' do
         }
       } }
 
-      response '200', 'Single credential value updated' do
+      response '200', 'Single credential value updated', save_request_example: :patch_request do
         schema type: :object, properties: {
           ok: { type: :boolean }
         }

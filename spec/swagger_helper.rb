@@ -69,4 +69,25 @@ RSpec.configure do |config|
   # the key, this may want to be changed to avoid putting yaml in json files.
   # Defaults to json. Accepts ':json' and ':yaml'.
   config.swagger_format = :yaml
+
+
+  # save configured requests as examples
+  config.after(:each, type: :request) do |example|
+    request_example_name = example.metadata[:save_request_example]
+    if request_example_name && respond_to?(request_example_name)
+      param = example.metadata[:operation][:parameters].detect { |p| p[:name] == request_example_name }
+      param[:schema][:example] = send(request_example_name)
+    end
+  end
+
+  # save responses as examples
+  config.after(:each, type: :request) do |example|
+    example.metadata[:response][:content] = {
+      'application/json' => {
+        example: JSON.parse(response.body, symbolize_names: true)
+      }
+    }
+  rescue JSON::ParserError
+    # continue
+  end
 end

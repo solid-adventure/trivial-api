@@ -108,7 +108,7 @@ describe 'Credential Sets API' do
         credentials: credentials
       } }
 
-      response '200', 'Credential set created' do
+      response '200', 'Credential set created', save_request_example: :credential_set do
         schema credential_set_response_schema
         run_test! do |response|
           data = JSON.parse(response.body)
@@ -174,7 +174,7 @@ describe 'Credential Sets API' do
         credentials: credentials
       } }
 
-      response '200', 'Credentials updated' do
+      response '200', 'Credentials updated', save_request_example: :credential_set do
         schema credential_set_response_schema
         run_test! do |response|
           data = JSON.parse(response.body)
@@ -233,7 +233,7 @@ describe 'Credential Sets API' do
         }
       } }
 
-      response '200', 'Credentials updated' do
+      response '200', 'Credentials updated', save_request_example: :credential_set do
         schema({type: :object, properties: { ok: {type: :boolean} }, required: ['ok']})
         run_test!
       end
@@ -293,7 +293,7 @@ describe 'Credential Sets API' do
       let(:stored_key) { key }
       let(:stored_credentials) { "{\"api_key\":\"#{stored_key}\"}" }
 
-      response '200', 'New API key issued and stored in credentials' do
+      response '200', 'New API key issued and stored in credentials', save_request_example: :stored_path do
         schema type: :object, properties: {
           api_key: { type: :string },
           required: ['api_key']

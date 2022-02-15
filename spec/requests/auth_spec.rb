@@ -49,7 +49,7 @@ describe 'Auth API' do
         name: name
       } }
 
-      response '200', 'user created' do
+      response '200', 'user created', save_request_example: :user do
         schema type: :object,
           properties: {
             status: { type: :string },
@@ -87,7 +87,7 @@ describe 'Auth API' do
       let(:password) { 'insecure' }
       let(:existing_user) { FactoryBot.create(:user) }
 
-      response '200', 'user logged in' do
+      response '200', 'user logged in', save_request_example: :user do
         schema type: :object, properties: {
           data: user_profile_schema
         }, required: ['data']
