@@ -9,6 +9,7 @@ describe 'Credentials API' do
     parameter name: :id, in: :path, type: :string
 
     patch 'Refresh an expired API key' do
+      tags 'App Credentials'
       parameter name: :patch_request, in: :body, schema: {
         type: :object,
         properties: {
@@ -43,7 +44,7 @@ describe 'Credentials API' do
         }
       } }
 
-      response '200', 'Single credential value updated' do
+      response '200', 'Single credential value updated', save_request_example: :patch_request do
         schema type: :object, properties: {
           ok: { type: :boolean }
         }

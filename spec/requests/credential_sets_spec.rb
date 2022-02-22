@@ -70,6 +70,7 @@ describe 'Credential Sets API' do
   path '/credential_sets' do
 
     get 'Return a list of credential sets for the account' do
+      tags 'Credential Sets'
       security [{access_token: [], client: [], expiry: [], uid: []}]
       produces 'application/json'
 
@@ -90,6 +91,7 @@ describe 'Credential Sets API' do
     end
 
     post 'Create a new credential set' do
+      tags 'Credential Sets'
       parameter name: :credential_set, in: :body, schema: credential_definition_schema
       security [{access_token: [], client: [], expiry: [], uid: []}]
       consumes 'application/json'
@@ -106,7 +108,7 @@ describe 'Credential Sets API' do
         credentials: credentials
       } }
 
-      response '200', 'Credential set created' do
+      response '200', 'Credential set created', save_request_example: :credential_set do
         schema credential_set_response_schema
         run_test! do |response|
           data = JSON.parse(response.body)
@@ -132,6 +134,7 @@ describe 'Credential Sets API' do
     }
 
     get 'Access the credential data for a set' do
+      tags 'Credential Sets'
       security [{access_token: [], client: [], expiry: [], uid: []}]
       produces 'application/json'
 
@@ -154,6 +157,7 @@ describe 'Credential Sets API' do
     end
 
     put 'Update the credential set and/or its credential data' do
+      tags 'Credential Sets'
       parameter name: :credential_set, in: :body, schema: credential_update_schema
       security [{access_token: [], client: [], expiry: [], uid: []}]
       consumes 'application/json'
@@ -170,7 +174,7 @@ describe 'Credential Sets API' do
         credentials: credentials
       } }
 
-      response '200', 'Credentials updated' do
+      response '200', 'Credentials updated', save_request_example: :credential_set do
         schema credential_set_response_schema
         run_test! do |response|
           data = JSON.parse(response.body)
@@ -191,6 +195,7 @@ describe 'Credential Sets API' do
     end
 
     patch 'Update a single value within the credential data for a set' do
+      tags 'Credential Sets'
       parameter name: :credential_set, in: :body, schema: {
         type: :object,
         properties: {
@@ -228,7 +233,7 @@ describe 'Credential Sets API' do
         }
       } }
 
-      response '200', 'Credentials updated' do
+      response '200', 'Credentials updated', save_request_example: :credential_set do
         schema({type: :object, properties: { ok: {type: :boolean} }, required: ['ok']})
         run_test!
       end
@@ -250,6 +255,7 @@ describe 'Credential Sets API' do
     end
 
     delete 'Delete the credential set and its credential data' do
+      tags 'Credential Sets'
       security [{access_token: [], client: [], expiry: [], uid: []}]
       produces 'application/json'
 
@@ -270,6 +276,7 @@ describe 'Credential Sets API' do
     let(:set_id) { existing_credential.external_id }
 
     put 'Refresh an expired API key' do
+      tags 'Credential Sets'
       parameter name: :stored_path, in: :body, schema: {
         type: :object, properties: {
           path: { type: :string }
@@ -286,7 +293,7 @@ describe 'Credential Sets API' do
       let(:stored_key) { key }
       let(:stored_credentials) { "{\"api_key\":\"#{stored_key}\"}" }
 
-      response '200', 'New API key issued and stored in credentials' do
+      response '200', 'New API key issued and stored in credentials', save_request_example: :stored_path do
         schema type: :object, properties: {
           api_key: { type: :string },
           required: ['api_key']
