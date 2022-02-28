@@ -45,6 +45,7 @@ gem 'aws-sdk-iam', '~> 1'
 gem 'aws-sdk-secretsmanager', '~> 1'
 gem 'jwt', '~> 2.3'
 gem 'redis'
+gem "posthog-ruby"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
