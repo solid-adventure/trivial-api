@@ -26,7 +26,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJkOTMyMmUyMjdiYjk1OCIsImV4cCI6MTY0NTU2NDA3MX0.D6r33NKVT58FnzSmF8R1o41SJd6ailNbgzOgCqf0tBhgqgyhePKkYfBcz1qyJ8uC8Wnc0EtgEuTWeqIyXf_VrU6V9ytGzouvpbbZLBIdEZ14CCcadnj89EQrVIZ0WB_thp7cCgCAlkirwMgX0NAM-12o0yNjijqCa4JHxWpSCmEiCo7Tan0IQW7e_gTfgv0bmFZLpAArDBWWsuk7qOji8_pf9SF-6NlwwengCs3P0VwyhpipIsu038Lwr0fV_O8VMLY0K_9G3LJ3YfybdVOznyJE1E7nr313pRwISTq1tbSnYNSR9fVzjyXuQfMw1xoNd9tGYT43L2qXYLNxHMTZ2w
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiI2NjUzYjA1MGE4MTc5MiIsImV4cCI6MTY0Njc4MDI3NX0.QlqChKsyNEupVPkd_FuwEFPOr-PZUT7TgFDm2aD17JfwoNeU00fjhh8lL0FYC8dEKF2tsULhlEcKXgcjk6iqiVfFKlG6C6qo80cn7FxXn6y7sg0n7-M0lG3lUUjpxdrGMAxdKMxBUspk4PI3EiZQF1D870bfOA3ytQKs_J1hbInLvL5KzddWWCb-jdlPxaDzfD14L4Jy2J1wmI3Jbo8tT-X2beT_xM7J1G0jEr2AYbIjarIwh4J9vHkNNixKvlVsAbxrN0WBY0imysUNufev_xEnSZOyG6wZ5XMOkF71SmUXi9igLzdvlVV1uTJ5LtTxmXFgRR_77IozTzMepBcdmg
               schema:
                 type: object
                 properties:
@@ -45,7 +45,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJlN2VhMTYzY2UwNjQyNiIsImV4cCI6MTY0NTU2NDA3MX0.ewnlzNL8EwTLDESEWtrL_ixbt_nw7SkhazgexaWSgcrafnh-rVTO0PsEqZ_7L5rnf0HbErwcYVYsJs7sDD80zI0g4z9mxAyaqD2CmV8YW3hk7h6BQsyr0vYNV5gIvt_xYfnbRyQoELQ3K8781gO-W39US5MEqH1_JP7uo5PYrpBpXc6kPT9d4fZQr9jefjVuB3TeEekSuJKXlPUI_J6AUHSemX88s_K2hFOmXqU-UICqUJg2geNaxhODUj36F-8CNExTxt3TCm_93hLJFayICK3lmouzO1f7wX5WA6sH7LxG-Xe_xb-kFWQOnpJj_qNtdqivdRlE6gD3dxYNssNj3w
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJiZDViOWZlZmQyY2U5YyIsImV4cCI6MTY0Njc4MDI3Nn0.lEsZ9_IfSbXhafcDUkTXsd8xUU-AM5jEMPg6oLNPjZVELY79D_MlJ9rzjg2F-h8TPFpRdA2J2t3CYSKJpiBNqopJYUVjKxBHYpaEhONFj9zz3ETErlODY3tc4gnSwnjhrhkDAu3v_IdgBD_Xoa4W-S762bx58xdcYgsT92EwCWl_I0q1rxXDGffAP8R_v0cGiLmbUXA_0Px-iIIQ4Q3MFwY-NUto9QkfbWzGKQIUF-Qi5I-AyW9UDFZP4uW00Kj3EufI9ZQjIVXNkvK9rm8YZt2OnhLA9URg-fAdBu6_PfaK9aNLHsJqmJ4QhZa-E2wDuOfMcLlX8OkahnYm2ODQ4g
               schema:
                 type: object
                 properties:
@@ -65,6 +65,379 @@ paths:
                   type: string
               example:
                 path: '1.1'
+  "/apps":
+    get:
+      summary: List the current user's applications
+      tags:
+      - Apps
+      security:
+      - access_token: []
+        client: []
+        uid: []
+        token_type: []
+      responses:
+        '200':
+          description: App listing
+          content:
+            application/json:
+              example:
+              - id: 441
+                user_id: 1622
+                name: 10b2fc5b7a360f
+                port: 3001
+                created_at: '2022-03-01T22:57:57.630Z'
+                updated_at: '2022-03-01T22:57:57.630Z'
+                discarded_at:
+                hostname: 10b2fc5b7a360f
+                domain: staging.trivialapps.io
+                load_balancer: staging-lb
+                descriptive_name: 'Test App #5'
+                aws_role: testlambda-ex-1
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    created_at:
+                      type: string
+                    updated_at:
+                      type: string
+                    hostname:
+                      type: string
+                    domain:
+                      type: string
+                    load_balancer:
+                      type: string
+                    descriptive_name:
+                      type: string
+                    aws_role:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - created_at
+                  - updated_at
+                  - hostname
+                  - domain
+                  - load_balancer
+                  - descriptive_name
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
+    post:
+      summary: Create a new application
+      tags:
+      - Apps
+      security:
+      - access_token: []
+        client: []
+        uid: []
+        token_type: []
+      parameters: []
+      responses:
+        '200':
+          description: App created
+          content:
+            application/json:
+              example:
+                id: 444
+                user_id: 1624
+                name: 2b92797e776885
+                port: 3002
+                created_at: '2022-03-01T22:57:58.260Z'
+                updated_at: '2022-03-01T22:57:58.260Z'
+                discarded_at:
+                hostname: 2b92797e776885
+                domain: staging.trivialapps.io
+                load_balancer: staging-lb
+                descriptive_name: A Test
+                aws_role: testlambda-ex-1
+              schema:
+                type:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    created_at:
+                      type: string
+                    updated_at:
+                      type: string
+                    hostname:
+                      type: string
+                    domain:
+                      type: string
+                    load_balancer:
+                      type: string
+                    descriptive_name:
+                      type: string
+                    aws_role:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - created_at
+                  - updated_at
+                  - hostname
+                  - domain
+                  - load_balancer
+                  - descriptive_name
+        '422':
+          description: Missing or invalid field
+          content:
+            application/json:
+              example:
+                errors:
+                - Descriptive name can't be blank
+                - Descriptive name is too short (minimum is 3 characters)
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                descriptive_name:
+                  type: string
+              required:
+              - descriptive_name
+              example:
+                descriptive_name: A Test
+  "/apps/{appId}":
+    get:
+      summary: Retrieve details for the app with the given id (name field)
+      tags:
+      - Apps
+      security:
+      - access_token: []
+        client: []
+        uid: []
+        token_type: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: App details
+          content:
+            application/json:
+              example:
+                id: 447
+                user_id: 1627
+                name: d959930c5b1758
+                port: 3001
+                created_at: '2022-03-01T22:57:59.118Z'
+                updated_at: '2022-03-01T22:57:59.118Z'
+                discarded_at:
+                hostname: d959930c5b1758
+                domain: staging.trivialapps.io
+                load_balancer: staging-lb
+                descriptive_name: 'Test App #10'
+                aws_role: testlambda-ex-1
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+                  updated_at:
+                    type: string
+                  hostname:
+                    type: string
+                  domain:
+                    type: string
+                  load_balancer:
+                    type: string
+                  descriptive_name:
+                    type: string
+                  aws_role:
+                    type: string
+                required:
+                - id
+                - name
+                - created_at
+                - updated_at
+                - hostname
+                - domain
+                - load_balancer
+                - descriptive_name
+        '404':
+          description: No app found for the current user with that id
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
+    put:
+      summary: Update the app
+      tags:
+      - Apps
+      security:
+      - access_token: []
+        client: []
+        uid: []
+        token_type: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: App updated
+          content:
+            application/json:
+              example:
+                user_id: 1630
+                id: 450
+                descriptive_name: A New Name
+                name: e26a257ea874f7
+                port: 3001
+                hostname: e26a257ea874f7
+                domain: staging.trivialapps.io
+                load_balancer: staging-lb
+                created_at: '2022-03-01T22:58:00.029Z'
+                updated_at: '2022-03-01T22:58:00.052Z'
+                discarded_at:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+                  updated_at:
+                    type: string
+                  hostname:
+                    type: string
+                  domain:
+                    type: string
+                  load_balancer:
+                    type: string
+                  descriptive_name:
+                    type: string
+                  aws_role:
+                    type: string
+                required:
+                - id
+                - name
+                - created_at
+                - updated_at
+                - hostname
+                - domain
+                - load_balancer
+                - descriptive_name
+        '404':
+          description: No app found for the current user with that id
+        '422':
+          description: Missing or invalid field
+          content:
+            application/json:
+              example:
+                errors:
+                - Descriptive name can't be blank
+                - Descriptive name is too short (minimum is 3 characters)
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                descriptive_name:
+                  type: string
+              example:
+                descriptive_name: A New Name
+    delete:
+      summary: Delete the app
+      tags:
+      - Apps
+      security:
+      - access_token: []
+        client: []
+        uid: []
+        token_type: []
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: App deleted
+        '404':
+          description: No app found for the current user with that id
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
+  "/apps/name_suggestion":
+    get:
+      summary: Retrieve a suggested descriptive name for a new app
+      tags:
+      - Apps
+      security:
+      - access_token: []
+        client: []
+        uid: []
+        token_type: []
+      responses:
+        '200':
+          description: New name suggestion
+          content:
+            application/json:
+              example:
+                suggestion: Monumental Unity
+              schema:
+                type: object
+                properties:
+                  suggestion:
+                    type: string
+                required:
+                - suggestion
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                errors:
+                - You need to sign in or sign up before continuing.
   "/auth":
     post:
       summary: Register a user
@@ -79,13 +452,13 @@ paths:
               example:
                 status: success
                 data:
-                  id: 1415
+                  id: 1639
                   provider: email
                   uid: jane.doe@example.test
                   name: Jane Doe
                   email: jane.doe@example.test
-                  created_at: '2022-02-15T21:07:53.072Z'
-                  updated_at: '2022-02-15T21:07:53.076Z'
+                  created_at: '2022-03-01T22:58:02.867Z'
+                  updated_at: '2022-03-01T22:58:02.871Z'
                   role: member
                   approval: approved
                   color_theme:
@@ -149,12 +522,12 @@ paths:
             application/json:
               example:
                 data:
-                  id: 1416
+                  id: 1640
                   aws_role: testlambda-ex-1
-                  email: user5@example.test
+                  email: user22@example.test
                   provider: email
                   name: Test User
-                  uid: user5@example.test
+                  uid: user22@example.test
                   role: member
                   approval: approved
                   color_theme:
@@ -181,7 +554,7 @@ paths:
               - email
               - password
               example:
-                email: user5@example.test
+                email: user22@example.test
                 password: insecure
   "/auth/sign_out":
     delete:
@@ -225,11 +598,11 @@ paths:
             application/json:
               example:
                 credential_sets:
-                - id: 6128da2a-35fa-4fa7-8f96-e58920f4fdea
+                - id: 46936c83-ff7a-4dce-8e7f-c5527d167857
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T21:07:55.638Z'
-                  updated_at: '2022-02-15T21:07:55.638Z'
+                  created_at: '2022-03-01T22:58:05.168Z'
+                  updated_at: '2022-03-01T22:58:05.168Z'
               schema:
                 type: object
                 properties:
@@ -267,11 +640,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 24fdef5f-ac40-4702-a7b2-2011cfbee82b
+                  id: 58b097b3-bd97-4bbf-8352-847859099e46
                   name: Mailgun
                   credential_type: MailgunCredentials
-                  created_at: '2022-02-15T21:07:55.968Z'
-                  updated_at: '2022-02-15T21:07:55.968Z'
+                  created_at: '2022-03-01T22:58:05.539Z'
+                  updated_at: '2022-03-01T22:58:05.539Z'
               schema:
                 type: object
                 properties:
@@ -347,11 +720,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: c879eff3-1f98-4db2-8a2d-4ba971455c71
+                  id: 833950e1-a8f7-4224-ad0c-072b779efe7e
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T21:07:56.668Z'
-                  updated_at: '2022-02-15T21:07:56.668Z'
+                  created_at: '2022-03-01T22:58:06.290Z'
+                  updated_at: '2022-03-01T22:58:06.290Z'
                 credentials:
                   account_sid: fa8f7fa53659d6de
                   auth_token: Whe8Y5poyQo=
@@ -395,11 +768,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 4cb41d0f-3e0e-4c27-b87b-6cdb51dbf44b
+                  id: 9c8a9111-e65d-427e-ae52-755bc866aa15
                   name: New Name
                   credential_type: TwilioCredentials
-                  created_at: '2022-02-15T21:07:57.416Z'
-                  updated_at: '2022-02-15T21:07:57.430Z'
+                  created_at: '2022-03-01T22:58:06.938Z'
+                  updated_at: '2022-03-01T22:58:06.951Z'
               schema:
                 type: object
                 properties:
@@ -552,7 +925,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiI1OGFkNDYxN2VlM2E1ZiIsImV4cCI6MTY0NTU2NDA4MH0.Do2b5JOZ7tRTbE32WxsmTHC31CJWCcb1HGjYwyMuZYQEFM0w4c6p87AOc8ceDjps8eS6-idfBs1cJfECEfpTH0jx1DXoFbjcpjzR-vBiWGz0EECjyjjmXOCKhSXojj3oSP6e_HlCY3o_vkr16Wr-CWfZ5okToyAnSrqsp-5ojqTdloN_rMIz6rw3uaAWgyZSosp4uon3WoMuw3WAYesvU53vLDgt-XGCEmT8ffPVZhUvVE38NEP_PM0JjSW8KzsAoOOjLmzDSfOO-8YuqCZ8we1T1W_fPMCQbRzB8iYmkqpHj6Q4X-AVrnzOrJmNczjJh1X1_rXd5gbvNP5OnK34Bg
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIwNzYwYTEzZjQ1MzY3YiIsImV4cCI6MTY0Njc4MDI5MH0.oBfVlKBlihPcaGtEuFGChFuQMQZZoBHSCREW4EtLzaP6hT1Iy6oY3dHrCrMDGv5mRjZRyJrdcNdziWtVwz4NwfhvDvqG0keY8RX4Lgf7adH3pHzFV6gR8Q3TabyFStq0vKAvI5-coTnqNZxQMNX7oofqUI2lK-52zcfW_Qh-XEMmVCrdc-o6VS4yA3x-VIAJc0wzXHjUHzOaTXggG5AfhEyJ51-pomCfT7RaZbdWjZ_y6k4ihgnld2lX-l7T92Rvg2LQa6lJWR_E6Q5QZwHM8fiWKcl-YmpR4p2GWXHWaonPLnan-_l3aNgv3l8fCr2ksyj8PJmD-OU5dHaohiWwAQ
               schema:
                 type: object
                 properties:
@@ -656,13 +1029,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1439
+                  id: 1663
                   name: Test User
-                  email: user28@example.test
+                  email: user45@example.test
                   role: admin
                   approval: pending
                   color_theme:
-                  created_at: '2022-02-15T21:08:02.700Z'
+                  created_at: '2022-03-01T22:58:12.168Z'
         '401':
           description: Not authorized
           content:
@@ -687,13 +1060,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1441
+                  id: 1665
                   name: My New Name
-                  email: user30@example.test
+                  email: user47@example.test
                   role: admin
                   approval: pending
                   color_theme: Light
-                  created_at: '2022-02-15T21:08:03.271Z'
+                  created_at: '2022-03-01T22:58:12.726Z'
         '400':
           description: Bad request
           content:
@@ -739,13 +1112,13 @@ paths:
             application/json:
               example:
                 users:
-                - id: 1444
+                - id: 1668
                   name: Test User
-                  email: user33@example.test
+                  email: user50@example.test
                   role: admin
                   approval: pending
                   color_theme:
-                  created_at: '2022-02-15T21:08:04.088Z'
+                  created_at: '2022-03-01T22:58:13.545Z'
         '401':
           description: unauthorized or not an admin user
           content:
@@ -770,13 +1143,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1447
+                  id: 1671
                   name: Jane Doe
                   email: jane.doe@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-02-15T21:08:04.905Z'
+                  created_at: '2022-03-01T22:58:14.360Z'
         '400':
           description: bad request
           content:
@@ -840,13 +1213,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1450
+                  id: 1674
                   name: Test User
-                  email: user38@example.test
+                  email: user55@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-02-15T21:08:05.961Z'
+                  created_at: '2022-03-01T22:58:15.463Z'
         '404':
           description: No user found with that id
         '401':
@@ -878,13 +1251,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 1455
+                  id: 1679
                   name: New Name
-                  email: user43@example.test
+                  email: user60@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-02-15T21:08:07.344Z'
+                  created_at: '2022-03-01T22:58:16.807Z'
         '400':
           description: bad request
           content:
