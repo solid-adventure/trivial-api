@@ -9,7 +9,7 @@ class App < ApplicationRecord
 
   validates :name, :port, presence: true, uniqueness: true
   validates :hostname, exclusion: { in: %w(staging www) }
-  validates :descriptive_name, presence: true, length: {minimum:3}, uniqueness: true
+  validates :descriptive_name, presence: true, length: {minimum:3}, uniqueness: { scope: :user_id }
 
   before_validation :set_defaults
 
