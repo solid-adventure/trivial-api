@@ -9,6 +9,28 @@ namespace :tasks do
     end
   end
 
+  desc "Create Sign Up events in PostHog for existing users"
+  task backfill_user_signups: :environment do
+
+    posthog = PostHog::Client.new({
+      api_key: ENV['POSTHOG_API_KEY'],
+      api_host: ENV['POSTHOG_HOST'],
+      on_error: Proc.new { |status, msg| print msg }
+    })
+
+    User.where("created_at > ?", Time.now - 7.day).each do |user|
+      puts posthog.capture({
+        distinct_id: user.email,
+        event: 'User Signup',
+        properties: {
+            source: 'backfill_user_signups',
+        },
+        timestamp: user.created_at
+      })
+    end
+  end
+
+
   desc "Seed from, to values in connections"
   task import_from_to: :environment do
     data = [
