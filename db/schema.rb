@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_25_153646) do
+ActiveRecord::Schema.define(version: 2022_03_10_040959) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,7 +26,6 @@ ActiveRecord::Schema.define(version: 2022_01_25_153646) do
     t.string "domain", null: false
     t.string "load_balancer", null: false
     t.string "descriptive_name", null: false
-    t.index ["descriptive_name"], name: "index_apps_on_descriptive_name", unique: true
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true
