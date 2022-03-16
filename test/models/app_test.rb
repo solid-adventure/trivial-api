@@ -44,6 +44,18 @@ class AppTest < ActiveSupport::TestCase
       assert_equal @app.errors[:descriptive_name], ["can't be blank", 'is too short (minimum is 3 characters)']
     end
 
+    test 'invalid with duplicate descriptive name' do
+      @app.descriptive_name = @existing.descriptive_name
+      @app.valid?
+      assert_equal @app.errors[:descriptive_name], ["has already been taken"]
+    end
+
+    test 'valid with duplicate descriptive across users' do
+      @app.descriptive_name = @existing.descriptive_name
+      @app.user = @user2
+      assert @app.valid?
+    end
+
     test 'assigns different roles to apps under different users' do
       Role.stub :create!, -> (n) { Role.new(name: n[:name], arn: "arn:x:#{n[:name]}") } do
         @other_app = App.new(user: @user2, descriptive_name: 'Other App')
