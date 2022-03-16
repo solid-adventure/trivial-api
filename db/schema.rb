@@ -10,10 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_10_040959) do
+ActiveRecord::Schema.define(version: 2022_03_15_151728) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "activity_entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "app_id"
+    t.uuid "update_id"
+    t.string "activity_type", null: false
+    t.string "status"
+    t.string "source"
+    t.integer "duration_ms"
+    t.jsonb "payload"
+    t.jsonb "diagnostics"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["app_id"], name: "index_activity_entries_on_app_id"
+    t.index ["update_id"], name: "index_activity_entries_on_update_id"
+    t.index ["user_id"], name: "index_activity_entries_on_user_id"
+  end
 
   create_table "apps", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -102,6 +119,8 @@ ActiveRecord::Schema.define(version: 2022_03_10_040959) do
     t.json "diagnostics"
   end
 
+  add_foreign_key "activity_entries", "apps"
+  add_foreign_key "activity_entries", "users"
   add_foreign_key "apps", "users"
   add_foreign_key "credential_sets", "users"
   add_foreign_key "manifest_drafts", "apps"

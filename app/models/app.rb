@@ -6,6 +6,7 @@ class App < ApplicationRecord
 
   belongs_to :user
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
+  has_many :activity_entries, inverse_of: :app
 
   validates :name, :port, presence: true, uniqueness: true
   validates :hostname, exclusion: { in: %w(staging www) }
@@ -84,13 +85,14 @@ class App < ApplicationRecord
       a.id,
       a.name,
       a.descriptive_name,
-      (SELECT MAX(created_at) FROM webhooks WHERE app_id=a.name) AS last_run,
+      (SELECT MAX(created_at) FROM activity_entries WHERE app_id=a.id) AS last_run,
       date_trunc(#{connection.quote interval_name}, w.created_at) AS period,
       COUNT(NULLIF(status::int >= 100 AND status::int < 300, false)) AS successes,
       COUNT(NULLIF(status::int >= 300, false)) AS failures
     FROM apps a
-    LEFT OUTER JOIN webhooks w ON
-      w.app_id=a.name
+    LEFT OUTER JOIN activity_entries w ON
+      w.app_id=a.id
+      AND w.activity_type='request'
       AND date_trunc(#{connection.quote interval_name}, w.created_at) >= #{connection.quote since_time}
       AND date_trunc(#{connection.quote interval_name}, w.created_at) <= #{connection.quote until_time}
     WHERE
