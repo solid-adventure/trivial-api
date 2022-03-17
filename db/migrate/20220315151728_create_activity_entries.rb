@@ -28,16 +28,18 @@ class CreateActivityEntries < ActiveRecord::Migration[6.0]
       puts "Converting webhooks batch # #{batch + 1} / #{batch_count}"
       ActivityEntry.transaction do
         webhooks.each do |webhook|
-          ActivityEntry.create! do |entry|
-            entry.user_id = webhook.user_id
-            entry.app_id = webhook.app.id
-            entry.activity_type = 'request'
-            entry.status = webhook.status
-            entry.source = webhook.source
-            entry.payload = JSON.parse(webhook.payload) rescue nil
-            entry.diagnostics = JSON.parse(webhook.diagnostics) rescue nil
-            entry.created_at = webhook.created_at
-            entry.updated_at = webhook.updated_at
+          if webhook.user_id.present? && webhook.app.present?
+            ActivityEntry.create! do |entry|
+              entry.user_id = webhook.user_id
+              entry.app_id = webhook.app.id
+              entry.activity_type = 'request'
+              entry.status = webhook.status
+              entry.source = webhook.source
+              entry.payload = JSON.parse(webhook.payload) rescue nil
+              entry.diagnostics = JSON.parse(webhook.diagnostics) rescue nil
+              entry.created_at = webhook.created_at
+              entry.updated_at = webhook.updated_at
+            end
           end
         rescue => e
           puts "Failed to import webhook##{webhook.id} - #{e}"
