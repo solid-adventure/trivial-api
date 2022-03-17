@@ -8,6 +8,7 @@ class ManifestTest < ActiveSupport::TestCase
         @manifest.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
         @manifest.app = App.create(user: @manifest.user, name: 'BrownShirt')
         @manifest.save!
+        @user2 = User.create(name: 'gandolf', email: 'gandolf@gmail.com', password: '12345678')
     end
 
     test 'valid manifest' do
@@ -34,4 +35,22 @@ class ManifestTest < ActiveSupport::TestCase
 
         assert_equal @manifest.errors[:user_id], ["can't be blank"]
     end
+
+    test 'content app id updates to app_id' do
+        @manifest.set_content_app_id
+        content = JSON.parse(@manifest.content)
+        assert_equal content["app_id"], "BrownShirt"
+    end
+
+    test 'copy_to_app! updates app and user' do
+        new_app = App.new(descriptive_name: "Hold Steady")
+        new_app.user = @user2
+        new_app.save!
+
+        new_manifest = @manifest.copy_to_app!(new_app)
+        assert_equal new_manifest.user, @user2
+        assert_equal new_manifest.app, new_app
+
+    end
+
 end

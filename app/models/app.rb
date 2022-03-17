@@ -56,6 +56,24 @@ class App < ApplicationRecord
     period_stats user, 'day', 1.week.ago.beginning_of_day, Time.now.utc.beginning_of_day
   end
 
+  def copy!(new_user=nil)
+    new_app = self.dup
+    new_app.unset_defaults
+    new_app.user = new_user if new_user
+    new_app.descriptive_name += ' Copy'
+    if new_app.save!
+      manifest = self.manifests.order("created_at DESC").first
+      manifest.copy_to_app!(new_app) if manifest
+    end
+    return new_app
+  end
+
+  def unset_defaults
+    %w(name port hostname domain load_balancer).each do |attr|
+      self[attr] = nil
+    end
+  end
+
   private
 
   def credentials_name
