@@ -1,37 +1,36 @@
 class WebhooksController < ApplicationController
-    skip_before_action :authenticate_user!, only: [:create]
+    MAX_RESULTS = 100
+
+    skip_before_action :authenticate_user!, only: [:create, :update]
     before_action :authenticate_app_id!, only: [:stats]
 
     def index
-        render json: webhooks
+        render json: webhooks.map(&:legacy_attributes).to_json
     end
 
     def create
-        webhook = Webhook.new(webhook_params)
-        webhook.user_id = App.find_by_name!(params[:app_id]).user_id
-        if webhook.save
-            webhook.publish_receipt!
-            render json: webhook, status: :created
-        else
-            render_bad_request webhook
-        end
+        @entry = ActivityEntry.new(activity_entry_params)
+        @entry.activity_type = 'request'
+        @entry.app = App.kept.find_by_name!(params[:app_id])
+        @entry.user_id = @entry.app.user_id
+        @entry.normalize_json
+        @entry.save!
+        @entry.publish_receipt!
+        render status: :created, json: @entry.legacy_attributes
     end
 
     def show
-        render json: webhook
+        render json: webhook.legacy_attributes
     end
 
     def update
-        if webhook.update(webhook_params)
-            render json: webhook
-        else
-            render_bad_request webhook
-        end
+      updatable_webhook.update!(entry_update_params)
+      render json: updatable_webhook.legacy_attributes
     end
 
     def send_new
       @app = current_user.apps.kept.find_by_name!(params[:id])
-      res = Webhook.send_new @app, params[:payload].to_json
+      res = ActivityEntry.send_new @app, params[:payload].to_json
       render json: {status: res.code.to_i, message: res.message}
     end
 
@@ -51,11 +50,19 @@ class WebhooksController < ApplicationController
     private
 
     def webhook
-        @_webhook ||= current_user.webhooks.find(params[:id])
+        @webhook ||= current_user.activity_entries.requests.find(params[:id])
+    end
+
+    def updatable_webhook
+      @updatable_webhook ||= ActivityEntry.updatable.find_by_update_id!(params[:id])
     end
 
     def webhooks
-        @_webhooks ||= current_user.webhooks.where(app_id: params[:app_id]).order(created_at: :desc)
+        @webhooks ||= current_user.apps.find_by_name!(params[:app_id]).activity_entries.requests.limit(limit).order(created_at: :desc)
+    end
+
+    def limit
+      [[(params[:limit] || MAX_RESULTS).to_i, 1].max, MAX_RESULTS].min
     end
 
     def webhook_app_id
@@ -68,5 +75,13 @@ class WebhooksController < ApplicationController
 
     def authenticate_app_id!
       current_user.apps.kept.find_by_name!(webhook_params[:app_id])
+    end
+
+    def activity_entry_params
+      params.permit(:source, :status, payload: {}, diagnostics: {})
+    end
+
+    def entry_update_params
+      params.permit(:status, :duration_ms, diagnostics: {})
     end
 end
