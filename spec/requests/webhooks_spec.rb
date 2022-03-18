@@ -79,7 +79,7 @@ describe 'Webhooks API' do
       let(:new_webhook) { {
         app_id: user_app.name,
         source: 'localhost',
-        payload: {"test_data" => "12345"}
+        payload: {"test_data" => "12345"}.to_json
       } }
 
       response '201', 'Request logged', save_request_example: :new_webhook do
