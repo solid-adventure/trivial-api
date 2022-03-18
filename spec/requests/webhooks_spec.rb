@@ -98,7 +98,7 @@ describe 'Webhooks API' do
           expect(data['app_id']).to eq user_app.name
           expect(data['activity_type']).to eq 'request'
           expect(data['source']).to eq new_webhook[:source]
-          expect(data['payload']).to eq new_webhook[:payload]
+          expect(data['payload'].to_json).to eq new_webhook[:payload]
         end
       end
     end
