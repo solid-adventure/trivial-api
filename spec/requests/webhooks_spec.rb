@@ -76,10 +76,11 @@ describe 'Webhooks API' do
         },
         required: [ 'app_id', 'source', 'payload' ]
       }
+      let(:payload) { {"test_data" => "12345"} }
       let(:new_webhook) { {
         app_id: user_app.name,
         source: 'localhost',
-        payload: {"test_data" => "12345"}.to_json
+        payload: payload.to_json
       } }
 
       response '201', 'Request logged', save_request_example: :new_webhook do
@@ -98,7 +99,7 @@ describe 'Webhooks API' do
           expect(data['app_id']).to eq user_app.name
           expect(data['activity_type']).to eq 'request'
           expect(data['source']).to eq new_webhook[:source]
-          expect(data['payload'].to_json).to eq new_webhook[:payload]
+          expect(data['payload']).to eq payload
         end
       end
     end
