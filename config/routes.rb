@@ -36,6 +36,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :activity_entries, only: [:index, :create]
+
   resources :manifests do
     resources :drafts, only: [:create, :update, :show], controller: :manifest_drafts do
       member do
