@@ -26,10 +26,6 @@ Rails.application.routes.draw do
 
 
   resources :webhooks do
-    collection do
-      get 'stats'
-      get 'subscribe'
-    end
     member do
       post 'send', action: :send_new
       post 'resend'

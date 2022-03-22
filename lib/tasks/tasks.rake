@@ -14,7 +14,6 @@ namespace :tasks do
     app.save
     app.manifests.update_all(user_id: new_owner.id)
     app.activity_entries.update_all(user_id: new_owner.id)
-    Webhook.where(app_id: app.name).update_all(user_id: new_owner.id)
     puts "Done"
   end
 

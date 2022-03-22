@@ -2,7 +2,6 @@ class WebhooksController < ApplicationController
     MAX_RESULTS = 100
 
     skip_before_action :authenticate_user!, only: [:create, :update]
-    before_action :authenticate_app_id!, only: [:stats]
 
     def index
         render json: webhooks.map(&:legacy_attributes).to_json
@@ -39,14 +38,6 @@ class WebhooksController < ApplicationController
         render json: {status: res.code.to_i, message: res.message}
     end
 
-    def stats
-        render json: Webhook.chart_stats(webhook_params[:app_id], 7)
-    end
-
-    def subscribe
-      render json: Webhook.wait_for_newer(current_user, params[:app_id], params[:last_seen]).to_json
-    end
-
     private
 
     def webhook
@@ -63,18 +54,6 @@ class WebhooksController < ApplicationController
 
     def limit
       [[(params[:limit] || MAX_RESULTS).to_i, 1].max, MAX_RESULTS].min
-    end
-
-    def webhook_app_id
-        @_webhook_app ||= Webhook.find_by(app_id: params[:app_id])
-    end
-
-    def webhook_params
-        params.permit(:app_id, :payload, :source, :topic, :status, :diagnostics)
-    end
-
-    def authenticate_app_id!
-      current_user.apps.kept.find_by_name!(webhook_params[:app_id])
     end
 
     def activity_entry_params
