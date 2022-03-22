@@ -78,7 +78,11 @@ class WebhooksController < ApplicationController
     end
 
     def activity_entry_params
-      params.permit(:source, :status, :payload, :diagnostics)
+      @activity_params = {}.merge(params.permit(:source, :status))
+      # :payload and :diagnostics may be a string or object
+      @activity_params[:payload] = params[:payload]
+      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params
     end
 
     def entry_update_params
