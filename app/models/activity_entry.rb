@@ -58,22 +58,6 @@ class ActivityEntry < ApplicationRecord
       }
     end
 
-    def activity_attributes
-      {
-        id: self.id,
-        user_id: self.user_id,
-        app_id: self.app.name,
-        activity_type: self.activity_type,
-        source: self.source,
-        status: self.status,
-        duration_ms: self.duration_ms,
-        payload: self.payload,
-        diagnostics: self.diagnostics,
-        created_at: self.created_at,
-        updated_at: self.updated_at
-      }
-    end
-
     def generate_update_id
       self.update_id = SecureRandom.uuid if is_request? && update_id.blank? && status.blank?
     end

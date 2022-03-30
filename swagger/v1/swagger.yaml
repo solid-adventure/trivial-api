@@ -4,167 +4,6 @@ info:
   title: API V1
   version: v1
 paths:
-  "/activity_entries":
-    get:
-      summary: Retrieve the list of activity
-      tags:
-      - Activity
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters:
-      - name: app_id
-        in: query
-        required: true
-      - name: limit
-        in: query
-        required: false
-      responses:
-        '200':
-          description: Activity listing returned
-          content:
-            application/json:
-              example:
-              - id: 20
-                user_id: 97
-                app_id: 9044fb1d343463
-                activity_type: request
-                source: localhost
-                status: '200'
-                duration_ms: 1503
-                payload:
-                  test_data: '12345'
-                diagnostics:
-                  errors: []
-                  events: []
-                created_at: '2022-03-22T19:31:00.245Z'
-                updated_at: '2022-03-22T19:31:00.245Z'
-              - id: 19
-                user_id: 97
-                app_id: 9044fb1d343463
-                activity_type: build
-                source:
-                status: success
-                duration_ms: 2839
-                payload:
-                diagnostics:
-                created_at: '2022-03-22T19:31:00.242Z'
-                updated_at: '2022-03-22T19:31:00.242Z'
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    app_id:
-                      type: string
-                    activity_type:
-                      type: string
-                    status:
-                      type: string
-                      nullable: true
-                    source:
-                      type: string
-                      nullable: true
-                    duration_ms:
-                      type: integer
-                      nullable: true
-                    payload:
-                      type: object
-                      nullable: true
-                    diagnostics:
-                      type: object
-                      nullable: true
-                  required:
-                  - app_id
-                  - activity_type
-    post:
-      summary: Log new activity
-      tags:
-      - Activity
-      security:
-      - access_token: []
-        client: []
-        uid: []
-        token_type: []
-      parameters: []
-      responses:
-        '201':
-          description: Activity logged
-          content:
-            application/json:
-              example:
-                id: 21
-                user_id: 98
-                app_id: 9a17d4ff7aaedf
-                activity_type: request
-                source: localhost
-                status:
-                duration_ms:
-                payload:
-                  test_data: '12345'
-                diagnostics:
-                created_at: '2022-03-22T19:31:00.612Z'
-                updated_at: '2022-03-22T19:31:00.612Z'
-              schema:
-                type: object
-                properties:
-                  app_id:
-                    type: string
-                  activity_type:
-                    type: string
-                  status:
-                    type: string
-                    nullable: true
-                  source:
-                    type: string
-                    nullable: true
-                  duration_ms:
-                    type: integer
-                    nullable: true
-                  payload:
-                    type: object
-                    nullable: true
-                  diagnostics:
-                    type: object
-                    nullable: true
-                required:
-                - app_id
-                - activity_type
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                app_id:
-                  type: string
-                activity_type:
-                  type: string
-                status:
-                  type: string
-                  nullable: true
-                source:
-                  type: string
-                duration_ms:
-                  type: integer
-                  nullable: true
-                payload:
-                  type: object
-                  nullable: true
-                diagnostics:
-                  type: object
-                  nullable: true
-              required:
-              - app_id
-              - activity_type
-              example:
-                app_id: 9a17d4ff7aaedf
-                activity_type: request
-                source: localhost
-                payload:
-                  test_data: '12345'
   "/apps/{id}/api_key":
     parameters:
     - name: id
@@ -187,7 +26,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJjMjllMDQzNzNjOWU4ZSIsImV4cCI6MTY0ODU4MjI2MH0.kXePZo-034rH0RhpgQ_LgcSNvsQaODfUZfL2vRqaiAWzD600qWgsSbdbresNIX6_B7tAPTDWgHiFzR8JgblQPIc7VfNLmFxgC2M8T6yxFcOLqhyv0VqAagMywxdCsGH_tBQDVa82j0HnJTjBlmumtwZQq03H2v_R3rX2qeZk1_cbdqPzx3cnZjhI2uaRrURG4LzgM7dHxHl3zOBdpBsM69rrdZgg72scFgfLZW8L7qWbGaiqG3BfTje00sPOG6dpRtYYblXnOAJiblgqh5dZ7iW7i2ricmszXxiuf1ka_hZpY_MbQpLOD1D-oQXjc7ungM6BCIdhY1GHiNENU3VryQ
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJhNDhiNzVjMWY0MmJhNyIsImV4cCI6MTY0ODA0MjU3MH0.ONfChoYSHBnAgx6Png02W-pnFZWk69Fsy7N_juEl0ZipqM_ywfNPhVzQd4sSxahVX0XeIBKFKXHa_f4bWFiuuC_CYNfzl7zfDf-RdS8nbXorerxLH3Ara6JTazxjfOnGnyCnLJ_kljWIMxpiMudGgqCD4eDriG1r0tOGIUB_lgLlhtH7KdbD8tfbvyTUasVRGJ0fm2_zQB2D1LdoqGQS67ZA02XK65wFr0LQGZz0YYxqct_fk9v-NXYVYgz4YLLItdLaRoYmTJOWWc_4pTrUFXacqt1AwjDcQFKSg1WEmkgJO3pOh6wAoLCFmSrIEzyVtSNcY7eW_p956YQA5FkJng
               schema:
                 type: object
                 properties:
@@ -206,7 +45,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJkNmZmNDNmNjczNzc5NyIsImV4cCI6MTY0ODU4MjI2MX0.RW-eGabT7g0Z9LeiwV0TG1nQH5kPczrtOwSpKHH5EARBqiWyDbZH2PfcdDg9rasFK6y9rtwdGBW3P10NltGSIHP1R-upTJ4_cVEu8eXm-_vGwMeGbWr7vc0JDUzPkBFV3WmrqxpnY0yQojmzgLkITOFaouqr2o2E7h3JD6lIZvHJVH2uh_nwW7lb7RzgI6Vc2juIZRHwMEBKzgxbJfQmpHC8V8buvOW2yw2hGoseteLF-7h3sb5WEZMXjtLL-6IubH1iIudU0xEzoQHitoc85MYWNmUn_mY364XpPVdIAr-OZa8xZRxQaKI3sgbSIiC_ZO19GB7KARp_71l1Az84pA
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJjOGEwYjc1YTMzZTk1OSIsImV4cCI6MTY0ODA0MjU3MH0.6sTEUfZ4SgxvTLEBQ1ylIrstQSyc4ckOzl2C5RPcC70GdNyiKVlOIwmGaE2lO39YZpIET3EVsgHM-Bh4vPnJq5qKPZXWu2D-VdV7I2DAqsiy7wt8G5ReuAgb0eeOL7g7AK2B_XJ1u1plZGFa6a5CkQymCYiWdCnOeLybNo5qknkafg5MuyeBiC1QOo806ztE-zW4SKxanzLdmMXOAg13WDl4EydQ1T9mizdX9ePJNz9y1tB24Er3VBFFBdoI54Fykjxx8ouVs4zKtJ1kqYhZdv4gZGKt5sN5ztXOC3KrZxPEeOZedTLqF49GEAod9pTcIs-FuJNGltcjGIGyTH4fSw
               schema:
                 type: object
                 properties:
@@ -242,17 +81,17 @@ paths:
           content:
             application/json:
               example:
-              - id: 59
-                user_id: 103
-                name: 526fc221e65f79
+              - id: 196
+                user_id: 240
+                name: 4970505a1e79d1
                 port: 3001
-                created_at: '2022-03-22T19:31:02.126Z'
-                updated_at: '2022-03-22T19:31:02.126Z'
+                created_at: '2022-03-16T13:36:11.369Z'
+                updated_at: '2022-03-16T13:36:11.369Z'
                 discarded_at:
-                hostname: 526fc221e65f79
+                hostname: 4970505a1e79d1
                 domain: staging.trivialapps.io
                 load_balancer: staging-lb
-                descriptive_name: 'Test App #7'
+                descriptive_name: 'Test App #5'
                 aws_role: testlambda-ex-1
               schema:
                 type: array
@@ -309,14 +148,14 @@ paths:
           content:
             application/json:
               example:
-                id: 62
-                user_id: 105
-                name: 6210c47ce05391
+                id: 199
+                user_id: 242
+                name: c7092b14473f56
                 port: 3002
-                created_at: '2022-03-22T19:31:02.740Z'
-                updated_at: '2022-03-22T19:31:02.740Z'
+                created_at: '2022-03-16T13:36:11.951Z'
+                updated_at: '2022-03-16T13:36:11.951Z'
                 discarded_at:
-                hostname: 6210c47ce05391
+                hostname: c7092b14473f56
                 domain: staging.trivialapps.io
                 load_balancer: staging-lb
                 descriptive_name: A Test
@@ -401,17 +240,17 @@ paths:
           content:
             application/json:
               example:
-                id: 65
-                user_id: 108
-                name: b6ff15abbe5bac
+                id: 202
+                user_id: 245
+                name: 730488849da64f
                 port: 3001
-                created_at: '2022-03-22T19:31:03.600Z'
-                updated_at: '2022-03-22T19:31:03.600Z'
+                created_at: '2022-03-16T13:36:12.789Z'
+                updated_at: '2022-03-16T13:36:12.789Z'
                 discarded_at:
-                hostname: b6ff15abbe5bac
+                hostname: 730488849da64f
                 domain: staging.trivialapps.io
                 load_balancer: staging-lb
-                descriptive_name: 'Test App #12'
+                descriptive_name: 'Test App #10'
                 aws_role: testlambda-ex-1
               schema:
                 type: object
@@ -473,16 +312,16 @@ paths:
           content:
             application/json:
               example:
-                user_id: 111
-                id: 68
+                user_id: 248
+                id: 205
                 descriptive_name: A New Name
-                name: eb4a1821b136d5
+                name: f3bebbdc906af0
                 port: 3001
-                hostname: eb4a1821b136d5
+                hostname: f3bebbdc906af0
                 domain: staging.trivialapps.io
                 load_balancer: staging-lb
-                created_at: '2022-03-22T19:31:04.438Z'
-                updated_at: '2022-03-22T19:31:04.455Z'
+                created_at: '2022-03-16T13:36:13.630Z'
+                updated_at: '2022-03-16T13:36:13.646Z'
                 discarded_at:
               schema:
                 type: object
@@ -584,7 +423,7 @@ paths:
           content:
             application/json:
               example:
-                suggestion: Sound Evolution
+                suggestion: Splendid Biped
               schema:
                 type: object
                 properties:
@@ -613,13 +452,13 @@ paths:
               example:
                 status: success
                 data:
-                  id: 120
+                  id: 257
                   provider: email
                   uid: jane.doe@example.test
                   name: Jane Doe
                   email: jane.doe@example.test
-                  created_at: '2022-03-22T19:31:07.035Z'
-                  updated_at: '2022-03-22T19:31:07.040Z'
+                  created_at: '2022-03-16T13:36:16.267Z'
+                  updated_at: '2022-03-16T13:36:16.272Z'
                   role: member
                   approval: approved
                   color_theme:
@@ -683,12 +522,12 @@ paths:
             application/json:
               example:
                 data:
-                  id: 121
+                  id: 258
                   aws_role: testlambda-ex-1
-                  email: user24@example.test
+                  email: user22@example.test
                   provider: email
                   name: Test User
-                  uid: user24@example.test
+                  uid: user22@example.test
                   role: member
                   approval: approved
                   color_theme:
@@ -715,7 +554,7 @@ paths:
               - email
               - password
               example:
-                email: user24@example.test
+                email: user22@example.test
                 password: insecure
   "/auth/sign_out":
     delete:
@@ -759,11 +598,11 @@ paths:
             application/json:
               example:
                 credential_sets:
-                - id: 0ce826b6-0122-4702-8afa-6ed440ffa8cf
+                - id: 55dd9a95-fd87-43f7-8be4-995d37ad15b4
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-03-22T19:31:09.709Z'
-                  updated_at: '2022-03-22T19:31:09.709Z'
+                  created_at: '2022-03-16T13:36:18.736Z'
+                  updated_at: '2022-03-16T13:36:18.736Z'
               schema:
                 type: object
                 properties:
@@ -801,11 +640,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 6456a2cd-ec70-4a71-bb37-1fc0dd311db8
+                  id: dfbe6509-0390-4701-9c47-93734d822c37
                   name: Mailgun
                   credential_type: MailgunCredentials
-                  created_at: '2022-03-22T19:31:10.025Z'
-                  updated_at: '2022-03-22T19:31:10.025Z'
+                  created_at: '2022-03-16T13:36:19.188Z'
+                  updated_at: '2022-03-16T13:36:19.188Z'
               schema:
                 type: object
                 properties:
@@ -881,11 +720,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 96e85c04-6efb-472a-93b8-2244ac84bd66
+                  id: 6e60e66f-71fb-498f-b042-a837a14b6d13
                   name: Twilio
                   credential_type: TwilioCredentials
-                  created_at: '2022-03-22T19:31:10.701Z'
-                  updated_at: '2022-03-22T19:31:10.701Z'
+                  created_at: '2022-03-16T13:36:19.949Z'
+                  updated_at: '2022-03-16T13:36:19.949Z'
                 credentials:
                   account_sid: fa8f7fa53659d6de
                   auth_token: Whe8Y5poyQo=
@@ -929,11 +768,11 @@ paths:
             application/json:
               example:
                 credential_set:
-                  id: 5b4540bc-1041-40fb-8cdf-71fb786c0be1
+                  id: d8669753-da54-4c21-aafe-9b671afc0636
                   name: New Name
                   credential_type: TwilioCredentials
-                  created_at: '2022-03-22T19:31:11.613Z'
-                  updated_at: '2022-03-22T19:31:11.628Z'
+                  created_at: '2022-03-16T13:36:20.952Z'
+                  updated_at: '2022-03-16T13:36:20.965Z'
               schema:
                 type: object
                 properties:
@@ -1086,7 +925,7 @@ paths:
           content:
             application/json:
               example:
-                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiJkMTdlNjJlNjZjM2Q5YyIsImV4cCI6MTY0ODU4MjI3NX0.Wdhmdk8QOapPTwgHuczRpkAgbswSwuVS1PjX2zdLNGCzqWeP37ZyiQz0KMwDLXA5Z2KFt7Tr18X-tQD3-LmkWvRmwAs2nASGTek9Minw0gYquo-3vZU5bUS-WdMnbpIMmniokHUdeG03V39Wxo1kAwI5jjzKkPfGzoPdIdsyV9L5xXyyF7pGP4KYZpMID6M-Sb_biVW5C7X-qrCQGgEGIuoSTGmYZwOmAv-z8yySrxKmW2DlyWEbHEJYOZ97VAEIWdpOOsuSzoxbOb_bbFYmImqWRDzZaVoBz7qa2dX5WfcoBw-eALtQw0wGW4G06uAyFn-wmZkZ1Hci9GXBUhoMPw
+                api_key: eyJhbGciOiJSUzI1NiJ9.eyJhcHAiOiIyODllNWQ2MDM0MmFkOSIsImV4cCI6MTY0ODA0MjU4NH0.kFtIbSre-K3a19Zk1ZDpVHWaZD77QVK4be56EmO2hWOZFXqYODadqlbvsY5ptX9QA_9JHFHOaxfXuzZDdJiPFAyHXhsZbvKp_NLRvzjJ87KaO7q5ULMkD2vilzoj1QWdfckoCeJnB5lWJK8AgZBVp5SuMCkk7odhp3JAKgCpNOGBXpnC64HwJ1B79BFa0Yxcg_4HGg_DoGSgNrkaIqwgAHe7LCeNVObNeu8zDgE6P0tIMnJoP2vyWafxeSSCSOIgXyacILceNxX7ViCkr73XxOMmXLifkYvl8R2ERTrNmALRrfF3o1mWNQSrbh9Y0M5baWK4Z_3lTJO17ggtpW_1TQ
               schema:
                 type: object
                 properties:
@@ -1190,13 +1029,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 144
+                  id: 281
                   name: Test User
-                  email: user47@example.test
+                  email: user45@example.test
                   role: admin
                   approval: pending
                   color_theme:
-                  created_at: '2022-03-22T19:31:17.023Z'
+                  created_at: '2022-03-16T13:36:26.583Z'
         '401':
           description: Not authorized
           content:
@@ -1221,13 +1060,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 146
+                  id: 283
                   name: My New Name
-                  email: user49@example.test
+                  email: user47@example.test
                   role: admin
                   approval: pending
                   color_theme: Light
-                  created_at: '2022-03-22T19:31:17.580Z'
+                  created_at: '2022-03-16T13:36:27.142Z'
         '400':
           description: Bad request
           content:
@@ -1273,13 +1112,13 @@ paths:
             application/json:
               example:
                 users:
-                - id: 149
+                - id: 286
                   name: Test User
-                  email: user52@example.test
+                  email: user50@example.test
                   role: admin
                   approval: pending
                   color_theme:
-                  created_at: '2022-03-22T19:31:18.415Z'
+                  created_at: '2022-03-16T13:36:27.959Z'
         '401':
           description: unauthorized or not an admin user
           content:
@@ -1304,13 +1143,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 152
+                  id: 289
                   name: Jane Doe
                   email: jane.doe@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-03-22T19:31:19.231Z'
+                  created_at: '2022-03-16T13:36:28.774Z'
         '400':
           description: bad request
           content:
@@ -1374,13 +1213,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 155
+                  id: 292
                   name: Test User
-                  email: user57@example.test
+                  email: user55@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-03-22T19:31:20.300Z'
+                  created_at: '2022-03-16T13:36:29.832Z'
         '404':
           description: No user found with that id
         '401':
@@ -1412,13 +1251,13 @@ paths:
             application/json:
               example:
                 user:
-                  id: 160
+                  id: 297
                   name: New Name
-                  email: user62@example.test
+                  email: user60@example.test
                   role: member
                   approval: approved
                   color_theme:
-                  created_at: '2022-03-22T19:31:21.633Z'
+                  created_at: '2022-03-16T13:36:31.176Z'
         '400':
           description: bad request
           content:
@@ -1504,9 +1343,9 @@ paths:
           content:
             application/json:
               example:
-              - id: 23
-                user_id: 172
-                app_id: 0b04d9f21fd287
+              - id: 174
+                user_id: 309
+                app_id: dd84a12ef22d8f
                 update_id:
                 activity_type: request
                 source: localhost
@@ -1516,8 +1355,8 @@ paths:
                 diagnostics:
                   errors: []
                   events: []
-                created_at: '2022-03-22T19:31:24.848Z'
-                updated_at: '2022-03-22T19:31:24.848Z'
+                created_at: '2022-03-16T13:36:34.427Z'
+                updated_at: '2022-03-16T13:36:34.427Z'
               schema:
                 type: array
                 items:
@@ -1556,18 +1395,18 @@ paths:
           content:
             application/json:
               example:
-                id: 24
-                user_id: 173
-                app_id: a955e50c655735
-                update_id: de4e0c7a-feb6-4dfe-bb09-1975a4790b9d
+                id: 175
+                user_id: 310
+                app_id: aacee9326f9b7c
+                update_id: 5697dfbe-4718-4cd3-a5cf-aa5164cc2fea
                 activity_type: request
                 source: localhost
                 status:
                 payload:
                   test_data: '12345'
                 diagnostics:
-                created_at: '2022-03-22T19:31:25.148Z'
-                updated_at: '2022-03-22T19:31:25.148Z'
+                created_at: '2022-03-16T13:36:34.733Z'
+                updated_at: '2022-03-16T13:36:34.733Z'
               schema:
                 type: object
                 properties:
@@ -1614,9 +1453,10 @@ paths:
               - source
               - payload
               example:
-                app_id: a955e50c655735
+                app_id: aacee9326f9b7c
                 source: localhost
-                payload: '{"test_data":"12345"}'
+                payload:
+                  test_data: '12345'
   "/webhooks/{webhookId}":
     get:
       summary: Retrieve the details of a single request log
@@ -1639,9 +1479,9 @@ paths:
           content:
             application/json:
               example:
-                id: 25
-                user_id: 174
-                app_id: adda3ff1ce7941
+                id: 176
+                user_id: 311
+                app_id: 4b583d7eed672e
                 update_id:
                 activity_type: request
                 source: localhost
@@ -1651,8 +1491,8 @@ paths:
                 diagnostics:
                   errors: []
                   events: []
-                created_at: '2022-03-22T19:31:25.419Z'
-                updated_at: '2022-03-22T19:31:25.419Z'
+                created_at: '2022-03-16T13:36:35.003Z'
+                updated_at: '2022-03-16T13:36:35.003Z'
               schema:
                 type: object
                 properties:
@@ -1694,10 +1534,10 @@ paths:
           content:
             application/json:
               example:
-                id: 26
-                user_id: 175
-                app_id: 4cedb33f4c661f
-                update_id: be607f0e-4e28-4d74-b739-aa3a1c6ac798
+                id: 177
+                user_id: 312
+                app_id: 454cf979618647
+                update_id: d7eee81f-8187-41c7-8cc9-468cbb252d72
                 activity_type: request
                 source: localhost
                 status: '500'
@@ -1718,8 +1558,8 @@ paths:
                       headers:
                         Content-Type: application/json
                     success: true
-                created_at: '2022-03-22T19:31:25.719Z'
-                updated_at: '2022-03-22T19:31:25.736Z'
+                created_at: '2022-03-16T13:36:35.288Z'
+                updated_at: '2022-03-16T13:36:35.303Z'
               schema:
                 type: object
                 properties:
