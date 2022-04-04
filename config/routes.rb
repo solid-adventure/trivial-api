@@ -27,7 +27,6 @@ Rails.application.routes.draw do
 
   resources :webhooks do
     collection do
-      get 'stats'
       get 'subscribe'
     end
     member do
@@ -36,7 +35,11 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :activity_entries, only: [:index, :create]
+  resources :activity_entries, only: [:index, :create] do
+    collection do
+      get 'stats'
+    end
+  end
 
   resources :manifests do
     resources :drafts, only: [:create, :update, :show], controller: :manifest_drafts do
