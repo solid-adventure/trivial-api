@@ -13,6 +13,16 @@ class ActivityEntriesController < ApplicationController
     render status: :created, json: @entry.activity_attributes
   end
 
+  def stats
+    internal_app_id = current_user.apps.find_by_name!(params[:app_id])
+    if internal_app_id
+      render json: ActivityEntry.chart_stats(internal_app_id, 7)
+    else
+      render status: :not_found
+    end
+  end
+
+
   private
 
   def activity
