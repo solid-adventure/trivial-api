@@ -1,0 +1,5 @@
+class AddPanelsToApps < ActiveRecord::Migration[6.0]
+  def change
+    add_column :apps, :panels, :jsonb
+  end
+end
