@@ -17,24 +17,6 @@ class ApplicationController < ActionController::API
     devise_parameter_sanitizer.permit :account_update, keys: %i[redirect_url email]
   end
 
-  def authenticate_admin!
-    render_unauthorized 'You are not a admin user' unless current_user.admin?
-  end
-
-  def authenticate_item_user!(board)
-    unless  Board.available(current_user).exists?(id: board.id)
-      raise ActiveRecord::RecordNotFound
-    end
-  end
-
-  def authenticate_item_manager!(board, message)
-    unless  current_user.admin? ||
-            current_user == board.owner ||
-            board.owner.team == current_user.team && board.secret? && current_user.approved?
-      render_unauthorized message
-    end
-  end
-
   def render_unauthorized(message = 'Unauthorized!')
     render_errors [message], status: :unauthorized
   end
