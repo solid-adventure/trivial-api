@@ -17,6 +17,10 @@ class ApplicationController < ActionController::API
     devise_parameter_sanitizer.permit :account_update, keys: %i[redirect_url email]
   end
 
+  def authenticate_admin!
+    render_unauthorized 'You are not a admin user' unless current_user.admin?
+  end
+
   def render_unauthorized(message = 'Unauthorized!')
     render_errors [message], status: :unauthorized
   end
