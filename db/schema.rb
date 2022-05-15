@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_07_205404) do
+ActiveRecord::Schema.define(version: 2022_04_15_001222) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -44,6 +44,7 @@ ActiveRecord::Schema.define(version: 2022_04_07_205404) do
     t.string "load_balancer", null: false
     t.string "descriptive_name", null: false
     t.jsonb "panels"
+    t.string "readable_by"
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true
