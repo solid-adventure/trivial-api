@@ -43,6 +43,6 @@ class AppsController < ApplicationController
   end
 
   def app_params
-    params.permit(:descriptive_name, :panels)
+    params.permit(:descriptive_name, panels: {})
   end
 end
