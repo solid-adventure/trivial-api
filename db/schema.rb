@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_13_172156) do
+ActiveRecord::Schema.define(version: 2022_06_14_152853) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,6 +70,13 @@ ActiveRecord::Schema.define(version: 2022_06_13_172156) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "customers_users", id: false, force: :cascade do |t|
+    t.bigint "customer_id", null: false
+    t.bigint "user_id", null: false
+    t.index ["customer_id"], name: "index_customers_users_on_customer_id"
+    t.index ["user_id"], name: "index_customers_users_on_user_id"
+  end
+
   create_table "manifest_drafts", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "app_id", null: false
@@ -94,6 +101,23 @@ ActiveRecord::Schema.define(version: 2022_06_13_172156) do
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "internal_app_id"
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.string "platform_id"
+    t.string "platform_created_at"
+    t.string "platform_name"
+    t.string "number"
+    t.string "shipping_method"
+    t.datetime "shipped_at"
+    t.decimal "subtotal", precision: 8, scale: 2
+    t.decimal "taxes", precision: 8, scale: 2
+    t.decimal "discounts", precision: 8, scale: 2
+    t.decimal "shipping", precision: 8, scale: 2
+    t.decimal "total", precision: 8, scale: 2
+    t.string "customer_token"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "users", force: :cascade do |t|

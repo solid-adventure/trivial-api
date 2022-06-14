@@ -1,5 +1,8 @@
 class Customer < ApplicationRecord
 
+	has_and_belongs_to_many :users
+	has_many :orders, primary_key: :token, foreign_key: :customer_token
+
 	before_create :set_token
 
 	validates :billing_email, presence: true
