@@ -106,7 +106,7 @@ ActiveRecord::Schema.define(version: 2022_06_14_152853) do
   create_table "orders", force: :cascade do |t|
     t.string "platform_id"
     t.string "platform_created_at"
-    t.string "platform_name"
+    t.string "platform_name", null: false
     t.string "number"
     t.string "shipping_method"
     t.datetime "shipped_at"
@@ -115,7 +115,7 @@ ActiveRecord::Schema.define(version: 2022_06_14_152853) do
     t.decimal "discounts", precision: 8, scale: 2
     t.decimal "shipping", precision: 8, scale: 2
     t.decimal "total", precision: 8, scale: 2
-    t.string "customer_token"
+    t.string "customer_token", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
