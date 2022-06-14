@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_14_152853) do
+ActiveRecord::Schema.define(version: 2022_06_14_160349) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -115,6 +115,37 @@ ActiveRecord::Schema.define(version: 2022_06_14_152853) do
     t.decimal "discounts", precision: 8, scale: 2
     t.decimal "shipping", precision: 8, scale: 2
     t.decimal "total", precision: 8, scale: 2
+    t.string "customer_token", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "shipments", force: :cascade do |t|
+    t.integer "order_id"
+    t.integer "platform_id"
+    t.datetime "shipped_at"
+    t.integer "zone"
+    t.decimal "cost", precision: 8, scale: 2
+    t.string "weight_units"
+    t.decimal "weight_value"
+    t.string "dims_units"
+    t.decimal "dims_length"
+    t.decimal "dims_width"
+    t.decimal "dims_height"
+    t.string "tracking_number"
+    t.string "to_company"
+    t.string "to_street1"
+    t.string "to_street2"
+    t.string "to_street3"
+    t.string "to_city"
+    t.string "to_state"
+    t.string "to_postal"
+    t.string "to_country"
+    t.string "to_country_iso2"
+    t.boolean "to_residential"
+    t.boolean "billed_dimensional"
+    t.decimal "insured_value", precision: 8, scale: 2
+    t.decimal "insurance_cost", precision: 8, scale: 2
     t.string "customer_token", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
