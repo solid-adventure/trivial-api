@@ -2,10 +2,10 @@
 
 one:
   name: 
-  token: 
+  token: 123ABC
   billing_email: MyString
 
 two:
   name: 
-  token: 
+  token: 456DEF
   billing_email: MyString
