@@ -12,7 +12,8 @@ class Manifest < ApplicationRecord
         new_manifest.user_id = new_app.user_id
         new_manifest.internal_app_id = new_app.id
         new_manifest.set_content_app_id
-        new_manifest.remove_config
+        # Pushing this responsibility to CredentialSet, which would be able to display an error if the new user doesn't have access to the creds 
+        # new_manifest.remove_config
         new_manifest.save!
         return new_manifest
     end

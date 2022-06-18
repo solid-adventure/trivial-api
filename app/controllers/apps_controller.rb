@@ -20,6 +20,11 @@ class AppsController < ApplicationController
     render json: app
   end
 
+  def copy
+    app_copy = app.copy!(nil, params[:new_app_descriptive_name])
+    render json: app_copy
+  end
+
   def destroy
     app.discard!
     head :ok
@@ -43,6 +48,6 @@ class AppsController < ApplicationController
   end
 
   def app_params
-    params.permit(:descriptive_name)
+    params.permit(:descriptive_name, :new_app_descriptive_name)
   end
 end

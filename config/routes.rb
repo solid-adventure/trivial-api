@@ -11,6 +11,10 @@ Rails.application.routes.draw do
   resources :users
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
+
+    member do 
+      post 'copy'
+    end
     resource :credentials, only: [:show] do
       put '', action: :update
       patch '', action: :patch
