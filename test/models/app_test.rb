@@ -64,14 +64,14 @@ class AppTest < ActiveSupport::TestCase
     end
 
     test 'copies into same user account when no user provided' do
-      new_app = @app.copy!
+      new_app = @app.copy!(nil, @app.descriptive_name + ' Copy')
       new_app.valid?
       assert_not_equal @app.name, new_app.name
       assert_equal @app.user, new_app.user
     end
 
     test 'copies into new user account' do
-      new_app = @app.copy!(@user2)
+      new_app = @app.copy!(@user2, @app.descriptive_name + ' Copy')
       new_app.valid?
       assert_equal new_app.user, @user2
     end
@@ -81,7 +81,7 @@ class AppTest < ActiveSupport::TestCase
       assert manifest.valid?
       @existing.manifests << manifest
       @existing.save!
-      new_app = @existing.copy!
+      new_app = @existing.copy!(nil, @app.descriptive_name + ' Copy')
       assert_equal @existing.manifests.size, 1
       assert new_app.manifests.size, 1
     end
