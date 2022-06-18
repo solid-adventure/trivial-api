@@ -62,4 +62,28 @@ class AppTest < ActiveSupport::TestCase
         assert_not_equal @app.aws_role, @other_app.aws_role
       end
     end
+
+    test 'copies into same user account when no user provided' do
+      new_app = @app.copy!(nil, @app.descriptive_name + ' Copy')
+      new_app.valid?
+      assert_not_equal @app.name, new_app.name
+      assert_equal @app.user, new_app.user
+    end
+
+    test 'copies into new user account' do
+      new_app = @app.copy!(@user2, @app.descriptive_name + ' Copy')
+      new_app.valid?
+      assert_equal new_app.user, @user2
+    end
+
+    test 'copy includes manifest' do
+      manifest = Manifest.new(app_id: @existing.name, internal_app_id: @existing.id, user_id: @user.id, content: {app_id: @existing.name}.to_json)
+      assert manifest.valid?
+      @existing.manifests << manifest
+      @existing.save!
+      new_app = @existing.copy!(nil, @app.descriptive_name + ' Copy')
+      assert_equal @existing.manifests.size, 1
+      assert new_app.manifests.size, 1
+    end
+
   end
