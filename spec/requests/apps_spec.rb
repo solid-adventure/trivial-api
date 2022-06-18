@@ -43,10 +43,12 @@ describe 'Apps API' do
         end
       end
 
-      response '401', 'Invalid credentials' do
-        let('access-token') { 'invalid-token' }
-        run_test!
-      end
+      # Disable to allow public views
+      # response '401', 'Invalid credentials' do
+      #   let('access-token') { 'invalid-token' }
+      #   run_test!
+      # end
+
     end
 
     post 'Create a new application' do
@@ -110,10 +112,11 @@ describe 'Apps API' do
         run_test!
       end
 
-      response '401', 'Invalid credentials' do
-        let('access-token') { 'invalid-token' }
-        run_test!
-      end
+      # Disable to allow public views
+      # response '401', 'Invalid credentials' do
+      #   let('access-token') { 'invalid-token' }
+      #   run_test!
+      # end
     end
 
     put 'Update the app' do

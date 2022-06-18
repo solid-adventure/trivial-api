@@ -39,10 +39,6 @@ class WebhooksController < ApplicationController
         render json: {status: res.code.to_i, message: res.message}
     end
 
-    def stats
-        render json: Webhook.chart_stats(webhook_params[:app_id], 7)
-    end
-
     def subscribe
       render json: Webhook.wait_for_newer(current_user, params[:app_id], params[:last_seen]).to_json
     end
@@ -78,7 +74,11 @@ class WebhooksController < ApplicationController
     end
 
     def activity_entry_params
-      params.permit(:source, :status, payload: {}, diagnostics: {})
+      @activity_params = {}.merge(params.permit(:source, :status))
+      # :payload and :diagnostics may be a string or object
+      @activity_params[:payload] = params[:payload]
+      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params
     end
 
     def entry_update_params

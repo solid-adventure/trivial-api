@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: 
+  token: 123ABC
+  billing_email: MyString
+
+two:
+  name: 
+  token: 456DEF
+  billing_email: MyString

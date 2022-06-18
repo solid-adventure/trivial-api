@@ -1,5 +1,7 @@
 class AppsController < ApplicationController
 
+  skip_before_action :authenticate_user!, only: [:show, :index] # TODO tighten to public
+
   def index
     render json: apps.as_json(methods: [:aws_role]).to_json
   end
@@ -36,18 +38,20 @@ class AppsController < ApplicationController
   private
 
   def app
-    @app ||= current_user.apps.kept.find_by_name!(params[:id])
+      @app ||= current_user.apps.kept.find_by_name!(params[:id]) if current_user
+      @app ||= App.publicReadable.kept.find_by_name!(params[:id])
   end
 
   def apps
     if params[:include_deleted].present?
       @apps ||= current_user.apps.order(:descriptive_name)
     else
-      @apps ||= current_user.apps.kept.order(:descriptive_name)
+      @apps ||= current_user.apps.kept.order(:descriptive_name) if current_user
+      @apps ||= App.publicReadable.kept.order(:descriptive_name)
     end
   end
 
   def app_params
-    params.permit(:descriptive_name, :new_app_descriptive_name)
+      params.permit(:descriptive_name, :new_app_descriptive_name, panels: {})
   end
 end
