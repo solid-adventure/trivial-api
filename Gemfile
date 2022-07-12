@@ -46,8 +46,9 @@ gem 'aws-sdk-secretsmanager', '~> 1'
 gem 'jwt', '~> 2.3'
 gem 'redis'
 gem "posthog-ruby"
-gem 'net-smtp'
-
+gem 'net-smtp', require: false
+gem 'net-imap', require: false
+gem 'net-pop', require: false
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
