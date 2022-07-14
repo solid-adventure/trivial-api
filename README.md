@@ -49,17 +49,17 @@ ruby -v
 
   
 
-The output should start with something like `ruby 2.6.3p62`
+The output should start with something like `ruby 3.1.2p20`
 
   
 
-If not, install the right ruby version using [rbenv](https://github.com/rbenv/rbenv) (it could take a while):
+If not, install the right ruby version using rvm or [rbenv](https://github.com/rbenv/rbenv) (it could take a while):
 
   
 
 ```shell
 
-rbenv install 2.6.3
+rbenv install 3.1.2
 
 ```
 
