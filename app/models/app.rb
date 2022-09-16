@@ -10,12 +10,22 @@ class App < ApplicationRecord
 
   validates :name, :port, presence: true, uniqueness: true
   validates :hostname, exclusion: { in: %w(staging www) }
-  validates :descriptive_name, presence: true, length: {minimum:3}, uniqueness: { scope: :user_id }
+  validates :descriptive_name, presence: true, length: {minimum:3}
+  validate :descriptive_name_unique?
 
   # This is over simplified, but allows guest users to view public apps when no user is present
   scope :publicReadable, -> { where(readable_by: 'public') }
 
   before_validation :set_defaults
+
+  def descriptive_name_unique?
+    # custom validator to factor for deleted apps
+    return false unless user
+    unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    if !unique
+      errors.add(:descriptive_name, "has already been taken")
+    end
+  end
 
   def url
     base = URI(App.base_url)
