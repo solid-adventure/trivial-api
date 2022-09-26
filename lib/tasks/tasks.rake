@@ -8,7 +8,7 @@ namespace :tasks do
     apps.each do |app|
       puts "Running #{app.name}, #{app.descriptive_name}"
       begin 
-        res = ActivityEntry.send_new app, app.schedule["payload"]
+        res = ActivityEntry.send_new app, app.schedule["payload"].to_json
         puts res
       rescue => e
         puts "Error running #{app.name}, #{app.descriptive_name}: #{e}"
