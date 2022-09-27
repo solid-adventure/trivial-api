@@ -1,10 +1,13 @@
 namespace :tasks do
 
-  # rake tasks:run_scheduled_every_10_minutes
-  desc "Run apps scheduled for every 10 minutes"
-  task run_scheduled_every_10_minutes: :environment do
-    puts "Starting Scheduled Every 10 Minutes apps..."
-    apps = App.kept.where('schedule @> ?', '{"every": "10 minutes"}')
+  # rake "tasks:run_scheduled[10 minutes]"
+  # rake "tasks:run_scheduled[hour]"
+  # rake "tasks:run_scheduled[day]"
+  desc "Run apps scheduled for every 10 minutes, hourly, or daily"
+  task :run_scheduled, [:interval] => :environment do |t, args|
+    interval = args[:interval]
+    puts "Starting Scheduled Every #{interval} apps..."
+    apps = App.kept.where('schedule @> ?', "{\"every\":\"#{interval}\"}")
     apps.each do |app|
       puts "Running #{app.name}, #{app.descriptive_name}"
       begin 
@@ -15,9 +18,8 @@ namespace :tasks do
       end
       puts "Completed #{app.name}, #{app.descriptive_name}"
     end
-    puts "Completed Scheduled Every 10 Minutes apps."
+    puts "Completed Scheduled Every #{interval} apps."
   end
-
 
   # rake "tasks:reassign_app_owner["123", "456"]"
   desc "Move an app and it's history into a new user account"
