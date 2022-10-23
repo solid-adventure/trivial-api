@@ -42,6 +42,9 @@ class ActivityEntriesController < ApplicationController
   end
 
   def activity_entry_params
-    params.permit(:activity_type, :source, :status, :duration_ms, payload: {}, diagnostics: {})
+      @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
+      @activity_params[:payload] = params[:payload]
+      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params
   end
 end
