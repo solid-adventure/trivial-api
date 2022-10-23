@@ -42,8 +42,9 @@ class ActivityEntriesController < ApplicationController
   end
 
   def activity_entry_params
-    # TODO These diagnostics and payload permissions are not enough; see webhooks_controller for how to fully expose JSON objects
-    # Fix before pushing traffic to /activity_entires instead of /webhooks
-    # params.permit(:activity_type, :source, :status, :duration_ms, payload: {}, diagnostics: {})
+      @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
+      @activity_params[:payload] = params[:payload]
+      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params
   end
 end
