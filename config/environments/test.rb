@@ -58,4 +58,10 @@ Rails.application.configure do
   :authentication => :plain,
   }
   ActionMailer::Base.delivery_method = :smtp
+
+  config.logger = Logger.new(STDOUT)
+
+  # Set log level
+  config.log_level = :INFO
+
 end
