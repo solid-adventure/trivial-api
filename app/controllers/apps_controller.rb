@@ -56,10 +56,8 @@ class AppsController < ApplicationController
   def apps
     if params[:include_deleted].present?
       @apps.order(:descriptive_name)
-      # App.accessible_by(Ability.new(current_user)).order(:descriptive_name)
     else
       @apps.kept.order(:descriptive_name)
-      # App.kept.accessible_by(Ability.new(current_user)).order(:descriptive_name)
     end
   end
 
