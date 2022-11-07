@@ -1,6 +1,6 @@
 class AppsController < ApplicationController
 
-  skip_before_action :authenticate_user!, only: [:show, :index] # TODO tighten to public
+  load_and_authorize_resource only: [:index]
 
   def index
     render json: apps.as_json(methods: [:aws_role]).to_json
@@ -14,22 +14,34 @@ class AppsController < ApplicationController
   end
 
   def show
+    authorize! :read, app
     render json: app.as_json(methods: [:aws_role])
+    rescue CanCan::AccessDenied => e
+      render_unauthorized
   end
 
   def update
+    authorize! :update, app
     app.update!(app_params)
     render json: app
+    rescue CanCan::AccessDenied => e
+      render_unauthorized
   end
 
   def copy
+    authorize! :update, app
     app_copy = app.copy!(nil, params[:new_app_descriptive_name])
     render json: app_copy
+    rescue CanCan::AccessDenied => e
+      render_unauthorized
   end
 
   def destroy
+    authorize! :destroy, app
     app.discard!
     head :ok
+    rescue CanCan::AccessDenied => e
+      render_unauthorized
   end
 
   def name_suggestion
@@ -38,16 +50,14 @@ class AppsController < ApplicationController
   private
 
   def app
-      @app ||= current_user.apps.kept.find_by_name!(params[:id]) if current_user
-      @app ||= App.publicReadable.kept.find_by_name!(params[:id])
+    @app ||= App.kept.find_by_name(params[:id])
   end
 
   def apps
     if params[:include_deleted].present?
-      @apps ||= current_user.apps.order(:descriptive_name)
+      @apps.order(:descriptive_name)
     else
-      @apps ||= current_user.apps.kept.order(:descriptive_name) if current_user
-      @apps ||= App.publicReadable.kept.order(:descriptive_name)
+      @apps.kept.order(:descriptive_name)
     end
   end
 
