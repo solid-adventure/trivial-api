@@ -12,6 +12,17 @@ describe 'manifests', type: :request do
   let!(:user_app) { FactoryBot.create(:app, user: user ) }
   let!(:user_manifest) { FactoryBot.create(:manifest, user: user, app_id: user_app.name, internal_app_id: user_app.id) }
 
+  def self.manifest_definition_schema
+    {
+      type: :object,
+      properties: {
+        app_id: { type: :string },
+        content: { type: :object }
+      },
+      required: ['app_id', 'content']
+    }
+  end
+
   path '/manifests?app_id={appId}' do
     get('list manifests') do
 
@@ -35,32 +46,30 @@ describe 'manifests', type: :request do
           expect(data["manifests"].length).to eq 0
         end
 
-      response '401', 'Invalid credentials' do
-        let('access-token') { 'invalid-token' }
-        run_test!
+        response '401', 'Invalid credentials' do
+          let('access-token') { 'invalid-token' }
+          run_test!
+        end
+
       end
-
-
-      end
-
-
 
     end
 
-  #   post('create manifest') do
-  #     response(200, 'successful') do
+    post('create manifest') do
 
-  #       after do |example|
-  #         example.metadata[:response][:content] = {
-  #           'application/json' => {
-  #             example: JSON.parse(response.body, symbolize_names: true)
-  #           }
-  #         }
-  #       end
-  #       run_test!
-  #     end
-  #   end
-  # end
+      parameter name: :manifest, in: :body, schema: manifest_definition_schema
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      consumes 'application/json'
+      produces 'application/json'
+
+      response(200, 'successful') do
+
+        run_test! do |response|
+          byebug
+        end
+      end
+    end
+  end
 
   # path '/manifests/{id}' do
   #   # You'll want to customize the parameter types...
