@@ -1,4 +1,7 @@
 class ManifestsController < ApplicationController
+
+    load_and_authorize_resource
+
     def index
         render json: manifests
     end
@@ -28,11 +31,13 @@ class ManifestsController < ApplicationController
     private
 
     def manifest
-        @_manifest ||= current_user.manifests.where(id: params[:id]).limit(1).first
+        # @manifest is already loaded and authorized
+        @manifest
     end
 
     def manifests
-        @_manifests ||= current_user.manifests.where(app_id: params[:app_id]).order(created_at: :desc)
+        # @manifests is already loaded and authorized
+        @manifests.where(app_id: params[:app_id]).order(created_at: :desc)
     end
 
     def manifest_params
