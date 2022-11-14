@@ -16,32 +16,24 @@ class AppsController < ApplicationController
   def show
     authorize! :read, app
     render json: app.as_json(methods: [:aws_role])
-    rescue CanCan::AccessDenied => e
-      render_unauthorized
   end
 
   def update
     authorize! :update, app
     app.update!(app_params)
     render json: app
-    rescue CanCan::AccessDenied => e
-      render_unauthorized
   end
 
   def copy
     authorize! :update, app
     app_copy = app.copy!(nil, params[:new_app_descriptive_name])
     render json: app_copy
-    rescue CanCan::AccessDenied => e
-      render_unauthorized
   end
 
   def destroy
     authorize! :destroy, app
     app.discard!
     head :ok
-    rescue CanCan::AccessDenied => e
-      render_unauthorized
   end
 
   def name_suggestion
