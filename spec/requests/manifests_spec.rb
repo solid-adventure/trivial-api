@@ -12,17 +12,6 @@ describe 'manifests', type: :request do
   let!(:user_app) { FactoryBot.create(:app, user: user ) }
   let!(:user_manifest) { FactoryBot.create(:manifest, user: user, app_id: user_app.name, internal_app_id: user_app.id) }
 
-  def self.manifest_definition_schema
-    {
-      type: :object,
-      properties: {
-        app_id: { type: :string },
-        content: { type: :object }
-      },
-      required: ['app_id', 'content']
-    }
-  end
-
   path '/manifests?app_id={appId}' do
     get('list manifests') do
 
@@ -45,94 +34,125 @@ describe 'manifests', type: :request do
           data = JSON.parse(response.body)
           expect(data["manifests"].length).to eq 0
         end
+      end
 
-        response '401', 'Invalid credentials' do
-          let('access-token') { 'invalid-token' }
-          run_test!
-        end
-
+      response '401', 'Invalid credentials' do
+        let(:appId) { user_app.name }
+        let('access-token') { 'invalid-token' }
+        run_test!
       end
 
     end
 
     post('create manifest') do
-
-      parameter name: :manifest, in: :body, schema: manifest_definition_schema
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
-      consumes 'application/json'
       produces 'application/json'
+      consumes 'application/json'
+      parameter name: "appId", in: :path, type: :string
+      parameter name: :manifest, in: :body, schema: {}
 
-      response(200, 'successful') do
-
-        run_test! do |response|
-          byebug
-        end
+      response(400, 'malformed with bad appId') do
+        let(:appId) { 'invalid' }
+        let(:manifest) { {content: '{}'} }
+        run_test!
       end
+
+
+      response(400, 'malformed without required fields') do
+        let(:appId) { user_app.name }
+        let(:manifest) { {} }
+        run_test!
+      end
+
+      response(201, 'valid with required fields') do
+        let(:appId) { user_app.name }
+        let(:manifest) { {content: '{}'} }
+        run_test!
+      end
+
+
     end
+
   end
 
-  # path '/manifests/{id}' do
-  #   # You'll want to customize the parameter types...
-  #   parameter name: 'id', in: :path, type: :string, description: 'id'
+  path '/manifests/{id}' do
 
-  #   get('show manifest') do
-  #     response(200, 'successful') do
-  #       let(:id) { '123' }
+    get('show manifest') do
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      produces 'application/json'
+      parameter name: 'id', in: :path, type: :string, description: 'id'
 
-  #       after do |example|
-  #         example.metadata[:response][:content] = {
-  #           'application/json' => {
-  #             example: JSON.parse(response.body, symbolize_names: true)
-  #           }
-  #         }
-  #       end
-  #       run_test!
-  #     end
-  #   end
+      response(200, 'successful') do
+        let(:id) { user_manifest.id }
+        run_test!
+      end
 
-    # patch('update manifest') do
-    #   response(200, 'successful') do
-    #     let(:id) { '123' }
+      response(404, 'unsuccessful with bad id') do
+        let(:id) { 123 }
+        run_test!
+      end
 
-    #     after do |example|
-    #       example.metadata[:response][:content] = {
-    #         'application/json' => {
-    #           example: JSON.parse(response.body, symbolize_names: true)
-    #         }
-    #       }
-    #     end
-    #     run_test!
-    #   end
-    # end
+      response(401, 'unsuccessful with bad auth') do
+        let(:id) { user_manifest.id }
+        let('access-token') { 'invalid-token' }
+        run_test!
+      end
+  
+    end
 
-    # put('update manifest') do
-    #   response(200, 'successful') do
-    #     let(:id) { '123' }
+    patch('update manifest') do
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      produces 'application/json'
+      consumes 'application/json'
+      parameter name: 'id', in: :path, type: :string, description: 'id'
+      parameter name: :manifest, in: :body, schema: {}
 
-    #     after do |example|
-    #       example.metadata[:response][:content] = {
-    #         'application/json' => {
-    #           example: JSON.parse(response.body, symbolize_names: true)
-    #         }
-    #       }
-    #     end
-    #     run_test!
-    #   end
-    # end
+      response(200, 'successful') do
+        let(:id) { user_manifest.id }
+        let(:manifest) { {content: '{updated: true}'} }
 
-    # delete('delete manifest') do
-    #   response(200, 'successful') do
-    #     let(:id) { '123' }
+        run_test! do |response|
+          content = JSON.parse(response.body)['content']
+          expect(content).to eq '{updated: true}'
+        end
+      end
 
-    #     after do |example|
-    #       example.metadata[:response][:content] = {
-    #         'application/json' => {
-    #           example: JSON.parse(response.body, symbolize_names: true)
-    #         }
-    #       }
-    #     end
-    #     run_test!
-    #   end
-    # end
+      response(401, 'unsuccessful with bad auth') do
+        let(:id) { user_manifest.id }
+        let(:manifest) { {content: '{updated: true}'} }
+        let('access-token') { 'invalid-token' }
+        run_test!
+      end
+
+    end
+
+    put('update manifest') do
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      produces 'application/json'
+      consumes 'application/json'
+      parameter name: 'id', in: :path, type: :string, description: 'id'
+      parameter name: :manifest, in: :body, schema: {}
+
+      response(200, 'successful') do
+        let(:id) { user_manifest.id }
+        let(:manifest) { {content: '{updated2: true}'} }
+
+        run_test! do |response|
+          content = JSON.parse(response.body)['content']
+          expect(content).to eq '{updated2: true}'
+        end
+      end
+
+      response(401, 'unsuccessful with bad auth') do
+        let(:id) { user_manifest.id }
+        let(:manifest) { {content: '{updated: true}'} }
+        let('access-token') { 'invalid-token' }
+        run_test!
+      end
+
+
+    end
+
+
   end
 end
