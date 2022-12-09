@@ -9,6 +9,7 @@ class ApplicationController < ActionController::API
 
   rescue_from ActiveRecord::RecordInvalid, with: :render_invalid_record
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from CanCan::AccessDenied, with: :render_unauthorized
 
   protected
 
