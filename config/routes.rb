@@ -40,7 +40,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :activity_entries, only: [:index, :create] do
+  resources :activity_entries, only: [:index, :create, :show] do
     collection do
       get 'stats'
     end
