@@ -50,8 +50,7 @@ class AbilityTest < ActiveSupport::TestCase
       assert_equal [], apps.pluck(:id)
     end
 
-
-     test 'admin can access all apps' do
+    test 'admin can access all apps' do
       skip("Pending support for admin abilities in UI")
       admin = User.create!(name: 'admin', email: 'admin@example.com', password: 'password', role: 'admin')
       assert_not_equal admin.id, nil

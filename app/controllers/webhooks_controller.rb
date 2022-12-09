@@ -54,7 +54,7 @@ class WebhooksController < ApplicationController
     end
 
     def webhooks
-        @webhooks ||= current_user.apps.find_by_name!(params[:app_id]).activity_entries.requests.limit(limit).order(created_at: :desc)
+        @webhooks ||= App.accessible_by(Ability.new(current_user)).find_by_name!(params[:app_id]).activity_entries.requests.limit(limit).order(created_at: :desc)
     end
 
     def limit
@@ -70,7 +70,7 @@ class WebhooksController < ApplicationController
     end
 
     def authenticate_app_id!
-      current_user.apps.kept.find_by_name!(webhook_params[:app_id])
+      App.accessible_by(Ability.new(current_user).kept.find_by_name!(webhook_params[:app_id])
     end
 
     def activity_entry_params
