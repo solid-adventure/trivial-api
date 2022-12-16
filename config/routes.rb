@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
     member do 
       post 'copy'
+      post 'last_request'
     end
     resource :credentials, only: [:show] do
       put '', action: :update
