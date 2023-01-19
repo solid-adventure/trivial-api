@@ -51,7 +51,7 @@ describe 'manifests', type: :request do
       parameter name: "appId", in: :path, type: :string
       parameter name: :manifest, in: :body, schema: {}
 
-      response(400, 'malformed with bad appId') do
+      response(401, 'unauthorized with bad appId') do
         let(:appId) { 'invalid' }
         let(:manifest) { {content: '{}'} }
         run_test!
