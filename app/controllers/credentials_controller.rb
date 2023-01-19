@@ -7,6 +7,7 @@ class CredentialsController < ApplicationController
   end
 
   def update
+    authorize! :update, app
     if params[:credentials].keys.empty?
       app.credentials.destroy!
     else
@@ -31,7 +32,9 @@ class CredentialsController < ApplicationController
   private
 
   def app
-    @app ||= current_user.apps.kept.find_by_name!(params[:app_id])
+    # @app ||= current_user.apps.kept.find_by_name!(params[:app_id])
+    @app ||= App.kept.find_by_name(params[:app_id])
+    authorize! :read, @app
   end
 
 end

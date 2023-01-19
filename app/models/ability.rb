@@ -21,10 +21,12 @@ class Ability
     can :manage, Manifest, user: user
     can :manage, ManifestDraft, user: user
 
-    # Users with customers can manage their own, plus their teammates
+    # Users with customers can read their teammates' resources
     return unless user.customers.length > 0
-    can :manage, App, user_id: user.customers.map{ |c| c.users.map{ |u| u.id }}.flatten
-
+    can :read, ActivityEntry, user_id: shared_customer_scope(user)
+    can :read, App, user_id: shared_customer_scope(user)
+    can :read, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
+    can :read, Manifest, user_id: shared_customer_scope(user)
 
     # Define abilities for the user here. For example:
     #
@@ -51,4 +53,9 @@ class Ability
     # See the wiki for details:
     # https://github.com/CanCanCommunity/cancancan/blob/develop/docs/define_check_abilities.md
   end
+
+  def shared_customer_scope(user)
+     user.customers.map{ |c| c.users.map{ |u| u.id }}.flatten
+  end
+
 end
