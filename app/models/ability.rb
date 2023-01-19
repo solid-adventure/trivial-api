@@ -23,9 +23,8 @@ class Ability
 
     # Users with customers can manage their own, plus their teammates
     return unless user.customers.length > 0
-    can :manage, App, user_id: user.customers.map{ |c| c.users.map{ |u| u.id }}.flatten
-
-
+    can :manage, App, user_id: shared_customer_scope(user)
+    can :manage, Manifest, user_id: shared_customer_scope(user)
     # Define abilities for the user here. For example:
     #
     #   return unless user.present?
@@ -51,4 +50,9 @@ class Ability
     # See the wiki for details:
     # https://github.com/CanCanCommunity/cancancan/blob/develop/docs/define_check_abilities.md
   end
+
+  def shared_customer_scope(user)
+     user.customers.map{ |c| c.users.map{ |u| u.id }}.flatten
+  end
+
 end
