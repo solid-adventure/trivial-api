@@ -21,10 +21,13 @@ class Ability
     can :manage, Manifest, user: user
     can :manage, ManifestDraft, user: user
 
-    # Users with customers can manage their own, plus their teammates
+    # Users with customers can read their teammates' resources
     return unless user.customers.length > 0
-    can :manage, App, user_id: shared_customer_scope(user)
-    can :manage, Manifest, user_id: shared_customer_scope(user)
+    can :read, ActivityEntry, user_id: shared_customer_scope(user)
+    can :read, App, user_id: shared_customer_scope(user)
+    can :read, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
+    can :read, Manifest, user_id: shared_customer_scope(user)
+
     # Define abilities for the user here. For example:
     #
     #   return unless user.present?
