@@ -28,6 +28,13 @@ class Ability
     can :read, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
     can :read, Manifest, user_id: shared_customer_scope(user)
 
+    if user.admin?
+      can :manage, ActivityEntry, user_id: shared_customer_scope(user)
+      can :manage, App, user_id: shared_customer_scope(user)
+      can :manage, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
+      can :manage, Manifest, user_id: shared_customer_scope(user)
+    end
+
     # Define abilities for the user here. For example:
     #
     #   return unless user.present?
