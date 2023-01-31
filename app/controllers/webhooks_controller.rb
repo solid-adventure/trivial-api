@@ -29,7 +29,6 @@ class WebhooksController < ApplicationController
     end
 
     def send_new
-      # @app = current_user.apps.kept.find_by_name!(params[:id])
       @app = App.kept.find_by_name!(params[:id])
       authorize! :read, @app
       res = ActivityEntry.send_new @app, params[:payload].to_json
