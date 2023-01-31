@@ -29,7 +29,8 @@ class WebhooksController < ApplicationController
     end
 
     def send_new
-      @app = current_user.apps.kept.find_by_name!(params[:id])
+      @app = App.kept.find_by_name!(params[:id])
+      authorize! :read, @app
       res = ActivityEntry.send_new @app, params[:payload].to_json
       render json: {status: res.code.to_i, message: res.message}
     end
@@ -46,7 +47,7 @@ class WebhooksController < ApplicationController
     private
 
     def webhook
-        @webhook ||= current_user.activity_entries.requests.find(params[:id])
+        @webhook ||= ActivityEntry.accessible_by(Ability.new(current_user)).requests.find(params[:id])
     end
 
     def updatable_webhook
@@ -54,7 +55,9 @@ class WebhooksController < ApplicationController
     end
 
     def webhooks
-        @webhooks ||= current_user.apps.find_by_name!(params[:app_id]).activity_entries.requests.limit(limit).order(created_at: :desc)
+      app = App.kept.find_by_name!(params[:app_id])
+      authorize! :read, app
+      @webhooks ||= app.activity_entries.requests.limit(limit).order(created_at: :desc)
     end
 
     def limit
@@ -70,7 +73,9 @@ class WebhooksController < ApplicationController
     end
 
     def authenticate_app_id!
-      current_user.apps.kept.find_by_name!(webhook_params[:app_id])
+      app = App.kept.find_by_name!(webhook_params[:app_id])
+      authorize! :read, app
+      return app
     end
 
     def activity_entry_params
