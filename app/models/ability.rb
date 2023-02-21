@@ -6,6 +6,10 @@ class Ability
   def initialize(user)
 
 
+    # all users can read public apps
+    can :read, App, readable_by: 'public'
+    can :read, Manifest, :app => { readable_by: 'public' }
+
     return unless user.present?
 
     # Until we have UI in place to support admin filtering by customer, this would be too much

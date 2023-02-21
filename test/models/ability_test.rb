@@ -11,7 +11,6 @@ class AbilityTest < ActiveSupport::TestCase
 
       @app_user2 = App.create(user: @user2, descriptive_name: 'New App, User 2')
       @manifest_user2 = Manifest.create(user: @user2, app_id: '456XYZ', content: "{}", internal_app_id: @app_user2.id)
-
     end
     # ruby -I test test/models/ability_test.rb 
 
@@ -39,7 +38,6 @@ class AbilityTest < ActiveSupport::TestCase
       manifests = Manifest.all
       assert_equal @user2.manifests.length, 1
       assert_equal @user2.manifests.accessible_by(ability).length, 0
-
     end
 
     test 'user can access other apps owned by the same customer account' do
@@ -51,9 +49,7 @@ class AbilityTest < ActiveSupport::TestCase
       assert_equal apps.pluck(:id), apps.accessible_by(ability).pluck(:id)
 
       manifests = Manifest.where(user_id: [@user1.id, @user2.id])
-      assert_equal manifests.pluck(:id), manifests.accessible_by(ability).pluck(:id)
-
-
+      assert_equal manifests.pluck(:id).sort, manifests.accessible_by(ability).pluck(:id).sort
     end
 
     test 'user cannot access apps owned by a customer account they are not a member of' do
