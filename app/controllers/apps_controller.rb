@@ -1,7 +1,5 @@
 class AppsController < ApplicationController
 
-  load_and_authorize_resource only: [:index]
-
   def index
     render json: apps.as_json(methods: [:aws_role]).to_json
   end
@@ -63,6 +61,7 @@ class AppsController < ApplicationController
   end
 
   def apps
+    @apps ||= App.accessible_by(Ability.new(current_user))
     if params[:include_deleted].present?
       @apps.order(:descriptive_name)
     else
