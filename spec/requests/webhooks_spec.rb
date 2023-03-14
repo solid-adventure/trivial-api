@@ -238,4 +238,39 @@ describe 'Webhooks API' do
     end
   end
 
+  path '/webhooks/{appId}/send' do
+    post 'Send a request with payload containing null values' do
+      tags 'Activity'
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: "appId", in: :path, type: :string
+
+      parameter name: :payload, in: :body, schema: {
+        type: :object,
+        properties: {
+          payload: { type: :object }
+        },
+        required: ['payload']
+      }
+
+      let(:appId) { user_app.name }
+      let(:payload) { { payload: {test_data: "12345", list_with_nulls: [nil, "null"]} } }
+
+      response '200', 'Request sent' do
+        schema request_status_schema
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['status']).to eq app_status_code.to_i
+          expect(data['message']).to eq app_status_message
+          expect(ActivityEntry).to have_received(:post).with(
+            URI(user_app.url) + "/webhooks/receive",
+            payload[:payload].to_json,
+            'Content-Type' => 'application/json'
+          )
+        end
+      end
+    end
+  end
+
 end

@@ -31,7 +31,8 @@ class WebhooksController < ApplicationController
     def send_new
       @app = App.kept.find_by_name!(params[:id])
       authorize! :read, @app
-      res = ActivityEntry.send_new @app, params[:payload].to_json
+      @bodyPayload = JSON.parse(request.body.read)
+      res = ActivityEntry.send_new @app, @bodyPayload["payload"].to_json
       render json: {status: res.code.to_i, message: res.message}
     end
 
@@ -81,7 +82,7 @@ class WebhooksController < ApplicationController
     def activity_entry_params
       @activity_params = {}.merge(params.permit(:source, :status))
       # :payload and :diagnostics may be a string or object
-      @activity_params[:payload] = params[:payload]
+      @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
       @activity_params[:diagnostics] = params[:diagnostics]
       @activity_params
     end
