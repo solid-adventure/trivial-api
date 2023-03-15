@@ -83,13 +83,13 @@ class WebhooksController < ApplicationController
       @activity_params = {}.merge(params.permit(:source, :status))
       # :payload and :diagnostics may be a string or object
       @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
-      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
       @activity_params
     end
 
     def entry_update_params
       @activity_params = {}.merge(params.permit(:status, :duration_ms))
-      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
       @activity_params
     end
 end
