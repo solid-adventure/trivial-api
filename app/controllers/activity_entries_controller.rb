@@ -58,7 +58,7 @@ class ActivityEntriesController < ApplicationController
   def activity_entry_params
       @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
       @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
-      @activity_params[:diagnostics] = params[:diagnostics]
+      @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
       @activity_params
   end
 end
