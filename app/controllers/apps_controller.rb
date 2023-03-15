@@ -75,7 +75,7 @@ class AppsController < ApplicationController
 
   def last_request_params
     @activity_params = {}
-    @activity_params[:payload] = params[:payload]
+    @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
     @activity_params
   end
 end
