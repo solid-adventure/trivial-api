@@ -21,6 +21,7 @@ class User < ActiveRecord::Base
   validates :name, presence: true, length: { minimum: 3 }
 
   before_save :set_values_for_individual
+  before_create :set_trial_expires_at
 
   def ensure_aws_role!
     name = "#{ENV['AWS_ROLE_PREFIX'] || ''}lambda-ex-#{id.to_s(36)}"
@@ -33,6 +34,10 @@ class User < ActiveRecord::Base
     super
   end
 
+  def set_trial_expires_at
+    self.trial_expires_at = Time.now + 14.day
+  end
+
   private
 
   def set_values_for_individual
@@ -41,6 +46,5 @@ class User < ActiveRecord::Base
       self.approval = 'approved'
     end
   end
-
 
 end
