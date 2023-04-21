@@ -1,0 +1,2 @@
+class CustomerTableDefinition < ApplicationRecord
+end

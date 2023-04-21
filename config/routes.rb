@@ -4,6 +4,12 @@ Rails.application.routes.draw do
   resources :customers
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
+  resources  :datastore do
+    collection do
+      post 'create_user'
+      post 'create_model'
+    end
+  end  
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
     registrations: 'overrides/registrations',
     sessions: 'overrides/sessions'
