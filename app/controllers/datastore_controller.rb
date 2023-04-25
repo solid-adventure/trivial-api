@@ -7,16 +7,9 @@ class DatastoreController < ApplicationController
     def show
         puts 'show'
     end
-
-    def create_user
-        username = 'testuser'
-        user_statement, password = DatastoreManager.create_account_statement(username)
-        puts username, password, user_statement
-
-    end
-
+    
     def create_model
-        table_statement, table_hash, full_table_name = DatastoreManager.create_table_from_json(params[:obj].to_json, params[:table_name].to_s)     
+        table_statement, table_hash, full_table_name = DatastoreManager.create_table_statement_from_json(params[:obj].to_json, params[:table_name].to_s)     
         puts table_statement, table_hash, full_table_name
         table_definition = CustomerTableDefinition.find_by(table_hash: table_hash)
         puts table_definition
