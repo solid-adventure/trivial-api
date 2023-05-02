@@ -7,19 +7,17 @@ class DatastoreController < ApplicationController
     def show
         puts 'show'
     end
-    
-    def create_model
-        table_statement, table_hash, full_table_name = DatastoreManager.create_table_statement_from_json(params[:obj].to_json, params[:table_name].to_s)     
-        puts table_statement, table_hash, full_table_name
-        table_definition = CustomerTableDefinition.find_by(table_hash: table_hash)
-        puts table_definition
-        if table_definition
-            full_table_name = table_definition.table_name
-        else    
-            ActiveRecord::Base.connection.execute(table_statement)
-            CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
-        end    
-        render json: {table_name: full_table_name, table_hash: table_hash}
+
+
+    def insert_values
+        username = 'testing_user'
+        records_inserted = DatastoreManager.verify_model_and_insert_records(
+            params[:records], 
+            params[:table_name], 
+            params[:unique_keys], 
+            current_user.email, 
+            current_user.id, 
+            current_user.role)
+        render json: {records_inserted: records_inserted}
     end
-       
 end    
