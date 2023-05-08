@@ -30,13 +30,8 @@ class User < ActiveRecord::Base
     aws_role
   end
 
-  def ensure_datastore_account!
-    DatastoreManager.create_datastore_account_for_user(self)
-  end
-
   def active_for_authentication?
     ensure_aws_role!
-    ensure_datastore_account!
     super
   end
 
