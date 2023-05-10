@@ -141,7 +141,7 @@ module DatastoreManager
         missing_columns = request_columns.reject { |column| existing_columns.include?(column) }
       
         if missing_columns.empty?
-          return nil
+          return nil, nil
         end
       
         alter_statements = missing_columns.map do |column,datatype|
@@ -181,7 +181,7 @@ module DatastoreManager
         # Check for the table definition hash in the database before trying to create a new table
         table_definition = CustomerTableDefinition.find_by(table_name: full_table_name)
 
-        if not table_definition 
+        if not table_definition
             # If table does not already exist we execute the DDL
             self.execute_datastore_statement(table_statement)
             # Insert table definition into the database
@@ -202,9 +202,11 @@ module DatastoreManager
             end
 
             # Alter the table and save new table hash
-            self.execute_datastore_statement(alter_statement)
-            table_definition.table_hash = new_table_hash
-            table_definition.save
+            if !alter_statement.nil?
+                self.execute_datastore_statement(alter_statement)
+                table_definition.table_hash = new_table_hash
+                table_definition.save
+            end    
         end    
 
         # Add default column values to each row
@@ -212,8 +214,7 @@ module DatastoreManager
 
         # Batch insert 20 at a time
         final_values.each_slice(20){|group|
-            res = self.insert_values(full_table_name, group, columns, 'external_id')
-            print(res)
+            self.insert_values(full_table_name, group, columns, 'external_id')
         }
         return final_values.length
     end
