@@ -4,8 +4,7 @@ require 'pg'
 module DatastoreManager
 
     def get_connection()
-        @conn ||= PG.connect(dbname: ENV['DATASTORE_POSTGRES_DATABASE'], host: ENV['DATASTORE_POSTGRES_HOST'], user: ENV['DATASTORE_POSTGRES_USER'], password: ENV['DATASTORE_POSTGRES_PASSWORD'], port: 5432)
-        @conn
+        PG.connect(dbname: ENV['DATASTORE_POSTGRES_DATABASE'], host: ENV['DATASTORE_POSTGRES_HOST'], user: ENV['DATASTORE_POSTGRES_USER'], password: ENV['DATASTORE_POSTGRES_PASSWORD'], port: 5432)
     end
 
     def schema_name()
@@ -51,10 +50,10 @@ module DatastoreManager
         hash.each_with_object({}) do |(k, v), h|
             if v.is_a? Hash
                 flatten_hash(v).map do |h_k, h_v|
-                    h["#{k}_#{h_k}"] = h_v
+                    h["#{k.downcase}_#{h_k.downcase}"] = h_v
                 end
             else 
-                h[k] = v
+                h[k.downcase] = v
             end
         end
     end
@@ -96,7 +95,7 @@ module DatastoreManager
             return
         end    
         insert_statement = self.generate_insert_sql_statement(table_name, values, columns, unique_key)
-        self.execute_datastore_statement(insert_statement)
+        return self.execute_datastore_statement(insert_statement)
     end
 
     def get_existing_table_columns(table_name)
@@ -120,6 +119,8 @@ module DatastoreManager
                 data_type = "TEXT"
             elsif v == 'boolean' 
                 data_type = "BOOLEAN"
+            elsif v == 'json'
+                data_type = "JSON"    
             else
                 data_type = "TEXT"
             end
@@ -187,7 +188,7 @@ module DatastoreManager
             CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
         elsif table_definition.table_hash != table_hash 
             # Get the existing data model so we can alter with new request columns
-            existing_columns, existing_pairs, existing_table_hash = self..get_existing_table_columns(table_name)
+            existing_columns, existing_pairs, existing_table_hash = self.get_existing_table_columns(table_name)
             if existing_columns.length >= table_definition.max_columns
                 raise "Table #{full_table_name} has hit the max columns limit"
             end
@@ -211,7 +212,8 @@ module DatastoreManager
 
         # Batch insert 20 at a time
         final_values.each_slice(20){|group|
-            self.insert_values(full_table_name, group, columns, 'external_id')
+            res = self.insert_values(full_table_name, group, columns, 'external_id')
+            print(res)
         }
         return final_values.length
     end
@@ -219,8 +221,8 @@ module DatastoreManager
     def create_table_statement_from_json(json_object, table_name)
         # Parse the JSON object
         parsed_objects = JSON.parse(json_object)
-        parsed_objects = parsed_objects.map do |(parsed_bbject)|
-            flatten_hash(parsed_bbject)
+        parsed_objects = parsed_objects.map do |(parsed_object)|
+            flatten_hash(parsed_object)
         end
 
         # Create one object with keys from every object to ensure the model can handle all values
@@ -272,6 +274,8 @@ module DatastoreManager
                 data_type = "TIMESTAMP"
             elsif value.is_a?(String)
                 data_type = "TEXT"
+            elsif value.is_a?(Array)
+                data_type = "JSON"    
             elsif value.is_a?(TrueClass) || value.is_a?(FalseClass)
                 data_type = "BOOLEAN"
             else
