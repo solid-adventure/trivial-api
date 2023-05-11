@@ -70,7 +70,6 @@ module DatastoreManager
 
 
     def generate_insert_sql_statement(table_name, data_list, columns, request_columns, unique_key)
-        puts columns
         columns_str = columns.join(', ')
         values = data_list.map do |data|
           quoted_values = data.map do |column,value|
@@ -278,7 +277,6 @@ module DatastoreManager
             if value.is_a?(Integer) || value.is_a?(Float)
                 data_type = "NUMERIC"
             elsif value.is_a?(String) && (DateTime.iso8601(value) rescue false)
-                puts value + ' ' + DateTime.parse(value).to_s + ' ' + Time.parse(value).to_s
                 data_type = "TIMESTAMP"
             elsif value.is_a?(String)
                 data_type = "TEXT"
