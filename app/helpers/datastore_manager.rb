@@ -69,13 +69,17 @@ module DatastoreManager
     end
 
 
-    def generate_insert_sql_statement(table_name, data_list, columns, unique_key)
+    def generate_insert_sql_statement(table_name, data_list, columns, request_columns, unique_key)
+        puts columns
         columns_str = columns.join(', ')
         values = data_list.map do |data|
-          quoted_values = data.values.map do |value|
+          quoted_values = data.map do |column,value|
             val = "'#{value}'"
             if value == 'NULL'
                 val = value
+            end 
+            if request_columns[column] == 'JSON'
+                val = "'#{value.to_json}'"
             end
             val
           end.join(', ')
@@ -90,11 +94,11 @@ module DatastoreManager
         return sql_statement
     end
 
-    def insert_values(table_name, values, columns,  unique_key)
+    def insert_values(table_name, values, columns, request_columns, unique_key)
         if values.length == 0
             return
         end    
-        insert_statement = self.generate_insert_sql_statement(table_name, values, columns, unique_key)
+        insert_statement = self.generate_insert_sql_statement(table_name, values, columns, request_columns, unique_key)
         return self.execute_datastore_statement(insert_statement)
     end
 
@@ -216,7 +220,7 @@ module DatastoreManager
 
         # Batch insert 20 at a time
         final_values.each_slice(20){|group|
-            self.insert_values(full_table_name, group, columns, 'external_id')
+            self.insert_values(full_table_name, group, columns, request_columns, 'external_id')
         }
         return final_values.length
     end
