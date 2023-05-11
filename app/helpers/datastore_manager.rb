@@ -46,7 +46,7 @@ module DatastoreManager
         return
     end
 
-    def flatten_hash(hash)
+    def flatten_hash_and_normalize_columns(hash)
         hash.each_with_object({}) do |(k, v), h|
             if v.is_a? Hash
                 flatten_hash(v).map do |h_k, h_v|
@@ -114,6 +114,8 @@ module DatastoreManager
             if v == 'numeric'
                 data_type = "NUMERIC"
             elsif v == 'timestamp without time zone'
+                data_type = "TIMESTAMP"
+            elsif v == 'timestamp with time zone'
                 data_type = "TIMESTAMP"
             elsif v == 'text'
                 data_type = "TEXT"
@@ -223,7 +225,7 @@ module DatastoreManager
         # Parse the JSON object
         parsed_objects = JSON.parse(json_object)
         parsed_objects = parsed_objects.map do |(parsed_object)|
-            flatten_hash(parsed_object)
+            flatten_hash_and_normalize_columns(parsed_object)
         end
 
         # Create one object with keys from every object to ensure the model can handle all values
@@ -271,7 +273,8 @@ module DatastoreManager
             # Select the correct column data type for the value of the key
             if value.is_a?(Integer) || value.is_a?(Float)
                 data_type = "NUMERIC"
-            elsif value.is_a?(String) && (DateTime.parse(value) <= DateTime.now() rescue false)
+            elsif value.is_a?(String) && (DateTime.iso8601(value) rescue false)
+                puts value + ' ' + DateTime.parse(value).to_s + ' ' + Time.parse(value).to_s
                 data_type = "TIMESTAMP"
             elsif value.is_a?(String)
                 data_type = "TEXT"

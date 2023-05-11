@@ -13,10 +13,10 @@ class DatastoreController < ApplicationController
         username = 'testing_user'
         records_inserted = DatastoreManager.verify_model_and_insert_records(
             params[:records].to_json, 
-            params[:table_name].to_s, 
-            params[:unique_keys].to_s, 
+            params[:table_name].to_s.downcase, 
+            params[:unique_keys].to_s.downcase, 
             username, 
-            132, 
+            132,
             'member')
         render json: {records_inserted: records_inserted}
     end
