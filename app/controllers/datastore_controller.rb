@@ -12,9 +12,10 @@ class DatastoreController < ApplicationController
     def insert_values
         username = 'testing_user'
         records_inserted = DatastoreManager.verify_model_and_insert_records(
-            params[:records].to_json, 
+            JSON.parse(params[:records].to_json), 
             params[:table_name].to_s.downcase, 
-            params[:unique_keys].to_s.downcase, 
+            JSON.parse(params[:unique_keys].to_json),
+            JSON.parse(params[:nested_tables].to_json), 
             username, 
             132,
             'member')

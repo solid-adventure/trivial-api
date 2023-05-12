@@ -58,14 +58,14 @@ module DatastoreManager
         end
     end
 
-    def prepare_values(values, tenant_name, tenant_id, tenant_type, unique_keys)
-        values.each do |(value)|
-            value['tenant_name'] = tenant_name
-            value['tenant_id'] = tenant_id
-            value['tenant_type'] = tenant_type
-            value['external_id'] = unique_keys.split(',').map do |unique_key| value[unique_key] end.join('_')
+    def prepare_records(records, tenant_name, tenant_id, tenant_type, unique_keys)
+        records.each do |(record)|
+            record['tenant_name'] = tenant_name
+            record['tenant_id'] = tenant_id
+            record['tenant_type'] = tenant_type
+            record['external_id'] = unique_keys.map do |unique_key| record[unique_key] end.join('_')
         end
-        return values
+        return records
     end
 
 
@@ -179,71 +179,85 @@ module DatastoreManager
         return ['tenant_name', 'tenant_id', 'tenant_type', 'external_id']
     end
 
-    def verify_model_and_insert_records(records, table_name, unique_keys, tenant_name, tenant_id, tenant_type)
-        table_statement, table_hash, full_table_name, values, columns, request_columns = self.create_table_statement_from_json(
-            records, table_name)   
+    def verify_model_and_insert_records(parent_records, parent_table_name, parent_unique_keys, nested_tables, tenant_name, tenant_id, tenant_type)
+        # Process the records recursively and return {full_table_name: {table_settings}}
+        tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})   
 
-        # Check for the table definition hash in the database before trying to create a new table
-        table_definition = CustomerTableDefinition.find_by(table_name: full_table_name)
+        # Keep track of total records inserted
+        records_inserted = 0
 
-        if not table_definition
-            # If table does not already exist we execute the DDL
-            self.execute_datastore_statement(table_statement)
-            # Insert table definition into the database
-            CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
-        elsif table_definition.table_hash != table_hash 
-            # Get the existing data model so we can alter with new request columns
-            existing_columns, existing_pairs, existing_table_hash = self.get_existing_table_columns(table_name)
-            if existing_columns.length >= table_definition.max_columns
-                raise "Table #{full_table_name} has hit the max columns limit"
-            end
+        tables.each do |(key, table)|
+            table_name = table[:table_name]
+            create_table_statement = table[:create_table_statement]
+            table_hash = table[:table_hash]
+            full_table_name = table[:full_table_name] 
+            records = table[:records] 
+            columns = table[:columns] 
+            request_columns = table[:request_columns]
+            unique_keys = table[:unique_keys]    
 
-            # Generate the column alter command to prepare the table for new fields
-            alter_statement, new_table_hash = self.generate_alter_table_sql_statement(
-                full_table_name, request_columns, existing_columns, existing_pairs)
-            # Verify the existing table matches what we built using the table definition of column:datatype
-            if table_definition.table_hash != existing_table_hash
-                raise 'Existing table hash no longer matches table hash in the database'
-            end
+            # Check for the table definition hash in the database before trying to create a new table
+            table_definition = CustomerTableDefinition.find_by(table_name: full_table_name)
 
-            # Alter the table and save new table hash
-            if !alter_statement.nil?
-                self.execute_datastore_statement(alter_statement)
-                table_definition.table_hash = new_table_hash
-                table_definition.save
+            if not table_definition
+                # If table does not already exist we execute the DDL
+                self.execute_datastore_statement(create_table_statement)
+                # Insert table definition into the database
+                CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
+            elsif table_definition.table_hash != table_hash 
+                # Get the existing data model so we can alter with new request columns
+                existing_columns, existing_pairs, existing_table_hash = self.get_existing_table_columns(table_name)
+                if existing_columns.length >= table_definition.max_columns
+                    raise "Table #{full_table_name} has hit the max columns limit"
+                end
+
+                # Generate the column alter command to prepare the table for new fields
+                alter_statement, new_table_hash = self.generate_alter_table_sql_statement(
+                    full_table_name, request_columns, existing_columns, existing_pairs)
+                # Verify the existing table matches what we built using the table definition of column:datatype
+                if table_definition.table_hash != existing_table_hash
+                    raise 'Existing table hash no longer matches table hash in the database'
+                end
+
+                # Alter the table and save new table hash
+                if !alter_statement.nil?
+                    self.execute_datastore_statement(alter_statement)
+                    table_definition.table_hash = new_table_hash
+                    table_definition.save
+                end    
             end    
-        end    
 
-        # Add default column values to each row
-        final_values = self.prepare_values(values, tenant_name, tenant_id, 'member', unique_keys)
+            # Add default column values to each row
+            final_values = self.prepare_records(records, tenant_name, tenant_id, 'member', unique_keys)
 
-        # Batch insert 20 at a time
-        final_values.each_slice(20){|group|
-            self.insert_values(full_table_name, group, columns, request_columns, 'external_id')
-        }
-        return final_values.length
+            # Batch insert 20 at a time
+            final_values.each_slice(20){|group|
+                self.insert_values(full_table_name, group, columns, request_columns, 'external_id')
+            }
+            records_inserted += final_values.length
+        end
+        return records_inserted
     end
 
-    def create_table_statement_from_json(json_object, table_name)
-        # Parse the JSON object
-        parsed_objects = JSON.parse(json_object)
-        parsed_objects = parsed_objects.map do |(parsed_object)|
-            flatten_hash_and_normalize_columns(parsed_object)
+    def create_table_statement_from_records(records, table_name, nested_tables, unique_keys, tables)
+
+        records = records.map do |(record)|
+            flatten_hash_and_normalize_columns(record)
         end
 
         # Create one object with keys from every object to ensure the model can handle all values
         agg_column_mapping = {}
-        parsed_objects.each do |(parsed_object)|
-            parsed_object.each_with_index do |(key, value), index|
+        records.each do |(record)|
+            record.each_with_index do |(key, value), index|
                 agg_column_mapping[key] = value
             end  
         end
 
         # Normalize the data so each object has all the keys
-        parsed_objects = parsed_objects.map do |(object)|
+        records = records.map do |(record)|
             new_object = {}
             agg_column_mapping.each do |(k,v)|
-                new_object[k] = object.fetch(k, 'NULL')
+                new_object[k] = record.fetch(k, 'NULL')
             end
             new_object
         end
@@ -253,7 +267,37 @@ module DatastoreManager
             raise 'Could not create table for empty object'
         end
 
+        # Check for nested tables in the records
+        if !nested_tables.nil?
+            nested_tables.each do |(key, settings)|
+                # Collect all nested records from each record
+                puts 'nested tables settings', settings
+                normalized_key = key.downcase
+                nested_table_name = "#{table_name}_#{normalized_key}"
+                nested_nested_tables = settings.fetch('nested_tables', {})
+                nested_unique_keys = settings.fetch('unique_keys', [])
+                parent_keys = settings.fetch('parent_keys', []) 
+                parent_nested_records = []
+                records.each do |(record)|
+                    # Get the list of nested reocrds from parent record
+                    nested_records = record.fetch(normalized_key)
+                    # Remove the key from parent record
+                    record.delete(normalized_key)
+                    nested_records.each do |nested_record|
+                        parent_keys.each do |parent_key|
+                            nested_record[parent_key['to']] = record[parent_key['from']]
+                        end
+                        parent_nested_records.push(nested_record)
+                    end    
+                end
+                # Remove the key from agg mapping
+                agg_column_mapping.delete(normalized_key)
+                # Call recursively
+                self.create_table_statement_from_records(parent_nested_records, nested_table_name, nested_nested_tables, unique_keys, tables)
+            end
+        end
 
+        # Create the full table name
         full_table_name = "#{schema_name()}.#{table_name}" 
     
         # Start building the CREATE TABLE statement
@@ -316,6 +360,17 @@ module DatastoreManager
         # Add default columns to the columns lists
         columns = agg_column_mapping.keys() + self.get_default_data_columns()
 
-        return create_table_statement, table_hash, full_table_name, parsed_objects, columns, request_columns
+        tables[full_table_name] = {
+            table_name: table_name,
+            create_table_statement: create_table_statement,
+            table_hash: table_hash,
+            full_table_name: full_table_name,
+            records: records,
+            columns: columns,
+            request_columns: request_columns,
+            unique_keys: unique_keys,
+        } 
+
+        return tables
     end
 end    
