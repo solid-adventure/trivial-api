@@ -15,7 +15,7 @@ class Customer < ApplicationRecord
 	end
 
 	def username
-		name.sub(' ', '_').downcase
+		name.gsub(' ', '_').gsub('.', '').downcase
 	end
 
 	def create_token
