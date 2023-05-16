@@ -26,8 +26,8 @@ module DatastoreManager
         return user_statement, password
     end
 
-    def create_datastore_account_for_user(user)
-        username = user.email.gsub('+', '_').gsub('@', '_').gsub('.', '_')
+    def create_datastore_account_for_user(user, customer)
+        username = customer.username
         account_statement, password = create_account_statement(username)
         credential_set = CredentialSet.create!(name: "TrivialDatastore", user: user, credential_type: "PostgreSQLCredentials")
         credential_set.credentials.user = user
@@ -39,9 +39,6 @@ module DatastoreManager
           :user => username,
         }
         result = self.execute_datastore_statement(account_statement)
-        puts result
-        puts "Sleeping 5 seconds after creating new aws role"
-        sleep 5.0
         credential_set.credentials.save!
         return
     end

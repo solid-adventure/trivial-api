@@ -9,8 +9,22 @@ class DatastoreController < ApplicationController
         puts 'show'
     end
 
+    def create_account
+        user = User.find(current_app[:user_id])
+        token = user[:current_customer_token]
+        if token.nil?
+            raise 'User account must be associated with customer'
+        end     
+        customer = Customer.find_by(token: user[:current_customer_token])
+        DatastoreManager.create_datastore_account_for_user(user, customer)
+    end
+
     def insert_values
         user = User.find(current_app[:user_id])
+        token = user[:current_customer_token]
+        if token.nil?
+            raise 'User account must be associated with customer'
+        end    
         customer = Customer.find_by(token: user[:current_customer_token])
 
         records_inserted = DatastoreManager.verify_model_and_insert_records(

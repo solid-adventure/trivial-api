@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   resources  :datastore do
     collection do
       post 'insert_values'
+      post 'create_account'
     end
   end  
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
