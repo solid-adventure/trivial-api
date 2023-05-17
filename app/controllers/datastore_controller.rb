@@ -15,7 +15,7 @@ class DatastoreController < ApplicationController
         if token.nil?
             raise 'User account must be associated with customer'
         end     
-        customer = Customer.find_by(token: user[:current_customer_token])
+        customer = Customer.find_by(token: token)
         DatastoreManager.create_datastore_account_for_user(user, customer)
     end
 
@@ -25,7 +25,7 @@ class DatastoreController < ApplicationController
         if token.nil?
             raise 'User account must be associated with customer'
         end    
-        customer = Customer.find_by(token: user[:current_customer_token])
+        customer = Customer.find_by(token: token)
 
         records_inserted = DatastoreManager.verify_model_and_insert_records(
             JSON.parse(params[:records].to_json), 
