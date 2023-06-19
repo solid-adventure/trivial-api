@@ -46,7 +46,7 @@ module DatastoreManager
     def flatten_hash_and_normalize_columns(hash)
         hash.each_with_object({}) do |(k, v), h|
             if v.is_a? Hash
-                flatten_hash(v).map do |h_k, h_v|
+                flatten_hash_and_normalize_columns(v).map do |h_k, h_v|
                     h["#{k.downcase}_#{h_k.downcase}"] = h_v
                 end
             else 
@@ -176,12 +176,12 @@ module DatastoreManager
         return ['tenant_name', 'tenant_id', 'tenant_type', 'external_id']
     end
 
-    def verify_model_and_insert_records(parent_records, parent_table_name, parent_unique_keys, nested_tables, tenant_name, tenant_id, tenant_type)
+    def verify_model(parent_records, parent_table_name, parent_unique_keys, nested_tables, tenant_name, tenant_id, tenant_type, apply_table_changes)
         # Process the records recursively and return {full_table_name: {table_settings}}
         tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})   
 
         # Keep track of total records inserted
-        records_inserted = 0
+        model_updates = {}
 
         tables.each do |(key, table)|
             table_name = table[:table_name]
@@ -208,6 +208,7 @@ module DatastoreManager
                     raise "Table #{full_table_name} has hit the max columns limit"
                 end
 
+
                 # Generate the column alter command to prepare the table for new fields
                 alter_statement, new_table_hash = self.generate_alter_table_sql_statement(
                     full_table_name, request_columns, existing_columns, existing_pairs)
@@ -217,12 +218,73 @@ module DatastoreManager
                 end
 
                 # Alter the table and save new table hash
-                if !alter_statement.nil?
+                if !alter_statement.nil? and apply_table_changes
                     self.execute_datastore_statement(alter_statement)
                     table_definition.table_hash = new_table_hash
                     table_definition.save
                 end    
+                
+                # Add table modifications
+                if !alter_statement.nil?
+                    model_updates[table_name] = {
+                        change_statement: alter_statement
+                    } 
+                end
             end    
+        end
+        return model_updates
+    end
+
+    def insert_records(parent_records, parent_table_name, parent_unique_keys, nested_tables, tenant_name, tenant_id, tenant_type, apply_table_changes)
+        # Process the records recursively and return {full_table_name: {table_settings}}
+        tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})   
+
+        # Keep track of total records inserted
+        records_inserted = 0
+
+        tables.each do |(key, table)|
+            table_name = table[:table_name]
+            create_table_statement = table[:create_table_statement]
+            table_hash = table[:table_hash]
+            full_table_name = table[:full_table_name] 
+            records = table[:records] 
+            columns = table[:columns] 
+            request_columns = table[:request_columns]
+            unique_keys = table[:unique_keys]    
+
+            # Check for the table definition hash in the database before trying to create a new table
+            table_definition = CustomerTableDefinition.find_by(table_name: full_table_name)
+
+
+            if apply_table_changes
+                if not table_definition
+                    # If table does not already exist we execute the DDL
+                    self.execute_datastore_statement(create_table_statement)
+                    # Insert table definition into the database
+                    CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
+                elsif table_definition.table_hash != table_hash 
+                    # Get the existing data model so we can alter with new request columns
+                    existing_columns, existing_pairs, existing_table_hash = self.get_existing_table_columns(table_name)
+                    if existing_columns.length >= table_definition.max_columns
+                        raise "Table #{full_table_name} has hit the max columns limit"
+                    end
+
+                    # Generate the column alter command to prepare the table for new fields
+                    alter_statement, new_table_hash = self.generate_alter_table_sql_statement(
+                        full_table_name, request_columns, existing_columns, existing_pairs)
+                    # Verify the existing table matches what we built using the table definition of column:datatype
+                    if table_definition.table_hash != existing_table_hash
+                        raise 'Existing table hash no longer matches table hash in the database'
+                    end
+
+                    # Alter the table and save new table hash
+                    if !alter_statement.nil?
+                        self.execute_datastore_statement(alter_statement)
+                        table_definition.table_hash = new_table_hash
+                        table_definition.save
+                    end    
+                end    
+            end
 
             # Add default column values to each row
             final_values = self.prepare_records(records, tenant_name, tenant_id, 'member', unique_keys)

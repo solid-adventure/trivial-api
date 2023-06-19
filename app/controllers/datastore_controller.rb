@@ -11,30 +11,48 @@ class DatastoreController < ApplicationController
 
     def create_account
         user = User.find(current_app[:user_id])
-        token = user[:current_customer_token]
-        if token.nil?
+        if user.customers.length == 0
             raise 'User account must be associated with customer'
-        end     
-        customer = Customer.find_by(token: token)
+        end    
+        customer = user.customers.first
         DatastoreManager.create_datastore_account_for_user(user, customer)
     end
 
-    def insert_values
+    def verify_model
         user = User.find(current_app[:user_id])
-        token = user[:current_customer_token]
-        if token.nil?
+        if user.customers.length == 0
             raise 'User account must be associated with customer'
         end    
-        customer = Customer.find_by(token: token)
+        customer = user.customers.first
 
-        records_inserted = DatastoreManager.verify_model_and_insert_records(
+        table_updates = DatastoreManager.verify_model(
             JSON.parse(params[:records].to_json), 
             params[:table_name].to_s.downcase, 
             JSON.parse(params[:unique_keys].to_json),
             JSON.parse(params[:nested_tables].to_json), 
             customer.username, 
             customer.id,
-            'customer')
+            'customer',
+            params[:apply_table_changes] || false)
+        render json: {table_updates: table_updates}
+    end
+
+    def insert_values
+        user = User.find(current_app[:user_id])
+        if user.customers.length == 0
+            raise 'User account must be associated with customer'
+        end    
+        customer = user.customers.first
+
+        records_inserted = DatastoreManager.insert_records(
+            JSON.parse(params[:records].to_json), 
+            params[:table_name].to_s.downcase, 
+            JSON.parse(params[:unique_keys].to_json),
+            JSON.parse(params[:nested_tables].to_json), 
+            customer.username, 
+            customer.id,
+            'customer',
+            params[:apply_table_changes] || false)
         render json: {records_inserted: records_inserted}
     end
 end

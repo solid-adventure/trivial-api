@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   resources  :datastore do
     collection do
       post 'insert_values'
+      post 'verify_model'
       post 'create_account'
     end
   end  
