@@ -20,7 +20,7 @@ module DatastoreManager
         user = User.find(current_app[:user_id])
         customer = nil
         if params.has_key?(:customer_token)
-            customer = Customer.accessible_by(Ability.new(user)).find_by(token: params[:customer_token])
+            customer = user.customers.find { |customer| customer.token == params[:customer_token] }
             if customer.nil?
                 raise "Customer not found for token #{params[:customer_token]}"
             end
