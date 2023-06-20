@@ -18,12 +18,8 @@ class DatastoreController < ApplicationController
         DatastoreManager.create_datastore_account_for_user(user, customer)
     end
 
-    def verify_model
-        user = User.find(current_app[:user_id])
-        if user.customers.length == 0
-            raise 'User account must be associated with customer'
-        end    
-        customer = user.customers.first
+    def verify_model   
+        customer = DatastoreManager.get_customer(current_app, params)
 
         table_updates = DatastoreManager.verify_model(
             JSON.parse(params[:records].to_json), 
@@ -37,13 +33,8 @@ class DatastoreController < ApplicationController
         render json: {table_updates: table_updates}
     end
 
-    def insert_values
-        user = User.find(current_app[:user_id])
-        if user.customers.length == 0
-            raise 'User account must be associated with customer'
-        end    
-        customer = user.customers.first
-        puts 'testing', params[:unique_keys].to_json, JSON.parse(params[:unique_keys].to_json)
+    def insert_values  
+        customer = DatastoreManager.get_customer(current_app, params)
 
         records_inserted = DatastoreManager.insert_records(
             JSON.parse(params[:records].to_json), 

@@ -4,7 +4,7 @@ require 'pg'
 module DatastoreManager
 
     def get_connection()
-        PG.connect(dbname: ENV['DATASTORE_POSTGRES_DATABASE'], host: ENV['DATASTORE_POSTGRES_HOST'], user: ENV['DATASTORE_POSTGRES_USER'], password: ENV['DATASTORE_POSTGRES_PASSWORD'], port: 5432)
+        PG.connect(dbname: ENV['DATASTORE_POSTGRES_DATABASE'], host: ENV['DATASTORE_POSTGRES_HOST'], user: ENV['DATASTORE_POSTGRES_USER'], password: ENV['DATASTORE_POSTGRES_PASSWORD'], port: ENV['DATASTORE_POSTGRES_PORT'])
     end
 
     def schema_name()
@@ -14,6 +14,23 @@ module DatastoreManager
     def execute_datastore_statement(statement)
         puts 'executing sql: ' + statement
         return self.get_connection().exec(statement)
+    end
+
+    def get_customer(current_app, params)
+        user = User.find(current_app[:user_id])
+        customer = nil
+        if params.has_key?(:customer_token)
+            customer = Customer.accessible_by(Ability.new(user)).find_by(token: params[:customer_token])
+            if customer.nil?
+                raise "Customer not found for token #{params[:customer_token]}"
+            end
+        else
+            if user.customers.length == 0
+                raise 'User account must be associated with customer'
+            end 
+            customer = user.customers.first
+        end
+        customer
     end
     
     def create_account_statement(username)
