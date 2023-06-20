@@ -33,7 +33,7 @@ class DatastoreController < ApplicationController
             customer.username, 
             customer.id,
             'customer',
-            params[:apply_table_changes] || false)
+            params.fetch(:apply_table_changes, false))
         render json: {table_updates: table_updates}
     end
 
@@ -43,6 +43,7 @@ class DatastoreController < ApplicationController
             raise 'User account must be associated with customer'
         end    
         customer = user.customers.first
+        puts 'testing', params[:unique_keys].to_json, JSON.parse(params[:unique_keys].to_json)
 
         records_inserted = DatastoreManager.insert_records(
             JSON.parse(params[:records].to_json), 
@@ -52,7 +53,7 @@ class DatastoreController < ApplicationController
             customer.username, 
             customer.id,
             'customer',
-            params[:apply_table_changes] || false)
+            params.fetch(:apply_table_changes, false))
         render json: {records_inserted: records_inserted}
     end
 end

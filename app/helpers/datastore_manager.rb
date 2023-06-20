@@ -21,8 +21,8 @@ module DatastoreManager
         user_statement = "CREATE USER #{username} WITH PASSWORD '#{password}';"
         user_statement += "\nGRANT CONNECT ON DATABASE \"#{ENV['DATASTORE_POSTGRES_DATABASE']}\" TO #{username};"
         user_statement += "\nGRANT USAGE ON SCHEMA #{schema_name()} TO #{username};"
-        user_statement += "\nGRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA #{schema_name()} TO #{username};"
-        user_statement += "\nALTER DEFAULT PRIVILEGES IN SCHEMA #{schema_name()} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO #{username};"
+        user_statement += "\nGRANT SELECT ON ALL TABLES IN SCHEMA #{schema_name()} TO #{username};"
+        user_statement += "\nALTER DEFAULT PRIVILEGES IN SCHEMA #{schema_name()} GRANT SELECT ON TABLES TO #{username};"
         return user_statement, password
     end
 
@@ -352,7 +352,7 @@ module DatastoreManager
                 # Remove the key from agg mapping
                 agg_column_mapping.delete(normalized_key)
                 # Call recursively
-                self.create_table_statement_from_records(parent_nested_records, nested_table_name, nested_nested_tables, unique_keys, tables)
+                self.create_table_statement_from_records(parent_nested_records, nested_table_name, nested_nested_tables, nested_unique_keys, tables)
             end
         end
 
