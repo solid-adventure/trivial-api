@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_22_202204) do
+ActiveRecord::Schema.define(version: 2023_05_02_130354) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
 
   create_table "activity_entries", force: :cascade do |t|
@@ -61,6 +62,14 @@ ActiveRecord::Schema.define(version: 2023_03_22_202204) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
     t.index ["user_id"], name: "index_credential_sets_on_user_id"
+  end
+
+  create_table "customer_table_definitions", force: :cascade do |t|
+    t.string "table_name"
+    t.string "table_hash"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "max_columns"
   end
 
   create_table "customers", force: :cascade do |t|
