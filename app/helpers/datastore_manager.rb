@@ -16,6 +16,19 @@ module DatastoreManager
         return self.get_connection().exec(statement)
     end
 
+    def column_name_invalid?(name)
+        # Define a regex pattern that matches illegal characters
+        # in Postgres column names
+        illegal_pattern = /[^a-zA-Z0-9_]+/
+        
+        # Check if the column name contains any illegal characters
+        if name.match?(illegal_pattern)
+            return true
+        else
+            return false
+        end
+    end
+
     def get_customer(current_app, params)
         user = User.find(current_app[:user_id])
         customer = nil
@@ -84,7 +97,7 @@ module DatastoreManager
 
 
     def generate_insert_sql_statement(table_name, data_list, columns, request_columns, unique_key)
-        columns_str = columns.join(', ')
+        columns_str = columns.map { |column| "\"#{column}\"" }.join(', ')
         values = data_list.map do |data|
           quoted_values = data.map do |column,value|
             val = "'#{value}'"
@@ -164,7 +177,7 @@ module DatastoreManager
         end
       
         alter_statements = missing_columns.map do |column,datatype|
-          "ADD COLUMN #{column} #{datatype}"
+          "ADD COLUMN \"#{column}\" #{datatype}"
         end.join(', ')
 
         missing_columns.each do |k,v|
@@ -197,7 +210,7 @@ module DatastoreManager
         # Process the records recursively and return {full_table_name: {table_settings}}
         tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})   
 
-        # Keep track of total records inserted
+        # Keep track of model updates for each table
         model_updates = {}
 
         tables.each do |(key, table)|
@@ -325,6 +338,10 @@ module DatastoreManager
         agg_column_mapping = {}
         records.each do |(record)|
             record.each_with_index do |(key, value), index|
+                # Check for illegal characters in the column name before moving on
+                if column_name_invalid?(key)
+                    raise ActionController::BadRequest.new("Column name \"#{key}\" contains illegal characters. Column names must only contain a-z, A-Z, 0-9, and _")
+                end
                 agg_column_mapping[key] = value
             end  
         end
