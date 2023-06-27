@@ -2,11 +2,10 @@ class CredentialSet < ApplicationRecord
   belongs_to :user, inverse_of: :credential_sets
 
   validates :name, :credential_type, presence: true
-
   before_create :set_external_id
 
   def credentials
-    @credentials ||= CredentialSetCredentials.find_or_build_by_user_and_name user, credentials_name
+    @credentials ||= Credentials.find_or_build_by_user_and_name user, credentials_name
   end
 
   def api_attrs
@@ -28,5 +27,4 @@ class CredentialSet < ApplicationRecord
   def set_external_id
     self.external_id = SecureRandom.uuid
   end
-
 end

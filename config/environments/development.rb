@@ -1,5 +1,4 @@
 require "active_support/core_ext/integer/time"
-
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -68,6 +67,12 @@ Rails.application.configure do
   # Highlight code that triggered database queries in logs.
   config.active_record.verbose_query_logs = true
 
+  credentials.active_record_encryption = {
+    :primary_key => "jOiOpPFcySHTyXEio505p8jF11ICRj2H",
+    :deterministic_key => "113p2D0rELaZXQGvO9eV4d5Lj6W3ReHW",
+    :key_derivation_salt => "miIwkvbfM1kPnC5zPXwxorAKyz2XQjf4"
+  }
+  # config.active_record.encryption.support_unencrypted_data = true
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true

@@ -3,12 +3,15 @@ class CredentialSetsController < ApplicationController
   before_action :authenticate_app!, only: [:patch]
 
   def index
-    render json: {credential_sets: current_user.credential_sets.order(:id).map(&:api_attrs)}
+    customer_credential_sets = current_user.customers.map{ |c| c.credential_sets }.flatten
+    credential_sets = current_user.credential_sets.order(:id) + customer_credential_sets
+    render json: {credential_sets: credential_sets.map(&:api_attrs)}
   end
 
   def create
     @credential_set = current_user.credential_sets.create! credential_set_params
     if params.has_key?(:credentials)
+      @credential_set.secret_value = params[:credentials]
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
     end
@@ -67,6 +70,11 @@ class CredentialSetsController < ApplicationController
   private
 
   def credential_set
+    if params[:id].include?("customer")
+      credential_type, customer_token, path = params[:id].split('_')
+      customer = current_user.customers.find { |c| c.token == customer_token }
+      @credential_set ||= customer.credential_set_by_external_id(params[:id])
+    end
     @credential_set ||= current_user.credential_sets.find_by_external_id!(params[:id])
   end
 
