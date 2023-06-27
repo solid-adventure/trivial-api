@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_02_130354) do
+ActiveRecord::Schema.define(version: 2023_06_26_173532) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -60,6 +60,7 @@ ActiveRecord::Schema.define(version: 2023_05_02_130354) do
     t.string "credential_type", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "secret_value"
     t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
     t.index ["user_id"], name: "index_credential_sets_on_user_id"
   end

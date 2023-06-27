@@ -10,7 +10,7 @@ namespace :tasks do
     apps = App.kept.where('schedule @> ?', "{\"every\":\"#{interval}\"}")
     apps.each do |app|
       puts "Running #{app.name}, #{app.descriptive_name}"
-      begin 
+      begin
         res = ActivityEntry.send_new app, app.schedule["payload"].to_json
         puts res
       rescue => e
@@ -61,4 +61,13 @@ namespace :tasks do
     end
   end
 
+  desc "Migrate secrets from AWS to internal Postgres"
+  task migrate_secret_store: :environment do
+    puts 'Migrating secrets from AWS to internal Postgres'
+    count = 0
+    CredentialSet.where(secret_value: nil).each do |credential_set|
+      count += 1
+      puts "credential_set #{count}", credential_set.credentials.secret_value
+    end
+  end
 end

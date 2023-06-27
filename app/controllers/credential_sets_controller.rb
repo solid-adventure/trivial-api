@@ -8,28 +8,33 @@ class CredentialSetsController < ApplicationController
 
   def create
     @credential_set = current_user.credential_sets.create! credential_set_params
-    if params.has_key?(:credentials)
-      @credential_set.credentials.secret_value = params[:credentials]
-      @credential_set.credentials.save!
-    end
+    # if params.has_key?(:credentials)
+    #   @credential_set.secret_value = params[:credentials].to_s
+      # @credential_set.credentials.secret_value = params[:credentials]
+      # @credential_set.credentials.save!
+    # end
     render json: {credential_set: @credential_set.api_attrs}
   end
 
   def show
+    puts credential_set.secret_value
+    puts credential_set.secret_value.class
     render json: {
       credential_set: credential_set.api_attrs,
-      credentials: credential_set.credentials.secret_value
+      credentials: credential_set.secret_value # credential_set.credentials.secret_value
     }
   end
 
   def update
+    puts credential_set_params
+    puts params
     if params.has_key?(:credential_set)
       credential_set.update!(credential_set_params)
     end
-    if params.has_key?(:credentials)
-      credential_set.credentials.secret_value = params[:credentials]
-      credential_set.credentials.save!
-    end
+    # if params.has_key?(:credentials)
+    #   credential_set.credentials.secret_value = params[:credentials]
+    #   credential_set.credentials.save!
+    # end
     render json: {credential_set: credential_set.api_attrs}
   end
 
@@ -46,7 +51,7 @@ class CredentialSetsController < ApplicationController
   end
 
   def destroy
-    credential_set.credentials.destroy!
+    # credential_set.credentials.destroy!
     credential_set.destroy!
     render status: :ok
   end
@@ -75,7 +80,11 @@ class CredentialSetsController < ApplicationController
   end
 
   def credential_set_params
-    params.require(:credential_set).permit(:name, :credential_type)
+    # Move credentials parameter to the secret_value field for migration purposes
+    if params.has_key?(:credentials)
+      params[:credential_set][:secret_value] = params[:credentials].to_json
+    end
+    params.require(:credential_set).permit(:name, :credential_type, :secret_value)
   end
 
 end
