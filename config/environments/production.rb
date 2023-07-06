@@ -98,4 +98,10 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  credentials.active_record_encryption = {
+    :primary_key => "oSgxicF7L51Yc9u51js8AxftAqJeBA1s",
+    :deterministic_key => "ksmk4k6n8W9UXnYJuAnE2WtcepK9kpbg",
+    :key_derivation_salt => "SAZPc74gggs53GnW2SaR0npsOZ1Gyvlh"
+  }
 end
