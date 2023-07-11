@@ -4,6 +4,7 @@ class ApiKeys
 
   ALGORITHM = 'RS256'
   DURATION = 1.week
+  APP_KEY_DURATION = 5.years
 
   attr_accessor :app
 
@@ -14,6 +15,10 @@ class ApiKeys
 
   def issue!
     JWT.encode payload, private_key, ALGORITHM
+  end
+
+  def issue_app_key!
+    JWT.encode app_key_payload, private_key, ALGORITHM
   end
 
   def refresh!(key, path)
@@ -54,6 +59,13 @@ class ApiKeys
     {
       app: app.name,
       exp: DURATION.from_now.to_i
+    }
+  end
+
+  def app_key_payload
+    {
+      app: app.name,
+      exp: APP_KEY_DURATION.from_now.to_i
     }
   end
 

@@ -1,6 +1,6 @@
 class CredentialSetsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:patch, :update_api_key]
-  before_action :authenticate_app!, only: [:patch]
+  skip_before_action :authenticate_user!, only: [:patch, :update_api_key, :show_app]
+  before_action :authenticate_app!, only: [:patch, :show_app]
 
   def index
     customer_credential_sets = current_user.customers.map{ |c| c.credential_sets }.flatten
@@ -22,6 +22,13 @@ class CredentialSetsController < ApplicationController
     render json: {
       credential_set: credential_set.api_attrs,
       credentials: credential_set.credentials.secret_value
+    }
+  end
+
+  def show_app
+    render json: {
+      credential_set: credential_set_app.api_attrs,
+      credentials: credential_set_app.credentials.secret_value
     }
   end
 
@@ -70,12 +77,27 @@ class CredentialSetsController < ApplicationController
   private
 
   def credential_set
+    if @credential_set
+      return @credential_set
+    end
     if params[:id].include?("customer")
       credential_type, customer_token, path = params[:id].split('_')
       customer = current_user.customers.find { |c| c.token == customer_token }
       @credential_set ||= customer.credential_set_by_external_id(params[:id])
     end
     @credential_set ||= current_user.credential_sets.find_by_external_id!(params[:id])
+  end
+
+  def credential_set_app
+    if @credential_set_app
+      return @credential_set_app
+    end
+    if params[:id].include?("customer")
+      credential_type, customer_token, path = params[:id].split('_')
+      customer = current_app.user.customers.find { |c| c.token == customer_token }
+      @credential_set_app ||= customer.credential_set_by_external_id(params[:id])
+    end
+    @credential_set_app ||= current_app.user.credential_sets.find_by_external_id!(params[:id])
   end
 
   def patchable_credential_set
