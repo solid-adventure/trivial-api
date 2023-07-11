@@ -7,7 +7,7 @@ class CredentialsTest < ActiveSupport::TestCase
   end
 
   test 'grants permission to the app\'s role' do
-    Credentials.stub :find_by_app_and_name!, -> (a, n) { Credentials.new(app: a, name: n, arn: "arn:x:#{n}", secret_value: {}) } do
+    Credentials.stub :find_by_app_and_name!, -> (a, n) { Credentials.new(app: a, name: n, secret_value: {}) } do
       Role.stub :create!, -> (n) { Role.new(name: n[:name], arn: "arn:x:#{n[:name]}") } do
         assert_equal @app.aws_role,
           @app.credentials.default_policy[:Statement].first[:Principal][:AWS]
