@@ -11,7 +11,6 @@ class CredentialSetsController < ApplicationController
   def create
     @credential_set = current_user.credential_sets.create! credential_set_params
     if params.has_key?(:credentials)
-      @credential_set.secret_value = params[:credentials]
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
     end
@@ -50,7 +49,7 @@ class CredentialSetsController < ApplicationController
       params[:credentials][:new_value]
     )
     render json: {ok: true}
-  rescue CredentialsBase::InvalidPatch => e
+  rescue Credentials::InvalidPatch => e
     logger.error "Failed to patch credential set credentials #{e}"
     render status: 422, json: {ok: false, error: e.message}
   end

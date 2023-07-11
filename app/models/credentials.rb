@@ -1,13 +1,14 @@
 class Credentials < ApplicationRecord
   encrypts :secret_value
 
-  ALLOWED_PATCH_PATHS = [
-    %w(* * *)
-  ].freeze
-
   attr_accessor :app
   attr_accessor :user
   attr_accessor :customer
+  class InvalidPatch < StandardError
+    def initialize
+      super("Incorrect value or path")
+    end
+  end
 
   def initialize(attrs = nil)
     super(attrs)
@@ -115,7 +116,9 @@ class Credentials < ApplicationRecord
   end
 
   def can_patch_path?(path, current_value)
-    return false unless allowed_patch_paths.any?{|p| path_matches?(p, path)}
+    puts 'secret', secret_value
+    puts 'value', value_at_path(secret_value, path)
+    puts 'current_value', current_value
     return false unless current_value == value_at_path(secret_value, path)
     true
   end
@@ -132,18 +135,6 @@ class Credentials < ApplicationRecord
     secret_value.to_json
   end
 
-  def allowed_patch_paths
-    []
-  end
-
-  def path_matches?(spec, path)
-    return false unless spec.length == path.length
-    for i in 0..spec.length-1
-      return false unless spec[i] == '*' || spec[i] == path[i]
-    end
-    true
-  end
-
   def value_at_path(obj, path)
     path.inject(obj){|obj, step| obj.try(:[], step)}
   end
@@ -151,10 +142,6 @@ class Credentials < ApplicationRecord
   def set_value_at_path(obj, path, val)
     parent = value_at_path(obj, path[0..-2])
     parent.try(:[]=, path[-1], val)
-  end
-
-  def allowed_patch_paths
-    ALLOWED_PATCH_PATHS
   end
 
   def secret_value_json
