@@ -68,9 +68,9 @@ Rails.application.configure do
   config.active_record.verbose_query_logs = true
 
   credentials.active_record_encryption = {
-    :primary_key => "jOiOpPFcySHTyXEio505p8jF11ICRj2H",
-    :deterministic_key => "113p2D0rELaZXQGvO9eV4d5Lj6W3ReHW",
-    :key_derivation_salt => "miIwkvbfM1kPnC5zPXwxorAKyz2XQjf4"
+    :primary_key => process.env.ACTIVE_RECORD_ENVCYPTION_PRIMARY_KEY,
+    :deterministic_key => process.env.ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY,
+    :key_derivation_salt => process.env.ACTIVE_RECORD_ENCRYPTION_DERIVATION_SALT,
   }
   # config.active_record.encryption.support_unencrypted_data = true
 

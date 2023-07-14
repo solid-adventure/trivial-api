@@ -100,8 +100,8 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   credentials.active_record_encryption = {
-    :primary_key => "oSgxicF7L51Yc9u51js8AxftAqJeBA1s",
-    :deterministic_key => "ksmk4k6n8W9UXnYJuAnE2WtcepK9kpbg",
-    :key_derivation_salt => "SAZPc74gggs53GnW2SaR0npsOZ1Gyvlh"
+    :primary_key => process.env.ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY,
+    :deterministic_key => process.env.ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY,
+    :key_derivation_salt => process.env.ACTIVE_RECORD_ENCRYPTION_DERIVATION_SALT,
   }
 end
