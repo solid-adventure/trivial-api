@@ -75,6 +75,7 @@ Rails.application.configure do
     :key_derivation_salt => "M26YWdZGfzWoNMYT9aVjKysTsKuZFy75"
   }
 
+  config.hosts = ['2085-24-23-228-115.ngrok-free.app']
   # Set log level
   # config.log_level = :INFO
   # config.logger = Logger.new(STDOUT)

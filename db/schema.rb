@@ -10,9 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_29_181052) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
 
   create_table "activity_entries", force: :cascade do |t|
@@ -54,14 +53,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_29_181052) do
 
   create_table "credential_sets", force: :cascade do |t|
     t.uuid "external_id", null: false
-    t.bigint "user_id", null: false
     t.string "name", null: false
     t.string "credential_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "secret_value"
+    t.integer "owner_id"
+    t.string "owner_type"
     t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
-    t.index ["user_id"], name: "index_credential_sets_on_user_id"
   end
 
   create_table "credentials", force: :cascade do |t|
@@ -209,7 +207,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_29_181052) do
   add_foreign_key "activity_entries", "apps"
   add_foreign_key "activity_entries", "users"
   add_foreign_key "apps", "users"
-  add_foreign_key "credential_sets", "users"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifest_drafts", "users"

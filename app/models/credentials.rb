@@ -20,7 +20,8 @@ class Credentials < ApplicationRecord
 
   def destroy!
     if owner_type == 'customer'
-      raise ActionController::BadRequest.new('Customer credentials cannot be deleted')
+      errors.add(:base, "Cannot delete credential sets for customers.")
+      throw :abort
     end
     super
   end
@@ -58,40 +59,29 @@ class Credentials < ApplicationRecord
     record
   end
 
-  def self.find_by_user_and_name!(user, name)
-    secret = self.find_by(name: name, owner_type: 'user')
-    if secret.nil?
-      secret = aws_client.get_secret_value secret_id: name
-      secret_value = ActiveSupport::JSON.decode(secret.secret_string)
-      record = self.new(
-        user: user,
-        name: secret.name,
-        owner_type: 'user',
-        secret_value: prune_drafts(secret_value)
-      )
+  def self.get_owner_type(owner)
+    if owner.is_a?(User)
+      'user'
+    elsif owner.is_a?(Customer)
+      'customer'
     else
-      secret.secret_value = prune_drafts(secret.secret_value)
-      record = secret
+      'user'
     end
-    record
   end
 
-  def self.find_by_customer_and_name!(customer, name, path)
-    secret = self.find_by(name: name, owner_type: 'customer')
+  def self.find_by_owner_and_name!(owner, owner_type,  name)
+    secret = self.find_by(name: name, owner_type: owner_type)
     if secret.nil?
       secret = aws_client.get_secret_value secret_id: name
       secret_value = ActiveSupport::JSON.decode(secret.secret_string)
       record = self.new(
-        customer: customer,
+        user: owner,
         name: secret.name,
-        owner_type: 'customer',
+        owner_type: owner_type,
         secret_value: prune_drafts(secret_value)
       )
     else
       secret.secret_value = prune_drafts(secret.secret_value)
-      if secret.secret_value.has_key?(path)
-        secret.secret_value = secret.secret_value[path]['secret_value']
-      end
       record = secret
     end
     record
@@ -103,16 +93,15 @@ class Credentials < ApplicationRecord
     self.new app: app, owner_type: 'app', name: name, secret_value: {}
   end
 
-  def self.find_or_build_by_user_and_name(user, name)
-    find_by_user_and_name!(user, name)
+  def self.find_or_build_by_owner_and_name(owner, name)
+    owner_type = get_owner_type(owner)
+    find_by_owner_and_name!(owner, owner_type, name)
   rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-    self.new user: user, owner_type: 'user', name: name, secret_value: {}
-  end
-
-  def self.find_or_build_by_customer_and_name(customer, name, path)
-    find_by_customer_and_name!(customer, name, path)
-  rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-    self.new customer: customer, owner_type: 'customer', name: name, secret_value: {}
+    if owner_type == 'user'
+      self.new user: owner, owner_type: owner_type, name: name, secret_value: {}
+    else
+      self.new customer: owner, owner_type: owner_type, name: name, secret_value: {}
+    end
   end
 
   def can_patch_path?(path, current_value)

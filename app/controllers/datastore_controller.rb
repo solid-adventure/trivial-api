@@ -15,7 +15,7 @@ class DatastoreController < ApplicationController
             raise 'User account must be associated with customer'
         end
         customer = user.customers.first
-        DatastoreManager.create_datastore_account_for_customer(user, customer)
+        DatastoreManager.create_datastore_account_for_customer(customer)
     end
 
     def verify_model

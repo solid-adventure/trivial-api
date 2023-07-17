@@ -13,7 +13,7 @@ class User < ActiveRecord::Base
   has_many :apps
   has_many :activity_entries
   has_many :manifest_drafts
-  has_many :credential_sets
+  has_many :credential_sets, as: :owner
 
   enum role: %i[member admin]
   enum approval: %i[pending approved rejected]
@@ -36,6 +36,17 @@ class User < ActiveRecord::Base
 
   def set_trial_expires_at
     self.trial_expires_at = Time.now + 14.day
+  end
+
+  def all_credential_sets
+    user_credentials = credential_sets.order(:id)
+    customers_credentials = customers.map { |customer| customer.credential_sets }.flatten
+    customers_credentials + user_credentials
+  end
+
+  # Find a CredentialSet by external id
+  def find_credential_by_external_id(external_id)
+    all_credential_sets.find { |c| c.external_id == external_id}
   end
 
   private

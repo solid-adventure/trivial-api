@@ -12,7 +12,6 @@ module DatastoreManager
     end
 
     def execute_datastore_statement(statement)
-        puts 'executing sql: ' + statement
         return self.get_connection().exec(statement)
     end
 
@@ -56,24 +55,26 @@ module DatastoreManager
         return user_statement, password
     end
 
-    def create_datastore_account_for_customer(user, customer)
+    def create_datastore_account_for_customer(customer)
         username = customer.username
         account_statement, password = create_account_statement(username)
         datastore_secret = {
+          database: ENV['DATASTORE_POSTGRES_DATABASE'],
+          host: ENV['DATASTORE_POSTGRES_HOST'],
+          password: password,
+          port: 5432,
+          user: username,
+        }
+        credential_set_params = {
             name: "TrivialDatastore",
             credential_type: "PostgreSQLCredentials",
-            secret_value: {
-                database: ENV['DATASTORE_POSTGRES_DATABASE'],
-                host: ENV['DATASTORE_POSTGRES_HOST'],
-                password: password,
-                port: 5432,
-                user: username,
-              }
         }
-        customer.credentials.secret_value['TrivialDatastore'] = datastore_secret
-        result = self.execute_datastore_statement(account_statement)
-        customer.credentials.save!
-        return
+        credential_set = customer.credential_sets.new(credential_set_params)
+        credential_set.owner = customer
+        credential_set.save!
+        credential_set.credentials.secret_value = datastore_secret
+        credential_set.credentials.save!
+        self.execute_datastore_statement(account_statement)
     end
 
     def flatten_hash_and_normalize_columns(hash)
@@ -367,7 +368,6 @@ module DatastoreManager
         if !nested_tables.nil?
             nested_tables.each do |(key, settings)|
                 # Collect all nested records from each record
-                puts 'nested tables settings', settings
                 normalized_key = key.downcase
                 nested_table_name = "#{table_name}_#{normalized_key}"
                 nested_nested_tables = settings.fetch('nested_tables', {})
