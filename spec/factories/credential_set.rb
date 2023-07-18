@@ -1,9 +1,7 @@
-require 'user'
-
 FactoryBot.define do
 
   factory :credential_set do
-    association :owner, factory: :user
+    owner { create(:user) }
     name { 'Twilio' }
     credential_type { 'TwilioCredentials' }
   end

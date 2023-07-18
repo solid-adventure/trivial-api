@@ -20,8 +20,7 @@ class Credentials < ApplicationRecord
 
   def destroy!
     if owner_type == 'customer'
-      errors.add(:base, "Cannot delete credential sets for customers.")
-      throw :abort
+      raise ActionController::BadRequest.new('Customer credentials cannot be deleted')
     end
     super
   end
@@ -42,14 +41,14 @@ class Credentials < ApplicationRecord
   end
 
   def self.find_by_app_and_name!(app, name)
-    secret = self.find_by(name: name, owner_type: 'app')
+    secret = self.find_by(name: name, owner_type: 'App')
     if secret.nil?
       secret = aws_client.get_secret_value secret_id: name
       secret_value = ActiveSupport::JSON.decode(secret.secret_string)
       record = self.new(
         app: app,
         name: secret.name,
-        owner_type: 'app',
+        owner_type: 'App',
         secret_value: prune_drafts(ActiveSupport::JSON.decode(secret.secret_string))
       )
     else
@@ -61,11 +60,11 @@ class Credentials < ApplicationRecord
 
   def self.get_owner_type(owner)
     if owner.is_a?(User)
-      'user'
+      'User'
     elsif owner.is_a?(Customer)
-      'customer'
+      'Customer'
     else
-      'user'
+      'User'
     end
   end
 
@@ -90,14 +89,14 @@ class Credentials < ApplicationRecord
   def self.find_or_build_by_app_and_name(app, name)
     find_by_app_and_name!(app, name)
   rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-    self.new app: app, owner_type: 'app', name: name, secret_value: {}
+    self.new app: app, owner_type: 'App', name: name, secret_value: {}
   end
 
   def self.find_or_build_by_owner_and_name(owner, name)
     owner_type = get_owner_type(owner)
     find_by_owner_and_name!(owner, owner_type, name)
   rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-    if owner_type == 'user'
+    if owner_type == 'User'
       self.new user: owner, owner_type: owner_type, name: name, secret_value: {}
     else
       self.new customer: owner, owner_type: owner_type, name: name, secret_value: {}
