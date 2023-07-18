@@ -11,7 +11,7 @@ describe 'Credential Sets API' do
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
 
-  let!(:existing_credential) { FactoryBot.create(:credential_set, user: user) }
+  let!(:existing_credential) { FactoryBot.create(:credential_set) }
 
   def self.credential_definition_schema
     {

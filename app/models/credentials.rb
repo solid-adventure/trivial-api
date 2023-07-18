@@ -105,9 +105,6 @@ class Credentials < ApplicationRecord
   end
 
   def can_patch_path?(path, current_value)
-    puts 'secret', secret_value
-    puts 'value', value_at_path(secret_value, path)
-    puts 'current_value', current_value
     return false unless current_value == value_at_path(secret_value, path)
     true
   end
