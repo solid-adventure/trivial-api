@@ -46,7 +46,7 @@ class User < ActiveRecord::Base
 
   # Find a CredentialSet by external id
   def find_credential_by_external_id(external_id)
-    credential_sets.or(CredentialSet.where(owner_type: 'customer', owner_id: user.customers.pluck(:id)))
+    credential_sets.or(CredentialSet.where(owner_type: 'customer', owner_id: customers.pluck(:id)))
                    .find_by(external_id: external_id)
   end
 
