@@ -8,9 +8,14 @@ class AbilityTest < ActiveSupport::TestCase
 
       @app_user1 = App.create(user: @user1, descriptive_name: 'New App, User 1')
       @manifest_user1 = Manifest.create(user: @user1, app_id: '123ABC', content: "{}", internal_app_id: @app_user1.id)
+      @credential_user1 = @user1.credential_sets.create(credential_type: 'AnythingType', name: 'Credential owned by User 1')
+      @credential_customer = @customer.credential_sets.create(credential_type: 'AnythingType', name: 'Credential owned by Cusotmer 1')
+
 
       @app_user2 = App.create(user: @user2, descriptive_name: 'New App, User 2')
       @manifest_user2 = Manifest.create(user: @user2, app_id: '456XYZ', content: "{}", internal_app_id: @app_user2.id)
+      @credential_user2 = @user2.credential_sets.create(credential_type: 'AnythingType', name: 'Credential owned by User 2')
+
     end
     # ruby -I test test/models/ability_test.rb 
 
@@ -65,8 +70,18 @@ class AbilityTest < ActiveSupport::TestCase
       assert_equal [], apps.pluck(:id)
     end
 
+    test 'returns credentials for both user and customer' do
+      assert_equal @user1.all_credential_sets.pluck(:id), [@credential_user1.id]
+      @customer.users << @user1
+      assert_equal @user1.all_credential_sets.pluck(:id), [@credential_user1.id,  @credential_customer.id]
+    end
 
-     test 'admin can access all apps' do
+    test 'does not return credentials for customer user is not a member of' do
+      assert_not_nil @credential_user2.id
+      assert_not_includes @user1.all_credential_sets.pluck(:id), [@credential_user2.id]
+    end
+
+    test 'admin can access all apps' do
       skip("Pending support for admin abilities in UI")
       admin = User.create!(name: 'admin', email: 'admin@example.com', password: 'password', role: 'admin')
       assert_not_equal admin.id, nil

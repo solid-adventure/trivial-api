@@ -39,15 +39,12 @@ class User < ActiveRecord::Base
   end
 
   def all_credential_sets
-    user_credentials = credential_sets.order(:id)
-    customers_credentials = customers.map { |customer| customer.credential_sets }.flatten
-    customers_credentials + user_credentials
+    credential_sets.or(CredentialSet.where(owner_type: 'Customer', owner_id: customers.pluck(:id)))
   end
 
   # Find a CredentialSet by external id
   def find_credential_by_external_id(external_id)
-    found_credential ||= credential_sets.or(CredentialSet.where(owner_type: 'Customer', owner_id: customers.pluck(:id)))
-                   .find_by(external_id: external_id)
+    found_credential = all_credential_sets.find_by(external_id: external_id)
     if !found_credential
       raise ActiveRecord::RecordNotFound, "Record with ID #{external_id} not found"
     end
