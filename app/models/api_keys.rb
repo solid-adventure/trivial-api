@@ -4,7 +4,6 @@ class ApiKeys
 
   ALGORITHM = 'RS256'
   DURATION = 1.week
-  APP_KEY_DURATION = 5.years
 
   attr_accessor :app
 
@@ -17,8 +16,11 @@ class ApiKeys
     JWT.encode payload, private_key, ALGORITHM
   end
 
-  def issue_app_key!
-    JWT.encode app_key_payload, private_key, ALGORITHM
+  # Allow non-expiring api keys for apps to use in their environment variable settings. These
+  # api keys will be used for retrieving credential sets required to run the app. These
+  # cannot expire because the app has no way to update the environment variables for itself.
+  def issue_non_expiring_key!
+    JWT.encode non_expiring_payload, private_key, ALGORITHM
   end
 
   def refresh!(key, path)
@@ -62,10 +64,9 @@ class ApiKeys
     }
   end
 
-  def app_key_payload
+  def non_expiring_payload
     {
       app: app.name,
-      exp: APP_KEY_DURATION.from_now.to_i
     }
   end
 

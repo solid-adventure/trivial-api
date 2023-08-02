@@ -21,6 +21,10 @@ class CredentialSet < ApplicationRecord
     }
   end
 
+  # For now the only customer credential is the Trivial Datastore credential that should never
+  # be removed from the account once created. We block any destroy request sent for customer
+  # credentials to ensure a user cannot accidentally do something destructive. This can be
+  # enhanced in the future if customer credentials need to be actively managed.
   def destroy!
     if owner_type == 'Customer'
       raise ActionController::BadRequest.new('Customer credential sets cannot be deleted')

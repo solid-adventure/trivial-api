@@ -6,7 +6,7 @@ class ApiKeysController < ApplicationController
   end
 
   def create_app_key
-    render json: {api_key: app.api_keys.issue_app_key!}
+    render json: {api_key: app.api_keys.issue_non_expiring_key!}
   end
 
   def update
