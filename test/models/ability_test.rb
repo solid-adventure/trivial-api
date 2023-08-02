@@ -9,7 +9,7 @@ class AbilityTest < ActiveSupport::TestCase
       @app_user1 = App.create(user: @user1, descriptive_name: 'New App, User 1')
       @manifest_user1 = Manifest.create(user: @user1, app_id: '123ABC', content: "{}", internal_app_id: @app_user1.id)
       @credential_user1 = @user1.credential_sets.create(credential_type: 'AnythingType', name: 'Credential owned by User 1')
-      @credential_customer = @customer.credential_sets.create(credential_type: 'AnythingType', name: 'Credential owned by Cusotmer 1')
+      @credential_customer = @customer.credential_sets.create(credential_type: 'AnythingType', name: 'Credential owned by Customer 1')
 
 
       @app_user2 = App.create(user: @user2, descriptive_name: 'New App, User 2')
