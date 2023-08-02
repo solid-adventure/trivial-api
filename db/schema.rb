@@ -57,9 +57,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
     t.string "credential_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "owner_id"
     t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
+    t.index ["owner_type", "owner_id"], name: "index_credential_sets_on_owner"
   end
 
   create_table "credentials", force: :cascade do |t|
