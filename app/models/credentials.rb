@@ -1,29 +1,34 @@
-class Credentials < CredentialsBase
-
-  ALLOWED_PATCH_PATHS = [
-    %w(* * *)
-  ].freeze
+class Credentials < ApplicationRecord
+  encrypts :secret_value
 
   attr_accessor :app
+  attr_accessor :user
+  attr_accessor :customer
+  class InvalidPatch < StandardError
+    def initialize
+      super("Incorrect value or path")
+    end
+  end
 
   def initialize(attrs = nil)
     super(attrs)
     attrs = (attrs || {}).stringify_keys
     @app = attrs['app']
+    @user = attrs['user']
+    @customer = attrs['customer']
   end
 
-  def default_policy
-    {
-      Version: '2012-10-17',
-      Statement: [{
-        Effect: 'Allow',
-        Principal: {AWS: app.aws_role},
-        Action: 'secretsmanager:GetSecretValue',
-        Resource: arn
-      }]
-    }
-  end
 
+  # For now the only customer credential is the Trivial Datastore credential that should never
+  # be removed from the account once created. We block any destroy request sent for customer
+  # credentials to ensure a user cannot accidentally do something destructive. This can be
+  # enhanced in the future if customer credentials need to be actively managed.
+  def destroy!
+    if owner_type == 'customer'
+      raise ActionController::BadRequest.new('Customer credentials cannot be deleted')
+    end
+    super
+  end
 
   def drafts
     secret_value['$drafts'] || {}
@@ -41,25 +46,92 @@ class Credentials < CredentialsBase
   end
 
   def self.find_by_app_and_name!(app, name)
-    secret = aws_client.get_secret_value secret_id: name
-    self.new(
-      app: app,
-      name: secret.name,
-      arn: secret.arn,
-      secret_value: prune_drafts(ActiveSupport::JSON.decode(secret.secret_string))
-    )
+    secret = self.find_by(name: name, owner_type: 'App')
+    if secret.nil?
+      secret = aws_client.get_secret_value secret_id: name
+      secret_value = ActiveSupport::JSON.decode(secret.secret_string)
+      record = self.new(
+        app: app,
+        name: secret.name,
+        owner_type: 'App',
+        secret_value: prune_drafts(ActiveSupport::JSON.decode(secret.secret_string))
+      )
+    else
+      secret.secret_value = prune_drafts(secret.secret_value)
+      record = secret
+    end
+    record
+  end
+
+  def self.get_owner_type(owner)
+    if owner.is_a?(User)
+      'User'
+    elsif owner.is_a?(Customer)
+      'Customer'
+    else
+      'User'
+    end
+  end
+
+  def self.find_by_owner_and_name!(owner, owner_type,  name)
+    secret = self.find_by(name: name, owner_type: owner_type)
+    if secret.nil?
+      secret = aws_client.get_secret_value secret_id: name
+      secret_value = ActiveSupport::JSON.decode(secret.secret_string)
+      record = self.new(
+        user: owner,
+        name: secret.name,
+        owner_type: owner_type,
+        secret_value: prune_drafts(secret_value)
+      )
+    else
+      secret.secret_value = prune_drafts(secret.secret_value)
+      record = secret
+    end
+    record
   end
 
   def self.find_or_build_by_app_and_name(app, name)
     find_by_app_and_name!(app, name)
   rescue Aws::SecretsManager::Errors::ResourceNotFoundException
-    self.new app: app, name: name, secret_value: {}
+    self.new app: app, owner_type: 'App', name: name, secret_value: {}
+  end
+
+  def self.find_or_build_by_owner_and_name(owner, name)
+    owner_type = get_owner_type(owner)
+    find_by_owner_and_name!(owner, owner_type, name)
+  rescue Aws::SecretsManager::Errors::ResourceNotFoundException
+    if owner_type == 'User'
+      self.new user: owner, owner_type: owner_type, name: name, secret_value: {}
+    else
+      self.new customer: owner, owner_type: owner_type, name: name, secret_value: {}
+    end
+  end
+
+  def can_patch_path?(path, current_value)
+    return false unless current_value == value_at_path(secret_value, path)
+    true
+  end
+
+  def patch_path!(path, current_value, new_value)
+    raise InvalidPatch unless can_patch_path?(path, current_value)
+    set_value_at_path(secret_value, path, new_value)
+    save!
   end
 
   protected
 
-  def allowed_patch_paths
-    ALLOWED_PATCH_PATHS
+  def secret_value_json
+    secret_value.to_json
+  end
+
+  def value_at_path(obj, path)
+    path.inject(obj){|obj, step| obj.try(:[], step)}
+  end
+
+  def set_value_at_path(obj, path, val)
+    parent = value_at_path(obj, path[0..-2])
+    parent.try(:[]=, path[-1], val)
   end
 
   def secret_value_json
@@ -72,6 +144,14 @@ class Credentials < CredentialsBase
       secret.delete('$drafts') if secret['$drafts'].empty?
     end
     secret
+  end
+
+  def aws_client
+    @aws_client ||= Aws::SecretsManager::Client.new
+  end
+
+  def self.aws_client
+    Aws::SecretsManager::Client.new
   end
 
 end

@@ -13,7 +13,7 @@ class User < ActiveRecord::Base
   has_many :apps
   has_many :activity_entries
   has_many :manifest_drafts
-  has_many :credential_sets
+  has_many :credential_sets, as: :owner
 
   enum role: %i[member admin]
   enum approval: %i[pending approved rejected]
@@ -36,6 +36,19 @@ class User < ActiveRecord::Base
 
   def set_trial_expires_at
     self.trial_expires_at = Time.now + 14.day
+  end
+
+  def all_credential_sets
+    credential_sets.or(CredentialSet.where(owner_type: 'Customer', owner_id: customers.pluck(:id)))
+  end
+
+  # Find a CredentialSet by external id
+  def find_credential_by_external_id(external_id)
+    found_credential = all_credential_sets.find_by(external_id: external_id)
+    if !found_credential
+      raise ActiveRecord::RecordNotFound, "Record with ID #{external_id} not found"
+    end
+    found_credential
   end
 
   private

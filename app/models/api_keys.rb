@@ -16,6 +16,13 @@ class ApiKeys
     JWT.encode payload, private_key, ALGORITHM
   end
 
+  # Allow non-expiring api keys for apps to use in their environment variable settings. These
+  # api keys will be used for retrieving credential sets required to run the app. These
+  # cannot expire because the app has no way to update the environment variables for itself.
+  def issue_non_expiring_key!
+    JWT.encode non_expiring_payload, private_key, ALGORITHM
+  end
+
   def refresh!(key, path)
     assert_was_valid_for_app!(key)
     new_key = issue!
@@ -54,6 +61,12 @@ class ApiKeys
     {
       app: app.name,
       exp: DURATION.from_now.to_i
+    }
+  end
+
+  def non_expiring_payload
+    {
+      app: app.name,
     }
   end
 

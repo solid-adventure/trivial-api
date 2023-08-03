@@ -23,12 +23,7 @@ describe ApiKeys do
     it 'returns a new token' do
       expect(result).to match /^[^.]+\.[^.]+\.[^.]+$/
     end
-
-    it 'updates the stored credentials' do
-      expect(credentials_client_inst).to have_received(:put_secret_value)
-        .with(secret_id: app.credentials.name, secret_string: "{\"1\":{\"1\":\"#{result}\"}}")
-    end
-
+    
     context 'invoked for a different app' do
       let(:app2) { FactoryBot.create(:app) }
 

@@ -12,7 +12,6 @@ module DatastoreManager
     end
 
     def execute_datastore_statement(statement)
-        puts 'executing sql: ' + statement
         return self.get_connection().exec(statement)
     end
 
@@ -20,7 +19,7 @@ module DatastoreManager
         # Define a regex pattern that matches illegal characters
         # in Postgres column names
         illegal_pattern = /[^a-zA-Z0-9_]+/
-        
+
         # Check if the column name contains any illegal characters
         if name.match?(illegal_pattern)
             return true
@@ -40,12 +39,12 @@ module DatastoreManager
         else
             if user.customers.length == 0
                 raise 'User account must be associated with customer'
-            end 
+            end
             customer = user.customers.first
         end
         customer
     end
-    
+
     def create_account_statement(username)
         password = SecureRandom.base64(15)
         user_statement = "CREATE USER #{username} WITH PASSWORD '#{password}';"
@@ -56,21 +55,26 @@ module DatastoreManager
         return user_statement, password
     end
 
-    def create_datastore_account_for_user(user, customer)
+    def create_datastore_account_for_customer(customer)
         username = customer.username
         account_statement, password = create_account_statement(username)
-        credential_set = CredentialSet.create!(name: "TrivialDatastore", user: user, credential_type: "PostgreSQLCredentials")
-        credential_set.credentials.user = user
-        credential_set.credentials.secret_value = {
-          :database => ENV['DATASTORE_POSTGRES_DATABASE'],
-          :host => ENV['DATASTORE_POSTGRES_HOST'],
-          :password => password,
-          :port => 5432,
-          :user => username,
+        datastore_secret = {
+          database: ENV['DATASTORE_POSTGRES_DATABASE'],
+          host: ENV['DATASTORE_POSTGRES_HOST'],
+          password: password,
+          port: 5432,
+          user: username,
         }
-        result = self.execute_datastore_statement(account_statement)
+        credential_set_params = {
+            name: "TrivialDatastore",
+            credential_type: "PostgreSQLCredentials",
+        }
+        credential_set = customer.credential_sets.new(credential_set_params)
+        credential_set.owner = customer
+        credential_set.save!
+        credential_set.credentials.secret_value = datastore_secret
         credential_set.credentials.save!
-        return
+        self.execute_datastore_statement(account_statement)
     end
 
     def flatten_hash_and_normalize_columns(hash)
@@ -79,7 +83,7 @@ module DatastoreManager
                 flatten_hash_and_normalize_columns(v).map do |h_k, h_v|
                     h["#{k.downcase}_#{h_k.downcase}"] = h_v
                 end
-            else 
+            else
                 h[k.downcase] = v
             end
         end
@@ -103,7 +107,7 @@ module DatastoreManager
             val = "'#{value}'"
             if value == 'NULL'
                 val = value
-            end 
+            end
             if request_columns[column] == 'JSON'
                 val = "'#{value.to_json}'"
             end
@@ -111,11 +115,11 @@ module DatastoreManager
           end.join(', ')
           "(#{quoted_values})"
         end.join(', ')
-      
+
         conflict_columns = data_list.first.keys.reject { |column| column == unique_key }.join(', ')
-        
+
         on_conflict_update = conflict_columns.split(', ').map { |column| "\"#{column}\"=EXCLUDED.\"#{column}\"" }.join(', ')
-      
+
         sql_statement = "INSERT INTO #{table_name} (#{columns_str}) VALUES #{values} ON CONFLICT (#{unique_key}) DO UPDATE SET #{on_conflict_update};"
         return sql_statement
     end
@@ -123,14 +127,14 @@ module DatastoreManager
     def insert_values(table_name, values, columns, request_columns, unique_key)
         if values.length == 0
             return
-        end    
+        end
         insert_statement = self.generate_insert_sql_statement(table_name, values, columns, request_columns, unique_key)
         return self.execute_datastore_statement(insert_statement)
     end
 
     def get_existing_table_columns(table_name)
         res = self.execute_datastore_statement("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '#{table_name}'")
-      
+
         columns = {}
         default_columns = self.get_default_columns()
         res.each do |row|
@@ -149,10 +153,10 @@ module DatastoreManager
                 data_type = "TIMESTAMP"
             elsif v == 'text'
                 data_type = "TEXT"
-            elsif v == 'boolean' 
+            elsif v == 'boolean'
                 data_type = "BOOLEAN"
             elsif v == 'json'
-                data_type = "JSON"    
+                data_type = "JSON"
             else
                 data_type = "TEXT"
             end
@@ -162,20 +166,20 @@ module DatastoreManager
         pairs = []
         columns.each do |k,v|
             pairs.push("#{k}:#{v}")
-        end    
+        end
         pairs.sort()
         table_hash = Digest::SHA1.hexdigest(pairs.join(','))
-      
+
         return columns, pairs, table_hash
     end
 
     def generate_alter_table_sql_statement(table_name, request_columns, existing_columns, pairs)
         missing_columns = request_columns.reject { |column| existing_columns.include?(column) }
-      
+
         if missing_columns.empty?
           return nil, nil
         end
-      
+
         alter_statements = missing_columns.map do |column,datatype|
           "ADD COLUMN \"#{column}\" #{datatype}"
         end.join(', ')
@@ -183,12 +187,12 @@ module DatastoreManager
         missing_columns.each do |k,v|
             pairs.push("#{k}:#{v}")
         end
-      
+
         sql_statement = "ALTER TABLE #{table_name} #{alter_statements};"
 
         pairs.sort()
         table_hash = Digest::SHA1.hexdigest(pairs.join(','))
-      
+
         return sql_statement, table_hash
     end
 
@@ -208,7 +212,7 @@ module DatastoreManager
 
     def verify_model(parent_records, parent_table_name, parent_unique_keys, nested_tables, tenant_name, tenant_id, tenant_type, apply_table_changes)
         # Process the records recursively and return {full_table_name: {table_settings}}
-        tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})   
+        tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})
 
         # Keep track of model updates for each table
         model_updates = {}
@@ -217,11 +221,11 @@ module DatastoreManager
             table_name = table[:table_name]
             create_table_statement = table[:create_table_statement]
             table_hash = table[:table_hash]
-            full_table_name = table[:full_table_name] 
-            records = table[:records] 
-            columns = table[:columns] 
+            full_table_name = table[:full_table_name]
+            records = table[:records]
+            columns = table[:columns]
             request_columns = table[:request_columns]
-            unique_keys = table[:unique_keys]    
+            unique_keys = table[:unique_keys]
 
             # Check for the table definition hash in the database before trying to create a new table
             table_definition = CustomerTableDefinition.find_by(table_name: full_table_name)
@@ -231,7 +235,7 @@ module DatastoreManager
                 self.execute_datastore_statement(create_table_statement)
                 # Insert table definition into the database
                 CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
-            elsif table_definition.table_hash != table_hash 
+            elsif table_definition.table_hash != table_hash
                 # Get the existing data model so we can alter with new request columns
                 existing_columns, existing_pairs, existing_table_hash = self.get_existing_table_columns(table_name)
                 if existing_columns.length >= table_definition.max_columns
@@ -252,22 +256,22 @@ module DatastoreManager
                     self.execute_datastore_statement(alter_statement)
                     table_definition.table_hash = new_table_hash
                     table_definition.save
-                end    
-                
+                end
+
                 # Add table modifications
                 if !alter_statement.nil?
                     model_updates[table_name] = {
                         change_statement: alter_statement
-                    } 
+                    }
                 end
-            end    
+            end
         end
         return model_updates
     end
 
     def insert_records(parent_records, parent_table_name, parent_unique_keys, nested_tables, tenant_name, tenant_id, tenant_type, apply_table_changes)
         # Process the records recursively and return {full_table_name: {table_settings}}
-        tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})   
+        tables = self.create_table_statement_from_records(parent_records, parent_table_name, nested_tables, parent_unique_keys, {})
 
         # Keep track of total records inserted
         records_inserted = 0
@@ -276,11 +280,11 @@ module DatastoreManager
             table_name = table[:table_name]
             create_table_statement = table[:create_table_statement]
             table_hash = table[:table_hash]
-            full_table_name = table[:full_table_name] 
-            records = table[:records] 
-            columns = table[:columns] 
+            full_table_name = table[:full_table_name]
+            records = table[:records]
+            columns = table[:columns]
             request_columns = table[:request_columns]
-            unique_keys = table[:unique_keys]    
+            unique_keys = table[:unique_keys]
 
             # Check for the table definition hash in the database before trying to create a new table
             table_definition = CustomerTableDefinition.find_by(table_name: full_table_name)
@@ -292,7 +296,7 @@ module DatastoreManager
                     self.execute_datastore_statement(create_table_statement)
                     # Insert table definition into the database
                     CustomerTableDefinition.create(table_name: full_table_name, table_hash: table_hash)
-                elsif table_definition.table_hash != table_hash 
+                elsif table_definition.table_hash != table_hash
                     # Get the existing data model so we can alter with new request columns
                     existing_columns, existing_pairs, existing_table_hash = self.get_existing_table_columns(table_name)
                     if existing_columns.length >= table_definition.max_columns
@@ -312,8 +316,8 @@ module DatastoreManager
                         self.execute_datastore_statement(alter_statement)
                         table_definition.table_hash = new_table_hash
                         table_definition.save
-                    end    
-                end    
+                    end
+                end
             end
 
             # Add default column values to each row
@@ -343,7 +347,7 @@ module DatastoreManager
                     raise ActionController::BadRequest.new("Column name \"#{key}\" contains illegal characters. Column names must only contain a-z, A-Z, 0-9, and _")
                 end
                 agg_column_mapping[key] = value
-            end  
+            end
         end
 
         # Normalize the data so each object has all the keys
@@ -364,12 +368,11 @@ module DatastoreManager
         if !nested_tables.nil?
             nested_tables.each do |(key, settings)|
                 # Collect all nested records from each record
-                puts 'nested tables settings', settings
                 normalized_key = key.downcase
                 nested_table_name = "#{table_name}_#{normalized_key}"
                 nested_nested_tables = settings.fetch('nested_tables', {})
                 nested_unique_keys = settings.fetch('unique_keys', [])
-                parent_keys = settings.fetch('parent_keys', []) 
+                parent_keys = settings.fetch('parent_keys', [])
                 parent_nested_records = []
                 records.each do |(record)|
                     # Get the list of nested reocrds from parent record
@@ -381,7 +384,7 @@ module DatastoreManager
                             nested_record[parent_key['to']] = record[parent_key['from']]
                         end
                         parent_nested_records.push(nested_record)
-                    end    
+                    end
                 end
                 # Remove the key from agg mapping
                 agg_column_mapping.delete(normalized_key)
@@ -391,8 +394,8 @@ module DatastoreManager
         end
 
         # Create the full table name
-        full_table_name = "#{schema_name()}.#{table_name}" 
-    
+        full_table_name = "#{schema_name()}.#{table_name}"
+
         # Start building the CREATE TABLE statement
         create_table_statement = "CREATE TABLE #{full_table_name} ("
 
@@ -418,16 +421,16 @@ module DatastoreManager
             elsif value.is_a?(String)
                 data_type = "TEXT"
             elsif value.is_a?(Array)
-                data_type = "JSON"    
+                data_type = "JSON"
             elsif value.is_a?(TrueClass) || value.is_a?(FalseClass)
                 data_type = "BOOLEAN"
             else
                 data_type = "TEXT"
             end
-    
+
             # Add the column definition to the CREATE TABLE statement
             create_table_statement += "\"#{key}\" #{data_type}"
-        
+
             # Add a comma after the column definition unless it's the last column
             create_table_statement += "," unless index == agg_column_mapping.keys.length - 1
 
@@ -435,10 +438,10 @@ module DatastoreManager
             pairs.push("#{key}:#{data_type}")
             request_columns[key] = data_type
         end
-    
+
         # Finish building the CREATE TABLE statement
         create_table_statement += ");"
-        
+
         # Enable row level security so users can only see their own records
         create_table_statement += "\nALTER TABLE #{full_table_name} ENABLE ROW LEVEL SECURITY;"
 
@@ -462,8 +465,8 @@ module DatastoreManager
             columns: columns,
             request_columns: request_columns,
             unique_keys: unique_keys,
-        } 
+        }
 
         return tables
     end
-end    
+end
