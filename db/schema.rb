@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_26_151518) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -32,7 +32,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
   end
 
   create_table "apps", force: :cascade do |t|
-    t.bigint "user_id", null: false
     t.string "name", null: false
     t.integer "port", null: false
     t.datetime "created_at", null: false
@@ -45,10 +44,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
     t.jsonb "panels"
     t.string "readable_by"
     t.jsonb "schedule"
+    t.bigint "owner_id"
+    t.string "owner_type"
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["port"], name: "index_apps_on_port", unique: true
-    t.index ["user_id"], name: "index_apps_on_user_id"
   end
 
   create_table "credential_sets", force: :cascade do |t|
@@ -67,6 +67,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
     t.string "name"
     t.string "owner_type"
     t.json "secret_value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "customer_roles", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.bigint "company_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -135,6 +143,30 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
     t.string "customer_token", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "permissions", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.bigint "resource_id"
+    t.string "resource_type"
+    t.string "access"
+    t.bigint "assigned_id"
+    t.string "assigned_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
+    t.index ["owner_type", "owner_id"], name: "index_permissions_on_owner"
+  end
+
+  create_table "role_permissions", force: :cascade do |t|
+    t.bigint "customer_role_id", null: false
+    t.bigint "permission_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_role_id"], name: "index_role_permissions_on_customer_role_id"
+    t.index ["permission_id"], name: "index_role_permissions_on_permission_id"
   end
 
   create_table "shipments", force: :cascade do |t|
@@ -207,9 +239,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_17_203919) do
 
   add_foreign_key "activity_entries", "apps"
   add_foreign_key "activity_entries", "users"
-  add_foreign_key "apps", "users"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifest_drafts", "users"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
+  add_foreign_key "role_permissions", "customer_roles"
+  add_foreign_key "role_permissions", "permissions"
 end

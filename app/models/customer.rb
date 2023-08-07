@@ -5,6 +5,7 @@ class Customer < ApplicationRecord
 	has_many :orders, primary_key: :token, foreign_key: :customer_token
 	has_many :shipments, primary_key: :token, foreign_key: :customer_token
 	has_many :credential_sets, as: :owner
+	has_many :customer_roles
 
 	before_create :set_token
 

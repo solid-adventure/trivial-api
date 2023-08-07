@@ -20,24 +20,29 @@ class Ability
 
     # Users with no customers can manage their own resources
     can :manage, ActivityEntry, user: user
-    can :manage, App, user: user
-    can :manage, CredentialSet, user: user
+    can :manage, App, owner: user
+    can :manage, CredentialSet, owner: user
     can :manage, Manifest, user: user
     can :manage, ManifestDraft, user: user
 
     # Users with customers can read their teammates' resources
     return unless user.customers.length > 0
-    can :read, ActivityEntry, user_id: shared_customer_scope(user)
-    can :read, App, user_id: shared_customer_scope(user)
-    can :read, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
-    can :read, Manifest, user_id: shared_customer_scope(user)
-
-    if user.admin?
-      can :manage, ActivityEntry, user_id: shared_customer_scope(user)
-      can :manage, App, user_id: shared_customer_scope(user)
-      can :manage, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
-      can :manage, Manifest, user_id: shared_customer_scope(user)
+    user.permissions.each do |permission|
+      can permission.access.to_sym, permission.resource_type.constantize do |resource|
+        resource.nil? || permission.resource_id.nil? || resource.id == permission.resource_id
+      end
     end
+    # can :read, ActivityEntry, user_id: shared_customer_scope(user)
+    # can :read, App, owner_id: shared_customer_scope(user)
+    # can :read, CredentialSet, owner_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
+    # can :read, Manifest, user_id: shared_customer_scope(user)
+    #
+    # if user.admin?
+    #   can :manage, ActivityEntry, user_id: shared_customer_scope(user)
+    #   can :manage, App, owner_id: shared_customer_scope(user)
+    #   can :manage, CredentialSet, owner_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
+    #   can :manage, Manifest, user_id: shared_customer_scope(user)
+    # end
 
     # Define abilities for the user here. For example:
     #

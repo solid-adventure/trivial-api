@@ -77,4 +77,5 @@ Rails.application.routes.draw do
   delete 'credential_sets/:id', to: 'credential_sets#destroy'
   put 'credential_sets/:id/api_key', to: 'credential_sets#update_api_key'
 
+  resources :permissions
 end
