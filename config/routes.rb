@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       post 'verify_model'
       post 'create_account'
     end
-  end
+  end  
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
     registrations: 'overrides/registrations',
     sessions: 'overrides/sessions'
@@ -20,18 +20,15 @@ Rails.application.routes.draw do
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
 
-    member do
+    member do 
       post 'copy'
       post 'last_request'
     end
     resource :credentials, only: [:show] do
       put '', action: :update
       patch '', action: :patch
-      get 'app', action: :show_app
     end
-    resource :api_key, only: [:create, :update] do
-      post 'app_key', action: :create_app_key
-    end
+    resource :api_key, only: [:create, :update]
     collection do
       get 'name_suggestion'
       get 'stats/hourly'
@@ -71,7 +68,6 @@ Rails.application.routes.draw do
   get 'credential_sets', to: 'credential_sets#index'
   post 'credential_sets', to: 'credential_sets#create'
   get 'credential_sets/:id', to: 'credential_sets#show'
-  get 'credential_sets/:id/app', to: 'credential_sets#show_app'
   put 'credential_sets/:id', to: 'credential_sets#update'
   patch 'credential_sets/:id', to: 'credential_sets#patch'
   delete 'credential_sets/:id', to: 'credential_sets#destroy'

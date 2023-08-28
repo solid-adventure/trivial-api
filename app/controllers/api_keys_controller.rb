@@ -5,10 +5,6 @@ class ApiKeysController < ApplicationController
     render json: {api_key: app.api_keys.issue!}
   end
 
-  def create_app_key
-    render json: {api_key: app.api_keys.issue_non_expiring_key!}
-  end
-
   def update
     render json: {api_key: app(false).api_keys.refresh!(auth_key, params[:path])}
   rescue ApiKeys::OutdatedKeyError

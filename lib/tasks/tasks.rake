@@ -10,7 +10,7 @@ namespace :tasks do
     apps = App.kept.where('schedule @> ?', "{\"every\":\"#{interval}\"}")
     apps.each do |app|
       puts "Running #{app.name}, #{app.descriptive_name}"
-      begin
+      begin 
         res = ActivityEntry.send_new app, app.schedule["payload"].to_json
         puts res
       rescue => e
@@ -61,25 +61,4 @@ namespace :tasks do
     end
   end
 
-  desc "Migrate secrets from AWS to internal Postgres"
-  task migrate_secret_store: :environment do
-    puts 'Migrating secrets from AWS to internal Postgres'
-    credentialsSetsUpdated = 0
-    CredentialSet.all.each do |credential_set|
-      credentialsSetsUpdated += 1
-      puts "credential_set updated:#{credentialsSetsUpdated} id:#{credential_set.id}"
-      credential_set.credentials.save!
-      break
-    end
-    appsUpdated = 0
-    App.all.each do |app|
-      if app.credentials.secret_value == {}
-        puts 'app not updated because the credential is empty'
-      else
-        appsUpdated += 1
-        puts "app updated:#{appsUpdated} id:#{app.id}, credentials:#{app.credentials.secret_value}"
-        app.credentials.save!
-      end
-    end
-  end
 end

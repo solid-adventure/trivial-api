@@ -34,6 +34,3 @@
 # Ignore .env file
 .env
 .env.*
-
-# Ignore ide files
-.idea
