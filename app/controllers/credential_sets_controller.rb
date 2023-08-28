@@ -1,15 +1,13 @@
 class CredentialSetsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:patch, :update_api_key, :show_app]
-  before_action :authenticate_app!, only: [:patch, :show_app]
+  skip_before_action :authenticate_user!, only: [:patch, :update_api_key]
+  before_action :authenticate_app!, only: [:patch]
 
   def index
-    render json: {credential_sets: current_user.all_credential_sets.map(&:api_attrs)}
+    render json: {credential_sets: current_user.credential_sets.order(:id).map(&:api_attrs)}
   end
 
   def create
-    @credential_set = current_user.credential_sets.new(credential_set_params)
-    @credential_set.owner = current_user
-    @credential_set.save!
+    @credential_set = current_user.credential_sets.create! credential_set_params
     if params.has_key?(:credentials)
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
@@ -21,13 +19,6 @@ class CredentialSetsController < ApplicationController
     render json: {
       credential_set: credential_set.api_attrs,
       credentials: credential_set.credentials.secret_value
-    }
-  end
-
-  def show_app
-    render json: {
-      credential_set: credential_set_app.api_attrs,
-      credentials: credential_set_app.credentials.secret_value
     }
   end
 
@@ -49,7 +40,7 @@ class CredentialSetsController < ApplicationController
       params[:credentials][:new_value]
     )
     render json: {ok: true}
-  rescue Credentials::InvalidPatch => e
+  rescue CredentialsBase::InvalidPatch => e
     logger.error "Failed to patch credential set credentials #{e}"
     render status: 422, json: {ok: false, error: e.message}
   end
@@ -62,7 +53,7 @@ class CredentialSetsController < ApplicationController
 
   def update_api_key
     @keys = ApiKeys.for_key!(auth_key)
-    @credential_set = @keys.app.user.find_credential_by_external_id(params[:id])
+    @credential_set = @keys.app.user.credential_sets.find_by_external_id!(params[:id])
     render json: {
       api_key: @keys.refresh_in_credential_set!(@credential_set, auth_key, params[:path])
     }
@@ -76,15 +67,11 @@ class CredentialSetsController < ApplicationController
   private
 
   def credential_set
-    @credential_set ||= current_user.find_credential_by_external_id(params[:id])
-  end
-
-  def credential_set_app
-    @credential_set_app ||= current_app.user.find_credential_by_external_id(params[:id])
+    @credential_set ||= current_user.credential_sets.find_by_external_id!(params[:id])
   end
 
   def patchable_credential_set
-    @credential_set ||= current_app.user.find_credential_by_external_id(params[:id])
+    @credential_set ||= current_app.user.credential_sets.find_by_external_id!(params[:id])
   end
 
   def credential_set_params

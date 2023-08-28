@@ -69,12 +69,6 @@ Rails.application.configure do
   }
   ActionMailer::Base.delivery_method = :smtp
 
-  credentials.active_record_encryption = {
-    :primary_key => "nuK16k7H4YC4j4ucWdVsUcRWdpvYu0fV",
-    :deterministic_key => "q1uZveODaHW0bYfu0K4aAqOoQUeKXwvJ",
-    :key_derivation_salt => "M26YWdZGfzWoNMYT9aVjKysTsKuZFy75"
-  }
-
   # Set log level
   # config.log_level = :INFO
   # config.logger = Logger.new(STDOUT)

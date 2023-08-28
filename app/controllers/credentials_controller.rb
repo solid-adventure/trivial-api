@@ -1,13 +1,9 @@
 class CredentialsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:patch, :show_app]
-  before_action :authenticate_app!, only: [:patch, :show_app]
+  skip_before_action :authenticate_user!, only: [:patch]
+  before_action :authenticate_app!, only: [:patch]
 
   def show
     render json: {credentials: app.credentials.secret_value}
-  end
-
-  def show_app
-    render json: {credentials: current_app.credentials.secret_value}
   end
 
   def update
