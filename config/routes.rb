@@ -32,20 +32,28 @@ Rails.application.routes.draw do
   end
 
 
-  resources :webhooks do
+  # Legacy traffic to /webhooks gets routed to /activity_entries
+  resources :webhooks, only: [:index, :show, :update, :send, :resend], controller: :activity_entries do
     collection do
-      get 'subscribe'
+      post '', action: :create_from_request
     end
+
     member do
       post 'send', action: :send_new
       post 'resend'
     end
   end
 
-  resources :activity_entries, only: [:index, :create, :show] do
+  resources :activity_entries, only: [:index, :create, :show, :create_from_request, :update] do
     collection do
       get 'stats'
     end
+
+    member do
+      post 'send', action: :send_new
+      post 'resend'
+    end
+
   end
 
   resources :manifests do

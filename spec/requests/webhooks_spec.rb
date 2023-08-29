@@ -26,6 +26,20 @@ describe 'Webhooks API' do
     }
   end
 
+  def self.webhook_schema_for_index
+    {
+      type: :object,
+      properties: {
+        app_id: { type: :string },
+        update_id: { type: :string, nullable: true },
+        activity_type: { type: :string },
+        status: { type: :string, nullable: true },
+        payload: { type: :object, nullable:true },
+        diagnostics: { type: :object, nullable: true }
+      }, required: ['app_id', 'payload']
+    }
+  end
+
   def self.request_status_schema
     {
       type: :object,
@@ -50,11 +64,11 @@ describe 'Webhooks API' do
       let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, app: user_app) }
 
       response '200', 'Request listing returned' do
-        schema type: :array, items: webhook_schema
+        schema type: :array, items: webhook_schema_for_index
 
         run_test! do |response|
           data = JSON.parse(response.body)
-          expect(data.length).to eq 1
+          expect(data.length).to eq 2
           expect(data.first['id']).to eq request_entry.id
         end
       end
