@@ -1,6 +1,9 @@
 class ActivityEntriesController < ApplicationController
   MAX_RESULTS = 100
 
+  skip_before_action :authenticate_user!, only: [:update, :create_from_webhook]
+
+
   def index
     authorize! :index, ActivityEntry
     render json: activity_for_index.map(&:activity_attributes_for_index).to_json
@@ -19,6 +22,48 @@ class ActivityEntriesController < ApplicationController
     @entry.app = current_user.apps.kept.find_by_name!(params[:app_id])
     @entry.save!
     render status: :created, json: @entry.activity_attributes
+  end
+
+  def create_from_webhook
+    @entry = ActivityEntry.new(activity_entry_params)
+    @entry.app = App.kept.find_by_name!(params[:app_id])
+    @entry.user_id = @entry.app.user_id
+    @entry.activity_type = 'request'
+    @entry.normalize_json
+    @entry.save!
+    render status: :created, json: @entry.legacy_attributes
+  end
+
+  # DEPRECATED, /webhooks_controller version    
+  # def create
+  #     @entry = ActivityEntry.new(activity_entry_params)
+  #     @entry.activity_type = 'request'
+  #     @entry.app = App.kept.find_by_name!(params[:app_id])
+  #     @entry.user_id = @entry.app.user_id
+  #     @entry.normalize_json
+  #     @entry.save!
+  #     @entry.publish_receipt!
+  #     render status: :created, json: @entry.legacy_attributes
+  # end
+
+  def update
+    updatable_entry.update!(activity_entry_update_params)
+    render json: updatable_entry.activity_attributes
+  end
+
+  def send_new
+    @app = App.kept.find_by_name!(params[:id])
+    authorize! :read, @app
+    @bodyPayload = JSON.parse(request.body.read)
+    res = ActivityEntry.send_new @app, @bodyPayload["payload"].to_json
+    render json: {status: res.code.to_i, message: res.message}
+  end
+
+  def resend
+    activity_entry = ActivityEntry.find(params[:id])
+    authorize! :read, activity_entry
+    res = activity_entry.resend
+    render json: {status: res.code.to_i, message: res.message}
   end
 
   def stats
@@ -61,4 +106,16 @@ class ActivityEntriesController < ApplicationController
       @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
       @activity_params
   end
+
+  # Do not permit :payload or :activity_type on update, as it would re-write history
+  def activity_entry_update_params
+    @activity_params = {}.merge(params.permit(:status, :duration_ms))
+    @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
+    @activity_params
+  end
+
+  def updatable_entry
+    @updatable_entry ||= ActivityEntry.updatable.find_by_update_id!(params[:id])
+  end
+
 end

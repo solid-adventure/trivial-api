@@ -32,17 +32,19 @@ Rails.application.routes.draw do
   end
 
 
-  resources :webhooks do
+  resources :webhooks, only: [:index, :show, :update, :send, :resend], controller: :activity_entries do
+
     collection do
-      get 'subscribe'
+      post '', action: :create_from_webhook
     end
+
     member do
       post 'send', action: :send_new
       post 'resend'
     end
   end
 
-  resources :activity_entries, only: [:index, :create, :show] do
+  resources :activity_entries, only: [:index, :create, :show, :update, :send_new] do
     collection do
       get 'stats'
     end
