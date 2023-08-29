@@ -1,7 +1,7 @@
 class ActivityEntriesController < ApplicationController
   MAX_RESULTS = 100
 
-  skip_before_action :authenticate_user!, only: [:update, :create_from_webhook]
+  skip_before_action :authenticate_user!, only: [:update, :create_from_request]
 
 
   def index
@@ -24,7 +24,7 @@ class ActivityEntriesController < ApplicationController
     render status: :created, json: @entry.activity_attributes
   end
 
-  def create_from_webhook
+  def create_from_request
     @entry = ActivityEntry.new(activity_entry_params)
     @entry.app = App.kept.find_by_name!(params[:app_id])
     @entry.user_id = @entry.app.user_id
