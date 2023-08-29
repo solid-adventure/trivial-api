@@ -34,18 +34,6 @@ class ActivityEntriesController < ApplicationController
     render status: :created, json: @entry.legacy_attributes
   end
 
-  # DEPRECATED, /webhooks_controller version    
-  # def create
-  #     @entry = ActivityEntry.new(activity_entry_params)
-  #     @entry.activity_type = 'request'
-  #     @entry.app = App.kept.find_by_name!(params[:app_id])
-  #     @entry.user_id = @entry.app.user_id
-  #     @entry.normalize_json
-  #     @entry.save!
-  #     @entry.publish_receipt!
-  #     render status: :created, json: @entry.legacy_attributes
-  # end
-
   def update
     updatable_entry.update!(activity_entry_update_params)
     render json: updatable_entry.activity_attributes
