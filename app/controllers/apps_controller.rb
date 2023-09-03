@@ -1,7 +1,7 @@
 class AppsController < ApplicationController
 
   def index
-    render json: apps.as_json(methods: [:aws_role]).to_json
+    render json: apps.as_json
   end
 
   def last_request
@@ -25,12 +25,12 @@ class AppsController < ApplicationController
     @app = App.new(app_params)
     @app.user = current_user
     @app.save!
-    render json: @app.as_json(methods: [:aws_role])
+    render json: @app.as_json
   end
 
   def show
     authorize! :read, app
-    render json: app.as_json(methods: [:aws_role])
+    render json: app.as_json
   end
 
   def update
