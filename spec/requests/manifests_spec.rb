@@ -24,6 +24,7 @@ describe 'manifests', type: :request do
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data.length).to eq 1
+          byebug
           expect(data.first['id']).to eq user_manifest.id
         end
       end

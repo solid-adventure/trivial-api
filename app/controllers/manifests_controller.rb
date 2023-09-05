@@ -32,7 +32,7 @@ class ManifestsController < ApplicationController
 
     def manifest
         # @manifest is already loaded and authorized
-         @manifest
+        @manifest
     end
 
     def manifests
@@ -41,7 +41,7 @@ class ManifestsController < ApplicationController
     end
 
     def manifest_params
-        params.permit(:app_id, :content)
+        params.permit(:app_id, :content, :bundle)
     end
 
     def app

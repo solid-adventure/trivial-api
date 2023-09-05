@@ -6,6 +6,8 @@ class Manifest < ApplicationRecord
     belongs_to :user
     belongs_to :app, foreign_key: :internal_app_id, inverse_of: :manifests
 
+    has_one_attached :bundle
+
     def copy_to_app!(new_app)
         new_manifest = self.dup
         new_manifest.app_id = new_app.name
