@@ -1,6 +1,8 @@
 class ManifestsController < ApplicationController
 
     load_and_authorize_resource
+    before_action :set_serializer_adapter
+
 
     def index
         render json: manifests
@@ -29,6 +31,11 @@ class ManifestsController < ApplicationController
     end
 
     private
+
+    def set_serializer_adapter
+        # Preserve behavior that preceeds the serializer
+        ActiveModelSerializers.config.adapter = :attributes
+    end
 
     def manifest
         # @manifest is already loaded and authorized

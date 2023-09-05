@@ -24,7 +24,6 @@ describe 'manifests', type: :request do
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data.length).to eq 1
-          byebug
           expect(data.first['id']).to eq user_manifest.id
         end
       end
@@ -33,7 +32,7 @@ describe 'manifests', type: :request do
         let(:appId) { 'invalid' }
         run_test! do |response|
           data = JSON.parse(response.body)
-          expect(data["manifests"].length).to eq 0
+          expect(data.length).to eq 0
         end
       end
 
