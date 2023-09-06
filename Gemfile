@@ -43,6 +43,7 @@ gem 'rswag-api'
 gem 'rswag-ui'
 
 gem 'discard', '~> 1.2'
+gem "aws-sdk-s3", require: false
 gem 'aws-sdk-iam', '~> 1'
 gem 'aws-sdk-secretsmanager', '~> 1'
 gem 'jwt', '~> 2.3'
