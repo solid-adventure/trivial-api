@@ -1,41 +1,34 @@
 class ManifestsController < ApplicationController
 
     load_and_authorize_resource
-    before_action :set_serializer_adapter
-
 
     def index
-        render json: manifests
+        render json: manifests, adapter: :attributes
     end
 
     def create
         manifest = Manifest.new(manifest_params.merge(app: app))
         manifest.user_id = current_user.id
         if manifest.save
-            render json: manifest, status: :created
+            render json: manifest, adapter: :attributes, status: :created
         else
             render_bad_request manifest
         end
     end
 
     def show
-        render json: manifest
+        render json: manifest, adapter: :attributes
     end
 
     def update
         if manifest.update(manifest_params)
-            render json: manifest
+            render json: manifest, adapter: :attributes
         else
             render_bad_request manifest
         end
     end
 
     private
-
-    def set_serializer_adapter
-        # Preserve behavior that preceeds the serializer
-        ActiveModelSerializers.config.adapter = :attributes
-    end
 
     def manifest
         # @manifest is already loaded and authorized
