@@ -12,10 +12,6 @@ class Ability
 
     return unless user.present?
 
-    if user.client?
-      can :manage, :all
-    end
-
     # Until we have UI in place to support admin filtering by customer, this would be too much
     # Admins can manage everything
     # if user.admin?

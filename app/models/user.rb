@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
   has_many :manifest_drafts
   has_many :credential_sets
 
-  enum role: %i[member admin client]
+  enum role: %i[member admin]
   enum approval: %i[pending approved rejected]
 
   validates :name, presence: true, length: { minimum: 3 }
