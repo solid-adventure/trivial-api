@@ -77,4 +77,8 @@ Rails.application.configure do
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
+
+  # Set the host that will be used with url_for methods
+  Rails.application.routes.default_url_options[:host] = ENV['DEFAULT_URL_HOST'] || "127.0.0.1"
+  Rails.application.routes.default_url_options[:port] = ENV['DEFAULT_URL_PORT'] || "3000"
 end

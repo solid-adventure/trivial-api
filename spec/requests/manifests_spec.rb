@@ -32,7 +32,7 @@ describe 'manifests', type: :request do
         let(:appId) { 'invalid' }
         run_test! do |response|
           data = JSON.parse(response.body)
-          expect(data["manifests"].length).to eq 0
+          expect(data.length).to eq 0
         end
       end
 

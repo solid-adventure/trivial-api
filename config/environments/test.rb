@@ -75,4 +75,8 @@ Rails.application.configure do
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
+
+  Rails.application.routes.default_url_options[:host] = ENV['DEFAULT_URL_HOST'] || "127.0.0.1"
+  Rails.application.routes.default_url_options[:port] = ENV['DEFAULT_URL_PORT'] || "3000"
+
 end
