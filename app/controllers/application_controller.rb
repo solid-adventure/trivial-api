@@ -13,6 +13,13 @@ class ApplicationController < ActionController::API
 
   protected
 
+  def authenticate_user!
+    ApiKeys.assert_client_key_valid!(auth_key)
+    @current_user = User.new(role: "client")
+    rescue StandardError => e
+      super
+  end
+
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit :sign_up, keys: %i[name email password team_id]
     devise_parameter_sanitizer.permit :account_update, keys: %i[redirect_url email]
@@ -46,7 +53,6 @@ class ApplicationController < ActionController::API
     render status: :not_found
   end
 
-
   def auth_key
     auth = request.headers['Authorization']
     match = /^Bearer\s+(\S+)/i.match(auth)
@@ -57,6 +63,13 @@ class ApplicationController < ActionController::API
     @current_app_id =  ApiKeys.assert_valid!(auth_key)
   rescue => e
     logger.error "Could not authorize API key: #{e}"
+    render_unauthorized
+  end
+
+  def authenticate_client_key!
+    ApiKeys.assert_client_key_valid!(auth_key)
+  rescue => e
+    logger.error "Could not authorize client key: #{e}"
     render_unauthorized
   end
 
