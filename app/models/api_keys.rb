@@ -16,6 +16,28 @@ class ApiKeys
     JWT.encode payload, private_key, ALGORITHM
   end
 
+  ## Issue a non-expiring key with permissions to all resources. Use with care.
+  def issue_client_key!
+    key_id = SecureRandom.hex(15)
+    payload = {key_id: key_id}
+    key_access_token = JWT.encode payload, private_key, ALGORITHM
+    return {
+      key_id: key_id,
+      key_access_token: key_access_token
+    }
+  end
+
+  # ApiKeys.assert_client_key_valid!(key_access_token)
+  def assert_client_key_valid!(key_access_token)
+    payload, header = JWT.decode key_access_token, public_key, true, {algorithm: ALGORITHM}
+    raise "Invalid Client Key" unless payload["key_id"] && valid_client_keys.include?(payload["key_id"])
+  end
+
+  def valid_client_keys
+    keys = ENV['CLIENT_KEYS'] || ""
+    return keys.split(',').map(&:strip)
+  end
+
   def refresh!(key, path)
     assert_was_valid_for_app!(key)
     new_key = issue!
@@ -85,6 +107,14 @@ class ApiKeys
     raise "Invalid app id" unless payload['app'] == app.name
   end
 
+  def self.issue_client_key!
+    ApiKeys.new().issue_client_key!
+  end
+
+  def self.assert_client_key_valid!(key_access_token)
+    ApiKeys.new().assert_client_key_valid!(key_access_token)
+  end
+
   def private_key
     OpenSSL::PKey::RSA.new ENV['JWT_PRIVATE_KEY']
   end
@@ -92,6 +122,7 @@ class ApiKeys
   def public_key
     private_key.public_key
   end
+
 
 
 end
