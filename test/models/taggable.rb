@@ -54,6 +54,15 @@ class TaggableTest < ActiveSupport::TestCase
       assert where.size == tag_list.size
     end
 
+    test 'does nothing on an empty array' do
+      assert App.where(id: @app.id) == App.where(id: @app.id).find_by_all_tags([])
+    end
+
+    test 'errors on null tag list' do
+      assert_raise(ArgumentError) { App.where(id: @app.id).find_by_all_tags() }
+    end
+
+
     test 'find_by_all_tags returns expected record' do
       @app1 = App.create(user_id: @user.id, descriptive_name: 'USD - customer 1')
       @app1.addTag!(:currency, 'USD')

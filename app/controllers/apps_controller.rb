@@ -1,7 +1,7 @@
 class AppsController < ApplicationController
 
   def index
-    render json: apps.as_json(methods: [:aws_role]).to_json
+    render json: apps, adapter: :attributes
   end
 
   def last_request
@@ -36,13 +36,13 @@ class AppsController < ApplicationController
   def update
     authorize! :update, app
     app.update!(app_params)
-    render json: app
+    render json: app, adapter: :attributes
   end
 
   def copy
     authorize! :update, app
     app_copy = app.copy!(nil, params[:new_app_descriptive_name])
-    render json: app_copy
+    render json: app_copy, adapter: :attributes
   end
 
   def destroy
@@ -62,11 +62,16 @@ class AppsController < ApplicationController
 
   def apps
     @apps ||= App.accessible_by(Ability.new(current_user))
+    @apps = @apps.find_by_all_tags(tagged_with_params) if tagged_with_params.present?
     if params[:include_deleted].present?
       @apps.order(:descriptive_name)
     else
       @apps.kept.order(:descriptive_name)
     end
+  end
+
+  def tagged_with_params
+    params[:tagged_with].present? ? JSON.parse(params[:tagged_with]) : nil
   end
 
   def app_params
