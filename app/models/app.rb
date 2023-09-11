@@ -7,6 +7,7 @@ class App < ApplicationRecord
   belongs_to :user
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app
+  has_many :tags, as: :taggable
 
   validates :name, :port, presence: true, uniqueness: true
   validates :hostname, exclusion: { in: %w(staging www) }
@@ -17,6 +18,27 @@ class App < ApplicationRecord
   scope :publicReadable, -> { where(readable_by: 'public') }
 
   before_validation :set_defaults
+
+
+  def addTag!(context, tag)
+    begin
+      self.tags.create(context: context, name: tag)
+    rescue TagExists => e
+      self.tags.where(context: context, name: tag).first
+    end
+  end
+
+  def removeTag!(context, tag)
+    self.tags.where(context: context, name: tag).delete_all
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["descriptive_name", "name"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    ["tags"]
+  end
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
