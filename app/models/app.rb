@@ -1,6 +1,7 @@
 class App < ApplicationRecord
   include Discard::Model
   include Suggestable
+  include Taggable
 
   MINIMUM_PORT_NUMBER = 3001
 
@@ -18,27 +19,6 @@ class App < ApplicationRecord
   scope :publicReadable, -> { where(readable_by: 'public') }
 
   before_validation :set_defaults
-
-
-  def addTag!(context, tag)
-    begin
-      self.tags.create(context: context, name: tag)
-    rescue TagExists => e
-      self.tags.where(context: context, name: tag).first
-    end
-  end
-
-  def removeTag!(context, tag)
-    self.tags.where(context: context, name: tag).delete_all
-  end
-
-  def self.ransackable_attributes(auth_object = nil)
-    ["descriptive_name", "name"]
-  end
-
-  def self.ransackable_associations(auth_object = nil)
-    ["tags"]
-  end
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
