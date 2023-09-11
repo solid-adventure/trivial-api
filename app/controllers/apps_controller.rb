@@ -1,7 +1,11 @@
 class AppsController < ApplicationController
 
   def index
-    render json: apps, adapter: :attributes
+    if params[:includes] && params[:includes].include?("manifest")
+      render json: apps, adapter: :attributes, include: [:manifests]
+    else
+      render json: apps, adapter: :attributes
+    end
   end
 
   def last_request
