@@ -1,12 +1,14 @@
 class App < ApplicationRecord
   include Discard::Model
   include Suggestable
+  include Taggable
 
   MINIMUM_PORT_NUMBER = 3001
 
   belongs_to :user
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app
+  has_many :tags, as: :taggable
 
   validates :name, :port, presence: true, uniqueness: true
   validates :hostname, exclusion: { in: %w(staging www) }
