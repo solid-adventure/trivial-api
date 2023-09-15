@@ -5,7 +5,9 @@ class App < ApplicationRecord
 
   MINIMUM_PORT_NUMBER = 3001
 
-  belongs_to :user
+  belongs_to :owner, polymorphic: true
+  has_many :permissions
+  has_many :users, through: :permissions
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app
   has_many :tags, as: :taggable
@@ -20,10 +22,11 @@ class App < ApplicationRecord
 
   before_validation :set_defaults
 
+  #TODO: check for correctness with change to owner
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
-    return false unless user
-    unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    return false unless owner
+    unique = owner.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
     if !unique
       errors.add(:descriptive_name, "has already been taken")
     end
@@ -71,10 +74,10 @@ class App < ApplicationRecord
     period_stats user, 'day', 1.week.ago.beginning_of_day, Time.now.utc.beginning_of_day
   end
 
-  def copy!(new_user=nil, descriptive_name)
+  def copy!(new_owner=nil, descriptive_name)
     new_app = self.dup
     new_app.unset_defaults
-    new_app.user = new_user if new_user
+    new_app.owner = new_owner if new_owner
     new_app.descriptive_name = descriptive_name
     if new_app.save!
       manifest = self.manifests.order("created_at DESC").first
