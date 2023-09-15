@@ -1,0 +1,2 @@
+class AppPermit < ApplicationRecord
+end
