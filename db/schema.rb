@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_15_203948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -60,16 +60,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
     t.index ["user_id"], name: "index_activity_entries_on_user_id"
   end
 
-  create_table "app_permits", id: false, force: :cascade do |t|
-    t.bigint "user_id"
-    t.bigint "app_id"
-    t.integer "permit_mask", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["app_id"], name: "index_app_permits_on_app_id"
-    t.index ["user_id"], name: "index_app_permits_on_user_id"
-  end
-
   create_table "apps", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "name", null: false
@@ -84,11 +74,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
     t.jsonb "panels"
     t.string "readable_by"
     t.jsonb "schedule"
-    t.string "owner_type"
-    t.bigint "owner_id"
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
-    t.index ["owner_type", "owner_id"], name: "index_apps_on_owner"
     t.index ["port"], name: "index_apps_on_port", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
   end
@@ -145,16 +132,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
   end
 
-  create_table "org_roles", id: false, force: :cascade do |t|
-    t.bigint "user_id"
-    t.bigint "org_id"
-    t.string "role"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["org_id"], name: "index_org_roles_on_org_id"
-    t.index ["user_id"], name: "index_org_roles_on_user_id"
-  end
-
   create_table "orgs", force: :cascade do |t|
     t.string "name"
     t.string "billing_email"
@@ -202,14 +179,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_entries", "apps"
   add_foreign_key "activity_entries", "users"
-  add_foreign_key "app_permits", "apps"
-  add_foreign_key "app_permits", "users"
   add_foreign_key "apps", "users"
   add_foreign_key "credential_sets", "users"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifest_drafts", "users"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
-  add_foreign_key "org_roles", "orgs"
-  add_foreign_key "org_roles", "users"
 end
