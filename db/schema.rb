@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_15_203948) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -74,8 +74,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_203948) do
     t.jsonb "panels"
     t.string "readable_by"
     t.jsonb "schedule"
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
+    t.index ["owner_type", "owner_id"], name: "index_apps_on_owner"
     t.index ["port"], name: "index_apps_on_port", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
   end
@@ -132,12 +135,33 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_203948) do
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
   end
 
-  create_table "orgs", force: :cascade do |t|
+  create_table "org_roles", id: false, force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "organization_id"
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_org_roles_on_organization_id"
+    t.index ["user_id"], name: "index_org_roles_on_user_id"
+  end
+
+  create_table "organizations", force: :cascade do |t|
     t.string "name"
     t.string "billing_email"
     t.string "token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "permissions", id: false, force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "permissable_type"
+    t.bigint "permissable_id"
+    t.integer "permit_mask", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permissable_type", "permissable_id"], name: "index_permissions_on_permissable"
+    t.index ["user_id"], name: "index_permissions_on_user_id"
   end
 
   create_table "tags", force: :cascade do |t|
@@ -185,4 +209,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_203948) do
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifest_drafts", "users"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
+  add_foreign_key "org_roles", "organizations"
+  add_foreign_key "org_roles", "users"
+  add_foreign_key "permissions", "users"
 end

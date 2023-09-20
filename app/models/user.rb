@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
   has_many :manifest_drafts, through: :permissions
   has_many :credential_sets
   has_many :org_roles
-  has_many :orgs, through: :org_roles
+  has_many :organizations, through: :org_roles
   has_many :permissions
   has_many :apps, through: :permissions
 

@@ -1,4 +1,4 @@
-class Org < ApplicationRecord
+class Organization < ApplicationRecord
   has_many :apps, as: :owner
   has_many :org_roles
   has_many :users, through: :org_roles

@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  resources :app_permits
-  resources :org_roles
-  resources :orgs
   resources :customers
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
@@ -14,6 +11,9 @@ Rails.application.routes.draw do
   }, skip: [:token_validations]
 
   resources :users
+  resources :org_roles
+  resources :organizations
+  resources :permissions
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
 
