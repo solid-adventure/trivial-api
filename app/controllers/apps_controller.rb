@@ -49,6 +49,18 @@ class AppsController < ApplicationController
     render json: app_copy, adapter: :attributes
   end
 
+  def tags
+    authorize! :read, app
+    app.addTag!(params[:context], params[:name])
+    render json: {"tags": app.find_by_taggable_id!(app.id)}
+  end
+
+  def remove_tags
+    authorize! :read, app
+    app.removeTag!(params[:context], params[:name])
+    render json: {"tags": app.find_by_taggable_id!(app.id)}
+  end
+
   def destroy
     authorize! :destroy, app
     app.discard!
