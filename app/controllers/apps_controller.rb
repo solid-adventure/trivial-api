@@ -50,15 +50,15 @@ class AppsController < ApplicationController
   end
 
   def tags
-    authorize! :read, app
-    app.addTag!(params[:context], params[:name])
-    render json: {"tags": app.find_by_taggable_id!(app.id)}
+    authorize! :update, app
+    tag = app.addTag!(params[:context], params[:name])
+    render json: tag
   end
 
   def remove_tags
-    authorize! :read, app
+    authorize! :update, app
     app.removeTag!(params[:context], params[:name])
-    render json: {"tags": app.find_by_taggable_id!(app.id)}
+    render json: {status: 200}
   end
 
   def destroy

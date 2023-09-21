@@ -13,10 +13,6 @@ module Taggable
     def removeTag!(context, tag)
       self.tags.where(context: context, name: tag).delete_all
     end
-
-    def find_by_taggable_id!(id)
-      return self.tags.where(taggable_id: id)
-    end
   end
 
   class_methods do
