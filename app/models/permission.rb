@@ -10,7 +10,7 @@ class Permission < ApplicationRecord
   GRANT_BIT = 16
   REVOKE_BIT = 32
 
-  # Defined permissions hash
+  # Defined permissions hash, this should match the abilities array in the Ability class
   PERMITS = { 
     read: READ_BIT,
     update: UPDATE_BIT,
