@@ -27,8 +27,11 @@ class AppsController < ApplicationController
 
   def create
     @app = App.new(app_params)
-    @app.user = current_user
+    @app.owner = current_user
     @app.save!
+    @permission = Permission.new(user: current_user, permissable: @app)
+    @permission.permits!(:all)
+    @permission.save!
     render json: @app.as_json(methods: [:aws_role])
   end
 

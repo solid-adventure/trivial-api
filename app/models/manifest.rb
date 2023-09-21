@@ -1,9 +1,10 @@
 class Manifest < ApplicationRecord
     validates :app_id, presence: true
-    validates :user_id, presence: true
     validates :content, presence: true
 
-    belongs_to :user
+    belongs_to :owner, polymorphic: true
+    has_many :permissions, as: :permissable
+    has_many :users, through: :permissions
     belongs_to :app, foreign_key: :internal_app_id, inverse_of: :manifests
 
     has_one_attached :bundle
@@ -11,7 +12,7 @@ class Manifest < ApplicationRecord
     def copy_to_app!(new_app)
         new_manifest = self.dup
         new_manifest.app_id = new_app.name
-        new_manifest.user_id = new_app.user_id
+        new_manifest.owner = new_app.owner
         new_manifest.internal_app_id = new_app.id
         new_manifest.set_content_app_id
         # Pushing this responsibility to CredentialSet, which would be able to display an error if the new user doesn't have access to the creds 

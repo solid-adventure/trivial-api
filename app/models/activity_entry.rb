@@ -5,7 +5,9 @@ class ActivityEntry < ApplicationRecord
 
     validates :source, presence: true, if: :is_request?
 
-    belongs_to :user
+    has_many :permissions, as: :permissable
+    has_many :users, through: :permissions
+    belongs_to :owner, polymorphic: true
     belongs_to :app
 
     before_create :generate_update_id
@@ -42,6 +44,7 @@ class ActivityEntry < ApplicationRecord
       ActivityEntry.redis_client.publish "#{app.name}.webhook", id if ActivityEntry.publish_enabled?
     end
 
+    #FIXME adjust for use of polymorphic owner
     def legacy_attributes
       {
         id: self.id,
@@ -58,6 +61,7 @@ class ActivityEntry < ApplicationRecord
       }
     end
 
+    #FIXME adjust for use of polymorphic owner
     def activity_attributes
       {
         id: self.id,
@@ -74,6 +78,7 @@ class ActivityEntry < ApplicationRecord
       }
     end
 
+    #FIXME adjust for use of polymorphic owner
     def activity_attributes_for_index
       {
         id: self.id,

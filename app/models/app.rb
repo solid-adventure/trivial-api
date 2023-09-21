@@ -6,7 +6,7 @@ class App < ApplicationRecord
   MINIMUM_PORT_NUMBER = 3001
 
   belongs_to :owner, polymorphic: true
-  has_many :permissions, :as :permissable
+  has_many :permissions, as: :permissable
   has_many :users, through: :permissions
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app

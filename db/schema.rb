@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_20_223135) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -55,7 +55,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
     t.jsonb "diagnostics"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["app_id"], name: "index_activity_entries_on_app_id"
+    t.index ["owner_type", "owner_id"], name: "index_activity_entries_on_owner"
     t.index ["update_id"], name: "index_activity_entries_on_update_id"
     t.index ["user_id"], name: "index_activity_entries_on_user_id"
   end
@@ -119,8 +122,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
     t.datetime "expires_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["app_id"], name: "index_manifest_drafts_on_app_id"
     t.index ["manifest_id"], name: "index_manifest_drafts_on_manifest_id"
+    t.index ["owner_type", "owner_id"], name: "index_manifest_drafts_on_owner"
     t.index ["token"], name: "index_manifest_drafts_on_token", unique: true
     t.index ["user_id"], name: "index_manifest_drafts_on_user_id"
   end
@@ -132,7 +138,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_15_204057) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "internal_app_id"
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
+    t.index ["owner_type", "owner_id"], name: "index_manifests_on_owner"
   end
 
   create_table "org_roles", id: false, force: :cascade do |t|

@@ -15,19 +15,21 @@ class ActivityEntriesController < ApplicationController
     render json: activity_entry.activity_attributes.to_json
   end
 
+  #TODO ask about how this should be owned and created
   def create
     authorize! :create, ActivityEntry
     @entry = ActivityEntry.new(activity_entry_params)
-    @entry.user = current_user
+    @entry.owner = current_user
     @entry.app = current_user.apps.kept.find_by_name!(params[:app_id])
     @entry.save!
     render status: :created, json: @entry.activity_attributes
   end
 
+  #TODO ask about how this should be owned and created
   def create_from_request
     @entry = ActivityEntry.new(activity_entry_params)
     @entry.app = App.kept.find_by_name!(params[:app_id])
-    @entry.user_id = @entry.app.user_id
+    @entry.owner = @entry.app.owner
     @entry.activity_type = 'request'
     @entry.normalize_json
     @entry.save!

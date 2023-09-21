@@ -3,28 +3,30 @@ class ManifestsController < ApplicationController
     load_and_authorize_resource
 
     def index
-        render json: manifests, adapter: :attributes
+        render json: @manifests, adapter: :attributes
     end
 
     def create
-        manifest = Manifest.new(manifest_params.merge(app: app))
-        manifest.user_id = current_user.id
-        if manifest.save
-            render json: manifest, adapter: :attributes, status: :created
+        @manifest = Manifest.new(manifest_params.merge(app: app))
+        @manifest.owner = current_user
+        @permission = Permission.new(user: current_user, permissable: @manifest)
+        @permission.permits(:all) 
+        if @manifest.save && @permission.save
+            render json: @manifest, adapter: :attributes, status: :created
         else
-            render_bad_request manifest
+            render_bad_request @manifest
         end
     end
 
     def show
-        render json: manifest, adapter: :attributes
+        render json: @manifest, adapter: :attributes
     end
 
     def update
-        if manifest.update(manifest_params)
-            render json: manifest, adapter: :attributes
+        if @manifest.update(manifest_params)
+            render json: @manifest, adapter: :attributes
         else
-            render_bad_request manifest
+            render_bad_request @manifest
         end
     end
 
@@ -48,5 +50,4 @@ class ManifestsController < ApplicationController
       @app ||= App.find_by_name(params[:app_id])
       authorize! :read, @app
     end
-
 end

@@ -6,6 +6,9 @@ class ManifestDraftsController < ApplicationController
 
   def create
     @manifest_draft = ManifestDraft.create_for_manifest!(manifest, manifest_draft_params)
+    @permission = Permission.new(user: current_user, permissable: @manifest_draft)
+    @permission.permits!(:all)
+    @permission.save!
     render json: @manifest_draft
   end
 
