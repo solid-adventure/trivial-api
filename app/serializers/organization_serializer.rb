@@ -1,3 +1,3 @@
 class OrganizationSerializer < ActiveModel::Serializer
-  attributes :id
+  attributes :id, :name, :token, :billing_email
 end

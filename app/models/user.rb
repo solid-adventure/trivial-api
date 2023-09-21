@@ -8,15 +8,15 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_and_belongs_to_many :customers
-  has_many :manifests, through: :permissions
   has_many :webhooks
-  has_many :activity_entries, through: :permissions
-  has_many :manifest_drafts, through: :permissions
   has_many :credential_sets
   has_many :org_roles
   has_many :organizations, through: :org_roles
   has_many :permissions
-  has_many :apps, through: :permissions
+  has_many :apps, through: :permissions, source: :permissable, source_type: 'App'
+  has_many :manifests, through: :permissions, source: :permissable, source_type: 'Manifest'
+  has_many :manifest_drafts, through: :permissions, source: :permissable, source_type: 'ManifestDraft'
+  has_many :activity_entries, through: :permissions, source: :permissable, source_type: 'ActivityEntry'
 
   accepts_nested_attributes_for :org_roles
   accepts_nested_attributes_for :permissions
@@ -48,33 +48,6 @@ class User < ActiveRecord::Base
   def set_role_for(org, role)
     if org = Org.find_by(name: org)
       org_roles.create(org_id: org.id, user_id: id, role: role)
-    else
-      nil
-    end
-  end
-  
-  def get_app_permit_for(app)
-    if app = apps.find_by(name: app)
-      permissions.find(app.id).permits
-    else
-      nil
-    end
-  end
-
-  def update_app_permit_for(app, *args)
-    byebug
-    if app = apps.find_by(name: app)
-      permissions.find(app_id).permits!(%i[args])
-    else 
-      nil
-    end
-  end
-
-  def set_app_permit_for(app, *args)
-    byebug
-    if app = App.find_by(name: app)
-      new_permit = permissions.create(user_id: id, app_id: app.id)
-      new_permit.permits!(%i[args])
     else
       nil
     end
