@@ -9,10 +9,10 @@ class User < ActiveRecord::Base
 
   has_and_belongs_to_many :customers
   has_many :webhooks
-  has_many :credential_sets
   has_many :org_roles
   has_many :organizations, through: :org_roles
   has_many :permissions
+  has_many :credential_sets, through: :permissions, source: :permissable, source_type: 'CredentialSet'
   has_many :apps, through: :permissions, source: :permissable, source_type: 'App'
   has_many :manifests, through: :permissions, source: :permissable, source_type: 'Manifest'
   has_many :manifest_drafts, through: :permissions, source: :permissable, source_type: 'ManifestDraft'

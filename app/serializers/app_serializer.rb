@@ -5,7 +5,7 @@ class AppSerializer < ActiveModel::Serializer
   attributes  :id, :name, :descriptive_name, :hostname, :domain, :load_balancer, :panels, :readable_by,
               :schedule, :aws_role, :created_at, :updated_at, :manifest
 
-  attribute :user_permissions, if :current_user do
+  attribute :user_permissions, if: :current_user do
     object.permissions.find_by(user: current_user)&.permits
   end
 

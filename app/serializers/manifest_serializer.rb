@@ -4,7 +4,7 @@ class ManifestSerializer < ActiveModel::Serializer
 
   attributes :id, :app_id, :bundle_url, :content, :created_at, :updated_at
 
-  attribute :user_permissions, if :current_user do
+  attribute :user_permissions, if: :current_user do
     object.permissions.find_by(user: current_user)&.permits
   end
 
