@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_10_203126) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_22_193005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -132,6 +132,24 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_10_203126) do
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
   end
 
+  create_table "org_roles", id: false, force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "organization_id"
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_org_roles_on_organization_id"
+    t.index ["user_id"], name: "index_org_roles_on_user_id"
+  end
+
+  create_table "organizations", force: :cascade do |t|
+    t.string "name"
+    t.string "billing_email"
+    t.string "token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "context"
     t.string "name"
@@ -177,4 +195,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_10_203126) do
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifest_drafts", "users"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
+  add_foreign_key "org_roles", "organizations"
+  add_foreign_key "org_roles", "users"
 end

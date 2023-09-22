@@ -16,7 +16,7 @@ class OrganizationsController < ApplicationController
   # POST /organizations
   def create
     @organization = Organization.new(organization_params)
-    @org_role = OrgRole.new(user: current_user, organization: @organization, role: 'admin')
+    @org_role = OrgRole.create(user: current_user, organization: @organization, role: 'admin')
 
     if @organization.save
       render json: @organization, status: :created, location: @organization
