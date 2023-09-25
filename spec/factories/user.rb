@@ -1,8 +1,8 @@
 FactoryBot.define do
 
   factory :user do
-    name { 'Test User' }
-    sequence(:email) {|n| "user#{n}@example.test"}
+    sequence(:name) {|n| "User \##{n}" }
+    sequence(:email) {|n| "user#{n}@email.com"}
     password { 'insecure' }
     aws_role { 'testlambda-ex-1' }
   end

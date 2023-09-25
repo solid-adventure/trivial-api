@@ -10,14 +10,14 @@ RSpec.describe Organization, type: :model do
 
   describe 'associations' do
     it 'creates an organization with users and roles' do
-      organization = FactoryBot.create(:organization, users_count: 5)
+      organization = FactoryBot.create(:organization, members_count: 2)
 
       # Ensure the organization is valid
       expect(organization).to be_valid
 
       # Verify the number of users and roles
-      expect(organization.users.count).to eq(5)
-      expect(OrgRole.where(organization: organization, role: 'member').count).to eq(4)
+      expect(organization.users.count).to eq(3)
+      expect(OrgRole.where(organization: organization, role: 'member').count).to eq(2)
       expect(OrgRole.where(organization: organization, role: 'admin').count).to eq(1)
     end
   end
