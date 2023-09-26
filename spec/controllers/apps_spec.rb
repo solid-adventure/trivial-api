@@ -22,12 +22,13 @@ RSpec.describe AppsController, :type => :controller do
 
   context "logged in user" do
 
+    let! (:app) { FactoryBot.create(:app, user: user) }
+
     before do
       login
     end
 
     it "returns a users apps" do
-      app = FactoryBot.create(:app, user: user)
       get :index, format: :json
       data = JSON.parse(response.body)
       expect(data.map { |a| a["id"] }).to eq [app.id]
