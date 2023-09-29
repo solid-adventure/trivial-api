@@ -188,7 +188,7 @@ describe 'Organizations API' do
 
       response '204', 'No Content' do
         run_test! do
-          expect(Organization.count).to eq(@orgs.size - 1)
+          expect(@admin.reload.organizations.count).to eq(@orgs.size - 1)
         end
       end
 
@@ -225,6 +225,8 @@ describe 'Organizations API' do
         schema type: :organization_schema
         run_test! do
           data = JSON.parse(response.body)
+          org_role = @member.org_roles.find_by(organization: @orgs.first)
+          expect(org_role.role).to eq(role)
         end
       end
 
@@ -266,6 +268,8 @@ describe 'Organizations API' do
         
         run_test! do
           data = JSON.parse(response.body)
+          org_role = @member.org_roles.find_by(organization: @orgs.first)
+          expect(org_role.role).to eq(role)
         end
       end
 
