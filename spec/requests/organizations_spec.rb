@@ -34,7 +34,7 @@ describe 'Organizations API' do
           }
         }
       },
-      required: %w(id name billing_email token)
+      required: %w(id name billing_email)
     }
   end
 
