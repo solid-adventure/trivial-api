@@ -145,7 +145,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_22_193005) do
   create_table "organizations", force: :cascade do |t|
     t.string "name"
     t.string "billing_email"
-    t.string "token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
