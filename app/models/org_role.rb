@@ -1,5 +1,5 @@
 class OrgRole < ApplicationRecord
-  ROLES = %w(trivial admin member guest).freeze
+  ROLES = %w(admin member guest).freeze
 
   validates :user_id, presence: true
   validates :organization_id, presence: true

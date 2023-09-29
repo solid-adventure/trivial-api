@@ -1,5 +1,5 @@
 class OrganizationSerializer < ActiveModel::Serializer
-  attributes :id, :name, :token, :billing_email
+  attributes :id, :name, :billing_email
   has_many :users, if: -> { instance_options[:include_users] }
  
   def users

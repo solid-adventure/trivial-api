@@ -15,7 +15,6 @@ describe 'Organizations API' do
         id: { type: :integer },
         name: { type: :string },
         billing_email: { type: :string },
-        token: { type: :string },
         org_role: {
           type: :object,
           properties: {
