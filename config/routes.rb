@@ -13,7 +13,7 @@ Rails.application.routes.draw do
   resources :users
   resources :organizations do
     member do
-      post 'set_org_role'
+      post 'create_org_role'
       put 'update_org_role'
       delete 'delete_org_role'
     end

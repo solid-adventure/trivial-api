@@ -136,7 +136,11 @@ describe 'Organizations API' do
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data['name']).to eq(@orgs.first.name)
-          puts data.inspect
+          users = data['users']
+          expect(users.count).to eq(2)
+          expect(users[1]['name']).to eq(@member.name)
+          expect(users[1]['email']).to eq(@member.email)
+          expect(users[1]['role']).to eq('member')
         end
       end
 
@@ -195,7 +199,10 @@ describe 'Organizations API' do
     end
   end
 
-  path '/organizations/{id}/set_org_role' do
+  path '/organizations/{id}/create_org_role' do
+    parameter name: 'id', in: :path, type: :integer
+    let(:id) { @orgs.first.id }
+
     post 'Create Organization Role' do
       tags 'Organizations'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
@@ -215,17 +222,24 @@ describe 'Organizations API' do
       let(:organization) { { user_id: user_id, role: role } }
 
       response '201', 'Organization Role created' do
-        run_test!
+        schema type: :organization_schema
+        run_test! do
+          data = JSON.parse(response.body)
+        end
       end
 
       response '422', 'Unprocessable Entity' do
+        let(:role) { 'wizard' }
         run_test!
       end
     end
   end
 
   path '/organizations/{id}/update_org_role' do
-    patch 'Update Organization Role' do
+    parameter name: 'id', in: :path, type: :integer
+    let(:id) { @orgs.first.id }
+
+    put 'Update Organization Role' do
       tags 'Organizations'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
@@ -248,7 +262,11 @@ describe 'Organizations API' do
       let(:organization) { { user_id: user_id, role: role } }
 
       response '200', 'Organization Role updated' do
-        run_test!
+        schema type: :organization_schema
+        
+        run_test! do
+          data = JSON.parse(response.body)
+        end
       end
 
       response '422', 'Unprocessable Entity' do
@@ -259,6 +277,9 @@ describe 'Organizations API' do
   end
 
   path '/organizations/{id}/delete_org_role' do
+    parameter name: 'id', in: :path, type: :integer
+    let(:id) { @orgs.first.id }
+
     delete 'Delete Organization Role' do
       tags 'Organizations'
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]

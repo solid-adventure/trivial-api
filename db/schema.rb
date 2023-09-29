@@ -132,7 +132,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_22_193005) do
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
   end
 
-  create_table "org_roles", id: false, force: :cascade do |t|
+  create_table "org_roles", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "organization_id"
     t.string "role"

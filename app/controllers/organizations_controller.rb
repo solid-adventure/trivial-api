@@ -1,5 +1,5 @@
 class OrganizationsController < ApplicationController
-  before_action :set_organization, only: %i[ show update destroy ]
+  before_action :set_organization, only: %i[ show update destroy create_org_role update_org_role delete_org_role ]
 
   # GET /organizations
   def index
@@ -10,8 +10,7 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations/1
   def show
-    @organization = Organization.includes(org_roles: :user).find(params[:id])
-    render json: @organization, adapter: :attributes
+    render json: @organization, include_users: true, adapter: :attributes
   end
 
   # POST /organizations
@@ -40,35 +39,38 @@ class OrganizationsController < ApplicationController
     @organization.destroy
   end
 
+  # POST /organizations/1/create_org_role
   def create_org_role
     user = User.find(params[:user_id])
     role = params[:role]
 
     @org_role = OrgRole.new(organization: @organization, user: user, role: role)
     if @org_role.save
-      render json: { organization: @organization, org_role: @org_role }
+      render json: @organization, include_users: true, adapter: :attributes, status: :created
     else
       render json: { errors: @org_role.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
+  # PUT /organizations/1/update_org_role
   def update_org_role
     user = User.find(params[:user_id])
     role = params[:role]
 
-    @org_role = @organization.org_roles.find_by(user: user)
-    @org_role.role = role
-
-    if @org_role.save
-      render json: { organization: @organization, org_role: @org_role }
+    @org_role = OrgRole.find_by(organization: @organization, user: user)
+    if @org_role.update(role: role)
+      render json: @organization, include_users: true, adapter: :attributes
     else
       render json: { errors: @org_role.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
+  # DELETE /organizations/1/delete_org_role
   def delete_org_role
     user = User.find(params[:user_id])
-    @organization.org_roles.find_by(user: user).destroy
+
+    @org_role = OrgRole.find_by(organization: @organization, user: user)
+    @org_role.destroy
   end
 
   private
