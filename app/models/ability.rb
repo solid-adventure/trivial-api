@@ -17,11 +17,11 @@ class Ability
     end
 
     can :read, Organization do |organization|
-      organization.org_roles.find(user.id).exists?
+      organization.org_roles.find_by(user: user).exists?
     end
 
     can :manage, Organization do |organization|
-      organization.org_roles.find(user.id)&.role == 'admin'
+      organization.org_roles.find_by(user: user)&.role == 'admin'
     end
 
     can :revoke, OrgRole do |org_role|
@@ -29,7 +29,7 @@ class Ability
     end
 
     can [:grant, :revoke], Organization do |organization|
-      organization.org_roles.find(user.id)&.role == 'admin'
+      organization.org_roles.find_by(user: user)&.role == 'admin'
     end
 
     # Until we have UI in place to support admin filtering by customer, this would be too much
