@@ -3,14 +3,21 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations
   def index
-    @organizations = current_user.organizations
-
-    render json: @organizations, adapter: :attributes
+    if @organizations = current_user.organizations
+      render json: @organizations, adapter: :attributes
+    else
+      render json: { message: 'User has no Organizations' }, status: :no_content
+    end
   end
 
   # GET /organizations/1
   def show
-    render json: @organization, include_users: true, adapter: :attributes
+    authorize! :show, @organization
+    if @organization.present?
+      render json: @organization, include_users: true, adapter: :attributes
+    else
+      render json: { message: 'No Organization Found' }, status: :no_content
+    end 
   end
 
   # POST /organizations
@@ -27,7 +34,8 @@ class OrganizationsController < ApplicationController
 
   # PATCH/PUT /organizations/1
   def update
-    if @organization.update(organization_params)
+    authorize! :update, @organization
+    if @organization&.update(organization_params)
       render json: @organization, adapter: :attributes
     else
       render json: @organization.errors, status: :unprocessable_entity
@@ -36,11 +44,14 @@ class OrganizationsController < ApplicationController
 
   # DELETE /organizations/1
   def destroy
+    authorize! :destroy, @organization
     @organization.destroy
+    render json: { message: 'Delete OK' }, status: :no_content
   end
 
   # POST /organizations/1/create_org_role
   def create_org_role
+    authorize! :grant, @organization
     user = User.find(params[:user_id])
     role = params[:role]
 
@@ -54,6 +65,7 @@ class OrganizationsController < ApplicationController
 
   # PUT /organizations/1/update_org_role
   def update_org_role
+    authorize! :grant, @organization
     user = User.find(params[:user_id])
     role = params[:role]
 
@@ -69,8 +81,16 @@ class OrganizationsController < ApplicationController
   def delete_org_role
     user = User.find(params[:user_id])
 
-    @org_role = OrgRole.find_by(organization: @organization, user: user)
-    @org_role.destroy
+    if @org_role = OrgRole.find_by(organization: @organization, user: user)
+      if can?(:revoke, @organization) || can?(:revoke, @org_role)
+        @org_role.destroy
+        render json: { message: 'Delete OK' }, status: :no_content
+      else
+        render json: { error: "Unauthorized" }, status: :unauthorized
+      end
+    else
+      render json: { errors: @org_role.errors.full_messages }, status: :unprocessable_entity
+    end 
   end
 
   private
