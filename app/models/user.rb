@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
   has_many :activity_entries
   has_many :manifest_drafts
   has_many :credential_sets
-  has_many :org_roles
+  has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
 
   enum role: %i[member admin client]
