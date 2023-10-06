@@ -17,7 +17,7 @@ class Ability
     end
 
     can :read, Organization do |organization|
-      organization.org_roles.find_by(user: user).exists?
+      organization.org_roles.find_by(user: user)
     end
 
     can :manage, Organization do |organization|

@@ -41,11 +41,13 @@ describe 'Organizations API' do
   before do
     @admin = user
     @member = FactoryBot.create(:user)
+    @test_org = FactoryBot.create(:organization, admin: FactoryBot.create(:user))
     @orgs = []
     3.times do
       @orgs.push(FactoryBot.create( :organization, admin: @admin ))
     end
   end
+
   path '/organizations' do
     get 'list the organizations' do
       tags 'Organizations'
@@ -60,6 +62,13 @@ describe 'Organizations API' do
           expect(data.length).to eq(3)
           expect(data[1]['name']).to eq(@orgs[1].name)
         end
+      end
+
+      response '204', 'User has no associated Organizations' do
+        before do
+          OrgRole.where(user: @admin).delete_all
+        end
+        run_test!
       end
 
       response '401', 'Invalid credentials' do
@@ -143,6 +152,16 @@ describe 'Organizations API' do
         end
       end
 
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '401', 'User missing permissions' do
+        let(:id) { @test_org.id }
+        run_test!
+      end
+
       response '401', 'Invalid credentials' do
         let('access-token') { 'invalid-token' }
         run_test!
@@ -175,6 +194,25 @@ describe 'Organizations API' do
         end
       end
 
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '401', 'User missing permissions, no role' do
+        let(:id) { @test_org.id }
+        run_test!
+      end
+
+      response '401', 'User missing permissions, not admin' do
+        before do
+          OrgRole
+            .find_by(user: @admin, organization: @orgs.first)
+            .update_column(:role, 'member')
+        end
+        run_test!
+      end
+
       response '401', 'Invalid credentials' do
         let('access-token') { 'invalid-token' }
         run_test!
@@ -189,6 +227,25 @@ describe 'Organizations API' do
         run_test! do
           expect(@admin.reload.organizations.count).to eq(@orgs.size - 1)
         end
+      end
+
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '401', 'User missing permissions, no role' do
+        let(:id) { @test_org.id }
+        run_test!
+      end
+
+      response '401', 'User missing permissions, not admin' do
+        before do
+          OrgRole
+            .find_by(user: @admin, organization: @orgs.first)
+            .update_column(:role, 'member')
+        end
+        run_test!
       end
 
       response '401', 'Invalid credentials' do
@@ -227,6 +284,30 @@ describe 'Organizations API' do
           org_role = @member.org_roles.find_by(organization: @orgs.first)
           expect(org_role.role).to eq(role)
         end
+      end
+
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No User Found' do
+        let(:user_id) { User.last.id + 999 }
+        run_test!
+      end
+
+      response '401', 'User missing permissions, no role' do
+        let(:id) { @test_org.id }
+        run_test!
+      end
+
+      response '401', 'User missing permissions, not admin' do
+        before do
+          OrgRole
+            .find_by(user: @admin, organization: @orgs.first)
+            .update_column(:role, 'member')
+        end
+        run_test!
       end
 
       response '422', 'Unprocessable Entity' do
@@ -272,6 +353,39 @@ describe 'Organizations API' do
         end
       end
 
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No User Found' do
+        let(:user_id) { User.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No OrgRole Found' do
+        before do
+          @member.org_roles.delete_all
+        end
+        run_test!
+      end
+
+      response '401', 'User missing permissions, no role' do
+        before do
+          @admin.org_roles.delete_all
+        end
+        run_test!
+      end
+
+      response '401', 'User missing permissions, not admin' do
+        before do
+          OrgRole
+            .find_by(user: @admin, organization: @orgs.first)
+            .update_column(:role, 'member')
+        end
+        run_test!
+      end
+
       response '422', 'Unprocessable Entity' do
         let(:role) { 'wizard' }
         run_test!
@@ -306,6 +420,39 @@ describe 'Organizations API' do
         run_test! do 
           expect(@orgs.first.reload.org_roles.count).to eq(1)
         end
+      end
+      
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No User Found' do
+        let(:user_id) { User.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No OrgRole Found' do
+        before do
+          @member.org_roles.delete_all
+        end
+        run_test!
+      end
+
+      response '401', 'User missing permissions, no role' do
+        before do
+          @admin.org_roles.delete_all
+        end
+        run_test!
+      end
+
+      response '401', 'User missing permissions, not admin' do
+        before do
+          OrgRole
+            .find_by(user: @admin, organization: @orgs.first)
+            .update_column(:role, 'member')
+        end
+        run_test!
       end
     end
   end

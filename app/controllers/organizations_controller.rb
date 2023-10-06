@@ -3,7 +3,8 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations
   def index
-    if @organizations = current_user.organizations
+    @organizations = current_user.organizations
+    if @organizations.any?
       render json: @organizations, adapter: :attributes
     else
       render json: { message: 'User has no Organizations' }, status: :no_content
@@ -13,11 +14,7 @@ class OrganizationsController < ApplicationController
   # GET /organizations/1
   def show
     authorize! :show, @organization
-    if @organization.present?
-      render json: @organization, include_users: true, adapter: :attributes
-    else
-      render json: { message: 'No Organization Found' }, status: :no_content
-    end 
+    render json: @organization, include_users: true, adapter: :attributes
   end
 
   # POST /organizations
@@ -69,7 +66,7 @@ class OrganizationsController < ApplicationController
     user = User.find(params[:user_id])
     role = params[:role]
 
-    @org_role = OrgRole.find_by(organization: @organization, user: user)
+    @org_role = OrgRole.find_by!(organization: @organization, user: user)
     if @org_role.update(role: role)
       render json: @organization, include_users: true, adapter: :attributes
     else
@@ -80,17 +77,14 @@ class OrganizationsController < ApplicationController
   # DELETE /organizations/1/delete_org_role
   def delete_org_role
     user = User.find(params[:user_id])
+    @org_role = OrgRole.find_by!(organization: @organization, user: user)
 
-    if @org_role = OrgRole.find_by(organization: @organization, user: user)
-      if can?(:revoke, @organization) || can?(:revoke, @org_role)
-        @org_role.destroy
-        render json: { message: 'Delete OK' }, status: :no_content
-      else
-        render json: { error: "Unauthorized" }, status: :unauthorized
-      end
+    if can?(:revoke, @organization) || can?(:revoke, @org_role)
+      @org_role.destroy
+      render json: { message: 'Delete OK' }, status: :no_content
     else
-      render json: { errors: @org_role.errors.full_messages }, status: :unprocessable_entity
-    end 
+      render json: { error: "Unauthorized" }, status: :unauthorized
+    end
   end
 
   private
