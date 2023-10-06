@@ -16,6 +16,22 @@ class Ability
       can :manage, :all
     end
 
+    can :read, Organization do |organization|
+      organization.org_roles.find_by(user: user)
+    end
+
+    can :manage, Organization do |organization|
+      organization.org_roles.find_by(user: user)&.role == 'admin'
+    end
+
+    can :revoke, OrgRole do |org_role|
+      org_role.user_id == user.id
+    end
+
+    can [:grant, :revoke], Organization do |organization|
+      organization.org_roles.find_by(user: user)&.role == 'admin'
+    end
+
     # Until we have UI in place to support admin filtering by customer, this would be too much
     # Admins can manage everything
     # if user.admin?

@@ -42,8 +42,8 @@ describe 'Users API' do
 
         run_test! do |response|
           data = JSON.parse(response.body)
-          expect(data['users'].length).to eq 1
-          expect(data['users'].first['id']).to eq user.id
+          expect(data['users'].length).to eq User.all.size
+          expect(data['users'].map{ |u| u["id"] }).to eq User.all.pluck(:id)
         end
       end
 

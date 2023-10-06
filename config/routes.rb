@@ -11,6 +11,13 @@ Rails.application.routes.draw do
   }, skip: [:token_validations]
 
   resources :users
+  resources :organizations do
+    member do
+      post 'create_org_role'
+      put 'update_org_role'
+      delete 'delete_org_role'
+    end
+  end
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
 
