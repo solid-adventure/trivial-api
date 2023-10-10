@@ -23,8 +23,13 @@ class App < ApplicationRecord
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
-    return false unless user
-    unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    if user
+      unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    elsif owner
+      unique = owner.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    else 
+      return false
+    end
     if !unique
       errors.add(:descriptive_name, "has already been taken")
     end
