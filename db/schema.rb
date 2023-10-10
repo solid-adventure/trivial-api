@@ -93,7 +93,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
     t.string "credential_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
+    t.index ["owner_type", "owner_id"], name: "index_credential_sets_on_owner"
     t.index ["user_id"], name: "index_credential_sets_on_user_id"
   end
 

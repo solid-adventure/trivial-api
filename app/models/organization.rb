@@ -3,6 +3,7 @@ class Organization < ApplicationRecord
   has_many :manifests, as: :owner
   has_many :manifest_drafts, as: :owner
   has_many :activity_entries, as: :owner
+  has_many :credential_sets, as: :owner
   has_many :org_roles, dependent: :delete_all
   has_many :users, through: :org_roles
 

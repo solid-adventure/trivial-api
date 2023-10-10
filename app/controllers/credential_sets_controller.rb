@@ -7,7 +7,9 @@ class CredentialSetsController < ApplicationController
   end
 
   def create
-    @credential_set = current_user.credential_sets.create! credential_set_params
+    @credential_set = current_user.credential_sets.new(credential_set_params)
+    @credential_set.user_id = current_user.id
+    @credential_set.save!
     if params.has_key?(:credentials)
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
