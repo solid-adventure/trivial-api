@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_10_191200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -164,6 +164,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "permissions", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "permissable_type"
+    t.bigint "permissable_id"
+    t.integer "permit", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permissable_type", "permissable_id"], name: "index_permissions_on_permissable"
+    t.index ["user_id"], name: "index_permissions_on_user_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "context"
     t.string "name"
@@ -211,4 +222,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
   add_foreign_key "manifests", "apps", column: "internal_app_id"
   add_foreign_key "org_roles", "organizations"
   add_foreign_key "org_roles", "users"
+  add_foreign_key "permissions", "users"
 end
