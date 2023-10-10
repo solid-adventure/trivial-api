@@ -77,7 +77,7 @@ class AppTest < ActiveSupport::TestCase
     end
 
     test 'copy includes manifest' do
-      manifest = Manifest.new(app_id: @existing.name, internal_app_id: @existing.id, user_id: @user.id, content: {app_id: @existing.name}.to_json)
+      manifest = Manifest.new(app_id: @existing.name, internal_app_id: @existing.id, user_id: @user.id, owner: @user, content: {app_id: @existing.name}.to_json)
       assert manifest.valid?
       @existing.manifests << manifest
       @existing.save!

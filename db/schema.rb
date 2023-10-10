@@ -132,7 +132,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "internal_app_id"
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["internal_app_id"], name: "index_manifests_on_internal_app_id"
+    t.index ["owner_type", "owner_id"], name: "index_manifests_on_owner"
   end
 
   create_table "org_roles", force: :cascade do |t|

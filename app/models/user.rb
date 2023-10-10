@@ -12,8 +12,9 @@ class User < ActiveRecord::Base
   has_many :apps
   has_many :apps, as: :owner
   has_many :manifests
-  has_many :activity_entries
+  has_many :manifests, as: :owner
   has_many :manifest_drafts
+  has_many :activity_entries
   has_many :credential_sets
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles

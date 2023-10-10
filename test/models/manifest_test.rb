@@ -6,6 +6,7 @@ class ManifestTest < ActiveSupport::TestCase
         @manifest.app_id = 'BrownShirt'
         @manifest.content = '{"x":1}'
         @manifest.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
+        @manifest.owner = @manifest.user
         @manifest.app = App.create(user: @manifest.user, owner: @manifest.user, name: 'BrownShirt')
         @manifest.save!
         @user2 = User.create(name: 'gandolf', email: 'gandolf@gmail.com', password: '12345678')
