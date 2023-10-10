@@ -19,6 +19,7 @@ class ActivityEntriesController < ApplicationController
     authorize! :create, ActivityEntry
     @entry = ActivityEntry.new(activity_entry_params)
     @entry.user = current_user
+    @entry.owner = current_user
     @entry.app = current_user.apps.kept.find_by_name!(params[:app_id])
     @entry.save!
     render status: :created, json: @entry.activity_attributes
@@ -28,6 +29,7 @@ class ActivityEntriesController < ApplicationController
     @entry = ActivityEntry.new(activity_entry_params)
     @entry.app = App.kept.find_by_name!(params[:app_id])
     @entry.user_id = @entry.app.user_id
+    @entry.owner = @entry.app.owner
     @entry.activity_type = 'request'
     @entry.normalize_json
     @entry.save!
@@ -68,7 +70,7 @@ class ActivityEntriesController < ApplicationController
   private
 
   def activity_for_index
-    attrs = [:id, :user_id, :app_id, :activity_type, :status, :duration_ms, :payload, :created_at]
+    attrs = [:id, :user_id, :owner_id, :owner_type, :app_id, :activity_type, :status, :duration_ms, :payload, :created_at]
     @activity ||= app_activity.select(attrs).limit(limit).order(created_at: :desc)
   end
 

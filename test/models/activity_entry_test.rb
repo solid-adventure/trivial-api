@@ -13,6 +13,7 @@ class ActivityEntryTest < ActiveSupport::TestCase
     @entry.activity_type = 'request'
     @entry.source = 'sample'
     @entry.user = @app.user
+    @entry.owner = @app.user
     @entry.save!
   end
 

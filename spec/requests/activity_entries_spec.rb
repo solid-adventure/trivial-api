@@ -36,8 +36,8 @@ describe 'Activity Entries API' do
 
       let(:app_id) { user_app.name }
       let(:limit) { 10 }
-      let!(:build_entry) { FactoryBot.create(:activity_entry, :build, user: user, app: user_app) }
-      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, app: user_app) }
+      let!(:build_entry) { FactoryBot.create(:activity_entry, :build, user: user, owner: user, app: user_app) }
+      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, owner: user, app: user_app) }
 
       response '200', 'Activity listing returned' do
         schema type: :array, items: activity_schema

@@ -55,7 +55,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
     t.jsonb "diagnostics"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["app_id"], name: "index_activity_entries_on_app_id"
+    t.index ["owner_type", "owner_id"], name: "index_activity_entries_on_owner"
     t.index ["update_id"], name: "index_activity_entries_on_update_id"
     t.index ["user_id"], name: "index_activity_entries_on_user_id"
   end
