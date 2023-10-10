@@ -119,8 +119,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
     t.datetime "expires_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["app_id"], name: "index_manifest_drafts_on_app_id"
     t.index ["manifest_id"], name: "index_manifest_drafts_on_manifest_id"
+    t.index ["owner_type", "owner_id"], name: "index_manifest_drafts_on_owner"
     t.index ["token"], name: "index_manifest_drafts_on_token", unique: true
     t.index ["user_id"], name: "index_manifest_drafts_on_user_id"
   end
