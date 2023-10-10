@@ -6,7 +6,7 @@ class ManifestTest < ActiveSupport::TestCase
         @manifest.app_id = 'BrownShirt'
         @manifest.content = '{"x":1}'
         @manifest.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
-        @manifest.app = App.create(user: @manifest.user, name: 'BrownShirt')
+        @manifest.app = App.create(user: @manifest.user, owner: @manifest.user, name: 'BrownShirt')
         @manifest.save!
         @user2 = User.create(name: 'gandolf', email: 'gandolf@gmail.com', password: '12345678')
     end
@@ -45,6 +45,7 @@ class ManifestTest < ActiveSupport::TestCase
     test 'copy_to_app! updates app and user' do
         new_app = App.new(descriptive_name: "Hold Steady")
         new_app.user = @user2
+        new_app.owner = @user2
         new_app.save!
 
         new_manifest = @manifest.copy_to_app!(new_app)

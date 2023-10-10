@@ -9,7 +9,7 @@ describe 'Activity Entries API' do
   let(:client) { user.tokens.keys.first }
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
-  let!(:user_app) { FactoryBot.create(:app, user: user) }
+  let!(:user_app) { FactoryBot.create(:app, user: user, owner: user) }
 
   def self.activity_schema
     {

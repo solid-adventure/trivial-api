@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_10_06_205407) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_09_145926) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -74,8 +74,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_06_205407) do
     t.jsonb "panels"
     t.string "readable_by"
     t.jsonb "schedule"
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["discarded_at"], name: "index_apps_on_discarded_at"
     t.index ["name"], name: "index_apps_on_name", unique: true
+    t.index ["owner_type", "owner_id"], name: "index_apps_on_owner"
     t.index ["port"], name: "index_apps_on_port", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
   end

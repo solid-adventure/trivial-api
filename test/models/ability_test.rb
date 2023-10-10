@@ -6,10 +6,10 @@ class AbilityTest < ActiveSupport::TestCase
       @user2 = User.create!(name: 'test2', email: 'test2@example.test', password: 'password2')
       @customer = Customer.create(name: 'Acme', billing_email: 'ap@acme.com')
 
-      @app_user1 = App.create(user: @user1, descriptive_name: 'New App, User 1')
+      @app_user1 = App.create(user: @user1, owner: @user1, descriptive_name: 'New App, User 1')
       @manifest_user1 = Manifest.create(user: @user1, app_id: '123ABC', content: "{}", internal_app_id: @app_user1.id)
 
-      @app_user2 = App.create(user: @user2, descriptive_name: 'New App, User 2')
+      @app_user2 = App.create(user: @user2, owner: @user2, descriptive_name: 'New App, User 2')
       @manifest_user2 = Manifest.create(user: @user2, app_id: '456XYZ', content: "{}", internal_app_id: @app_user2.id)
     end
     # ruby -I test test/models/ability_test.rb 

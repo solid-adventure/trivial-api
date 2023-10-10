@@ -4,8 +4,8 @@ class AppTest < ActiveSupport::TestCase
     def setup
       @user = User.create!(name: 'test', email: 'test@example.test', password: 'password')
       @user2 = User.create!(name: 'test2', email: 'test2@example.test', password: 'password2')
-      @existing = App.create!(user: @user, descriptive_name: 'Existing App')
-      @app = App.new(user: @user, descriptive_name: 'New App')
+      @existing = App.create!(user: @user, owner: @user, descriptive_name: 'Existing App')
+      @app = App.new(user: @user, owner: @user, descriptive_name: 'New App')
     end
 
     test 'passes validation with all required files' do

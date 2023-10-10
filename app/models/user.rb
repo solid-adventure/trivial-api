@@ -8,9 +8,10 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_and_belongs_to_many :customers
-  has_many :manifests
   has_many :webhooks
   has_many :apps
+  has_many :apps, as: :owner
+  has_many :manifests
   has_many :activity_entries
   has_many :manifest_drafts
   has_many :credential_sets
