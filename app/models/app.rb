@@ -26,7 +26,7 @@ class App < ApplicationRecord
     if user
       unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
     elsif owner
-      unique = owner.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+      unique = owner.owned_apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
     else 
       return false
     end
