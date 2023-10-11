@@ -9,7 +9,7 @@ describe 'API Key API' do
     parameter name: :id, in: :path, type: :string
 
     let(:id) { user_app.name }
-    let(:user_app) { FactoryBot.create(:app, user: user) }
+    let(:user_app) { FactoryBot.create(:app, user: user, owner: user) }
     let(:user) { FactoryBot.create(:user, :logged_in) }
 
     post 'Obtain a new API key' do

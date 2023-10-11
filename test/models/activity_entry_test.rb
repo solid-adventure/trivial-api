@@ -4,6 +4,7 @@ class ActivityEntryTest < ActiveSupport::TestCase
   def setup
     @app = App.new
     @app.user = User.create(name: 'bilbo', email: 'bilbo@example.test', password: '12345678')
+    @app.owner = @app.user
     @app.descriptive_name = "Bilbo's App"
     @app.save!
 
@@ -12,6 +13,7 @@ class ActivityEntryTest < ActiveSupport::TestCase
     @entry.activity_type = 'request'
     @entry.source = 'sample'
     @entry.user = @app.user
+    @entry.owner = @app.user
     @entry.save!
   end
 

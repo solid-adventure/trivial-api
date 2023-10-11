@@ -8,14 +8,23 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_and_belongs_to_many :customers
-  has_many :manifests
   has_many :webhooks
-  has_many :apps
-  has_many :activity_entries
-  has_many :manifest_drafts
-  has_many :credential_sets
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
+  
+  # to be deprecated associations upon ownership transfer
+  has_many :apps
+  has_many :manifests
+  has_many :manifest_drafts
+  has_many :activity_entries
+  has_many :credential_sets
+  
+  # new ownership associations
+  has_many :owned_apps, class_name: 'App', as: :owner
+  has_many :owned_manifests, class_name: 'Manifest', as: :owner
+  has_many :owned_manifest_drafts, class_name: 'ManifestDraft', as: :owner
+  has_many :owned_activity_entries, class_name: 'ActivityEntry', as: :owner
+  has_many :owned_credential_sets, class_name: 'CredentialSet', as: :owner
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]

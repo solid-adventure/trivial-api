@@ -6,6 +6,7 @@ class ActivityEntry < ApplicationRecord
     validates :source, presence: true, if: :is_request?
 
     belongs_to :user
+    belongs_to :owner, polymorphic: true
     belongs_to :app
 
     before_create :generate_update_id
@@ -46,6 +47,8 @@ class ActivityEntry < ApplicationRecord
       {
         id: self.id,
         user_id: self.user_id,
+        owner_id: self.owner_id,
+        owner_type: self.owner_type,
         app_id: self.app.name,
         update_id: self.update_id,
         activity_type: self.activity_type,
@@ -62,6 +65,8 @@ class ActivityEntry < ApplicationRecord
       {
         id: self.id,
         user_id: self.user_id,
+        owner_id: self.owner_id,
+        owner_type: self.owner_type,
         app_id: self.app.name,
         activity_type: self.activity_type,
         source: self.source,
@@ -78,6 +83,8 @@ class ActivityEntry < ApplicationRecord
       {
         id: self.id,
         user_id: self.user_id,
+        owner_id: self.owner_id,
+        owner_type: self.owner_type,
         app_id: self.app.name,
         activity_type: self.activity_type,
         status: self.status,

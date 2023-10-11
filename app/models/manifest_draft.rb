@@ -1,5 +1,6 @@
 class ManifestDraft < ApplicationRecord
   belongs_to :user, inverse_of: :manifest_drafts
+  belongs_to :owner, polymorphic: true, inverse_of: :manifest_drafts
   belongs_to :app
   belongs_to :manifest
 
@@ -22,6 +23,7 @@ class ManifestDraft < ApplicationRecord
   def self.create_for_manifest!(manifest, params)
     self.create!(params) do |draft|
       draft.user = manifest.user
+      draft.owner = manifest.owner
       draft.app = manifest.app
       draft.manifest = manifest
       draft.token = SecureRandom.uuid

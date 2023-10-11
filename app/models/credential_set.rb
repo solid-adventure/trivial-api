@@ -1,5 +1,6 @@
 class CredentialSet < ApplicationRecord
   belongs_to :user, inverse_of: :credential_sets
+  belongs_to :owner, polymorphic: true
 
   validates :name, :credential_type, presence: true
 

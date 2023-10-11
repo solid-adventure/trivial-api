@@ -6,6 +6,7 @@ class App < ApplicationRecord
   MINIMUM_PORT_NUMBER = 3001
 
   belongs_to :user
+  belongs_to :owner, polymorphic: true
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app
   has_many :tags, as: :taggable
@@ -22,8 +23,13 @@ class App < ApplicationRecord
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
-    return false unless user
-    unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    if user
+      unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    elsif owner
+      unique = owner.owned_apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
+    else 
+      return false
+    end
     if !unique
       errors.add(:descriptive_name, "has already been taken")
     end

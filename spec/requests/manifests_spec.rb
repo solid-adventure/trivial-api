@@ -10,7 +10,7 @@ describe 'manifests', type: :request do
   let(:uid) { user.uid }
 
   let!(:user_app) { FactoryBot.create(:app, user: user ) }
-  let!(:user_manifest) { FactoryBot.create(:manifest, user: user, app_id: user_app.name, internal_app_id: user_app.id) }
+  let!(:user_manifest) { FactoryBot.create(:manifest, user: user, owner: user, app_id: user_app.name, internal_app_id: user_app.id) }
 
   path '/manifests?app_id={appId}' do
     get('list manifests') do
