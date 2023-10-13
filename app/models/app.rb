@@ -2,6 +2,7 @@ class App < ApplicationRecord
   include Discard::Model
   include Suggestable
   include Taggable
+  include Ownable
 
   MINIMUM_PORT_NUMBER = 3001
 

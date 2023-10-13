@@ -30,7 +30,7 @@ class AppsController < ApplicationController
     @app.user = current_user
     @app.owner = current_user
     @app.save!
-    Permission.create_admin(permissible: @app, user_id: current_user.id)
+    Permission.grant_all(permissible: @app, user_id: current_user.id)
     render json: @app.as_json(methods: [:aws_role])
   end
 
