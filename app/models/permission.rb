@@ -1,6 +1,6 @@
 class Permission < ApplicationRecord
   belongs_to :user
-  belongs_to :permissable, polymorphic: true
+  belongs_to :permissible, polymorphic: true
 
   # Defined permissions and their bit alignment
   READ_BIT = 0b1
@@ -19,4 +19,14 @@ class Permission < ApplicationRecord
     grant: GRANT_BIT,
     revoke: REVOKE_BIT,
   }
+
+  def self.create_admin(permissible:, user_id:)
+    PERMISSIONS_HASH.each do |_, bit|
+      Permission.create(
+        user_id: user_id,
+        permissible: permissible,
+        permit: bit,
+      )
+    end
+  end
 end

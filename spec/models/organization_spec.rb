@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Organization, type: :model do
+describe Organization do
   describe 'factory' do
     it 'is valid' do
       organization = FactoryBot.create(:organization)

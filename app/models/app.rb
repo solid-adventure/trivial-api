@@ -5,8 +5,16 @@ class App < ApplicationRecord
 
   MINIMUM_PORT_NUMBER = 3001
 
+  # old user association to be deprecated for ownership and permissions
   belongs_to :user
+
+  # new owner based association
   belongs_to :owner, polymorphic: true
+
+  # new permission based multi-user association
+  has_many :permissions, as: :permissible
+  has_many :permitted_users, through: :permissions, source: :user
+  
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app
   has_many :tags, as: :taggable
@@ -81,6 +89,7 @@ class App < ApplicationRecord
     new_app = self.dup
     new_app.unset_defaults
     new_app.user = new_user if new_user
+    new_app.owner = new_user if new_user
     new_app.descriptive_name = descriptive_name
     if new_app.save!
       manifest = self.manifests.order("created_at DESC").first
@@ -118,6 +127,7 @@ class App < ApplicationRecord
     App.maximum(:port).try(:next) || MINIMUM_PORT_NUMBER
   end
 
+  #FIXME as part of ownership functionality change
   def self.period_stats(user, interval_name, since_time, until_time)
     rows = connection.exec_query(<<-SQL)
     SELECT

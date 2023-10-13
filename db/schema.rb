@@ -166,12 +166,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_10_191200) do
 
   create_table "permissions", force: :cascade do |t|
     t.bigint "user_id"
-    t.string "permissable_type"
-    t.bigint "permissable_id"
+    t.string "permissible_type"
+    t.bigint "permissible_id"
     t.integer "permit", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["permissable_type", "permissable_id"], name: "index_permissions_on_permissable"
+    t.index ["permissible_type", "permissible_id"], name: "index_permissions_on_permissible"
     t.index ["user_id"], name: "index_permissions_on_user_id"
   end
 

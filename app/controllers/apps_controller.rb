@@ -30,6 +30,7 @@ class AppsController < ApplicationController
     @app.user = current_user
     @app.owner = current_user
     @app.save!
+    Permission.create_admin(permissible: @app, user_id: current_user.id)
     render json: @app.as_json(methods: [:aws_role])
   end
 
@@ -92,7 +93,7 @@ class AppsController < ApplicationController
   end
 
   def app_params
-      params.permit(:descriptive_name, :new_app_descriptive_name, panels: {}, schedule: {})
+    params.permit(:descriptive_name, :new_app_descriptive_name, panels: {}, schedule: {})
   end
 
   def last_request_params

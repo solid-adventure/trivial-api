@@ -1,3 +1,3 @@
 class PermissionSerializer < ActiveModel::Serializer
-  attributes :id, :user_id, :permissable_id, :permissable_type, :permit
+  attributes :id, :user_id, :permissible_id, :permissible_type, :permit
 end
