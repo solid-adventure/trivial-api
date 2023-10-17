@@ -25,59 +25,79 @@ class Permission < ApplicationRecord
     revoke: REVOKE_BIT,
   }
 
-  def self.grant(permissible:, user_id:, permit:)
-    if permission = Permission.find_by(permissible: permissible, user_id: user_id, permit: NO_PERMIT_BIT)
-      permission.update_column(:permit, PERMISSIONS_HASH[permit])
-    else
-      Permission.create(permissible: permissible, user_id: user_id, permit: PERMISSIONS_HASH[permit])
-    end
-  end
+  # takes a user or array of users and grants them a specific permission for the given permissible
+  def self.grant(permissible:, user_ids:, permit:)
+    user_ids = Array(user_ids)
+    permissions = Permission.where(permissible: permissible, user_id: user_ids)
 
-  def self.revoke(permissible:, user_id:, permit:)
-    permissions = Permission.where(permissible: permissible, user_id: user_id)
-    if permissions.count == 1
-      permissions.first.update(permit: NO_PERMIT_BIT)
-    else
-      permissions.find_by(permit: PERMISSIONS_HASH[permit])&.delete
-    end
-  end
+    permissions.where(permit: NO_PERMIT_BIT).update_all(permit: PERMISSIONS_HASH[permit])
+    permits_exist = permissions.where(permit: PERMISSIONS_HASH[permit]).pluck(:user_id)
 
-  def self.grant_all(permissible:, user_id:)
-    if permission = Permission.find_by(permissible: permissible, user_id: user_id, permit: NO_PERMIT_BIT)
-      permission.delete
-    end
-    PERMISSIONS_HASH.each do |_, bit|
-      Permission.create(
-        user_id: user_id,
+    user_ids = user_ids - permits_exist
+    permits_to_create = []
+    user_ids.each do |user_id| 
+      permits_to_create << { 
         permissible: permissible,
-        permit: bit,
-      )
+        user_id: user_id,
+        permit: PERMISSIONS_HASH[permit]
+      }
     end
+    Permission.create(permits_to_create)
   end
 
-  def self.revoke_all(permissible:, user_id:)
-    Permission.where(permissible: permissible, user_id: user_id).delete_all
-    Permission.create(permissible: permissible, user_id: user_id, permit: NO_PERMIT_BIT)
-  end
-  
-  def self.grant_org_permissible(permissible:, organization:)
-    admin_user_ids = organization.org_roles.where(role: 'admin').pluck(:user_id)
-    admin_user_ids.each do |user_id|
-      Permission.grant_all(permissible: permissible, user_id: user_id)
+  # takes a user or array of users and revokes a specific permission for the given permissible
+  def self.revoke(permissible:, user_ids:, permit:)
+    user_ids = Array(user_ids)
+    permissions = Permission.where(permissible: permissible, user_id: user_ids, permit: PERMISSIONS_HASH[permit])
+    user_ids = permissions.pluck(:user_id)
+
+    permits_to_delete = Permission.none
+    user_ids.each do |user_id|
+      if Permission.where(permissible: permissible, user_id: user_id).count > 1
+        permits_to_delete = permits_to_delete.or(permissions.where(user_id: user_id))
+      end
     end
-    
-    member_user_ids = organization.org_roles.where(role: 'member').pluck(:user_id)
-    member_user_ids.each do |user_id|
-      Permission.grant(permissible: permissible, user_id: user_id, permit: :read)
-    end
+    permissions.where.not(user_id: permits_to_delete.pluck(:user_id)).update_all(permit: NO_PERMIT_BIT)
+    permits_to_delete.delete_all
   end
 
-  def self.revoke_org_permissible(permissible:, organization:)
-    org_user_ids = organization.org_roles.pluck(:user_id)
-    Permission.where(permissible: permissible, user_id: org_user_ids).delete_all
+  # takes a user or array of users and grants them all possible permissions for a given permissible
+  def self.grant_all(permissible:, user_ids:)
+    user_ids = Array(user_ids)
+    existing_permits = Permission.where(permissible: permissible, user_id: user_ids)
+    existing_permits.where(permit: NO_PERMIT_BIT).delete_all
 
-    org_user_ids.each do |user_id|
-      Permission.create(permissible: permissible, user_id: user_id, permit: NO_PERMIT_BIT)
-    end  
+    permits_to_create = []
+    user_ids.each do |user_id|
+      missing_permits = PERMISSIONS_HASH.values - existing_permits.where(user_id: user_id).pluck(:permit)
+      missing_permits.each do |permit|
+        permits_to_create << { 
+          permissible: permissible,
+          user_id: user_id,
+          permit: permit
+        }
+      end
+    end
+    Permission.create(permits_to_create)
+  end
+
+  # takes a user or array of users and revokes all of their permissions for a given permissible
+  def self.revoke_all(permissible:, user_ids:)
+    user_ids = Array(user_ids)
+    permissions = Permission.where(permissible: permissible, user_id: user_ids)
+    return unless permissions.count > 0
+
+    user_ids = permissions.distinct.pluck(:user_id)
+    permissions.delete_all
+
+    permits_to_create = []
+    user_ids.each do |user_id|
+      permits_to_create << { 
+        permissible: permissible, 
+        user_id: user_id, 
+        permit: NO_PERMIT_BIT 
+      }
+    end
+    Permission.create(permits_to_create)
   end
 end
