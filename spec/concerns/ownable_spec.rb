@@ -17,8 +17,8 @@ describe Ownable do
         admins = organization2.org_roles.where(role: 'admin').pluck(:user_id)
         members = organization2.org_roles.where(role: 'member').pluck(:user_id)
 
-        Permission.grant_all(permissible: ownable, user_ids: admins)
-        Permission.grant(permissible: ownable, user_ids: members, permit: :read)
+        ownable.grant_all(user_ids: admins)
+        ownable.grant(user_ids: members, permit: :read)
 
         @permitted_users = organization1.org_roles.pluck(:user_id) + organization2.org_roles.pluck(:user_id)
         @previous_permissions = Permission.where(permissible: ownable, user_id: @permitted_users)

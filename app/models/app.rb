@@ -3,6 +3,7 @@ class App < ApplicationRecord
   include Suggestable
   include Taggable
   include Ownable
+  include Permissible
 
   MINIMUM_PORT_NUMBER = 3001
 

@@ -20,17 +20,14 @@ FactoryBot.define do
     trait :permissible do
       after(:create) do |app, _evaluator|
         if app.owner.is_a?(User)
-          Permission.grant_all(
-            permissible: app,
+          app.grant_all(
             user_ids: app.owner.id
           )
         else # owner is an Organization
-          Permission.grant_all(
-            permissible: app,
+          app.grant_all(
             user_ids: app.owner.org_roles.where(role: 'admin').pluck(:user_id)
           )
-          Permission.grant(
-            permissible: app,
+          app.grant(
             user_ids: app.owner.org_roles.where(role: 'member').pluck(:user_id),
             permit: :read
           )

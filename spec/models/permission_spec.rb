@@ -10,7 +10,7 @@ describe Permission do
     context 'with valid input' do
       it 'creates a new permission when none exist' do
         expect {
-          Permission.grant(permissible: permissible, user_ids: user.id, permit: :read)
+          permissible.grant(user_ids: user.id, permit: :read)
         }.to change(Permission, :count).by(1)
 
         permission = Permission.last
@@ -23,7 +23,7 @@ describe Permission do
         permission = Permission.create(permissible: permissible, user: user, permit: Permission::NO_PERMIT_BIT)
 
         expect {
-          Permission.grant(permissible: permissible, user_ids: user.id, permit: :update)
+          permissible.grant(user_ids: user.id, permit: :update)
         }.to_not change(Permission, :count)
 
         expect(permission.reload.permit).to eq(Permission::PERMISSIONS_HASH[:update])
@@ -33,7 +33,7 @@ describe Permission do
         Permission.create(permissible: permissible, user: user, permit: Permission::READ_BIT)
 
         expect {
-          Permission.grant(permissible: permissible, user_ids: user.id, permit: :read)
+          permissible.grant(user_ids: user.id, permit: :read)
         }.to_not change(Permission, :count)
       end
 
@@ -41,7 +41,7 @@ describe Permission do
         users = [user.id, user2.id, user3.id]
 
         expect {
-          Permission.grant(permissible: permissible, user_ids: users, permit: :grant)
+          permissible.grant(user_ids: users, permit: :grant)
         }.to change(Permission, :count).by(3)
 
         permits = Permission.where(permissible: permissible, user_id: users, permit: Permission::GRANT_BIT)
@@ -52,7 +52,7 @@ describe Permission do
     context 'with invalid input' do
       it 'does not create a new permission for invalid permit types' do
         expect {
-          Permission.grant(permissible: permissible, user_ids: user.id, permit: :invalid_permission)
+          permissible.grant(user_ids: user.id, permit: :invalid_permission)
         }.not_to change(Permission, :count)
       end
     end
@@ -66,7 +66,7 @@ describe Permission do
 
       it 'changes the permission to NO_PERMIT_BIT when only one permit exists' do
         expect {
-          Permission.revoke(permissible: permissible, user_ids: user.id, permit: :read)
+          permissible.revoke(user_ids: user.id, permit: :read)
         }.not_to change(Permission, :count)
 
         expect(@permission.reload.permit).to eq(Permission::NO_PERMIT_BIT)
@@ -76,7 +76,7 @@ describe Permission do
         Permission.create(permissible: permissible, user: user, permit: Permission::UPDATE_BIT)
 
         expect {
-          Permission.revoke(permissible: permissible, user_ids: user.id, permit: :read)
+          permissible.revoke(user_ids: user.id, permit: :read)
         }.to change(Permission, :count).by(-1)
 
         expect(Permission.exists?(permissible: permissible, user: user, permit: Permission::NO_PERMIT_BIT)).to be false
@@ -88,7 +88,7 @@ describe Permission do
         Permission.create(permissible: permissible, user: user, permit: Permission::UPDATE_BIT)
 
         expect {
-          Permission.revoke(permissible: permissible, user_ids: user.id, permit: :delete)
+          permissible.revoke(user_ids: user.id, permit: :delete)
         }.not_to change(Permission, :count)
         
         expect(Permission.exists?(permissible: permissible, user: user, permit: Permission::NO_PERMIT_BIT)).to be false
@@ -105,7 +105,7 @@ describe Permission do
 
       it 'revokes from each user' do
         expect {
-          Permission.revoke(permissible: permissible, user_ids: @user_ids, permit: :read)
+          permissible.revoke(user_ids: @user_ids, permit: :read)
         }.not_to change(Permission, :count)
 
         revoked_permits = Permission.where(permissible: permissible, user_id: @user_ids, permit: Permission::NO_PERMIT_BIT)
@@ -118,7 +118,7 @@ describe Permission do
         end
 
         expect {
-          Permission.revoke(permissible: permissible, user_ids: @user_ids, permit: :update)
+          permissible.revoke(user_ids: @user_ids, permit: :update)
         }.to change(Permission, :count).by(-3)
 
         expect(Permission.exists?(permissible: permissible, user_id: @user_ids, permit: Permission::NO_PERMIT_BIT)).to be false
@@ -130,7 +130,7 @@ describe Permission do
     context 'when no permissions exist' do
       it 'creates the full set of permissions for a specific permissible' do
         expect {
-          Permission.grant_all(permissible: permissible, user_ids: user.id)
+          permissible.grant_all(user_ids: user.id)
         }.to change(Permission, :count).by(Permission::PERMISSIONS_HASH.length)
 
         permissions = Permission.where(permissible: permissible, user_id: user.id)
@@ -146,7 +146,7 @@ describe Permission do
 
       it 'deletes the existing permission and grants all permissions' do
         expect {
-          Permission.grant_all(permissible: permissible, user_ids: user.id)
+          permissible.grant_all(user_ids: user.id)
         }.to change(Permission, :count).by(Permission::PERMISSIONS_HASH.length - 1)
 
         permissions = Permission.where(permissible: permissible, user_id: user.id)
@@ -161,7 +161,7 @@ describe Permission do
 
       it 'does not modify existing permissions and grants missing permissions' do
         expect {
-          Permission.grant_all(permissible: permissible, user_ids: user.id)
+          permissible.grant_all(user_ids: user.id)
         }.to change(Permission, :count).by(Permission::PERMISSIONS_HASH.length - 2)
         permissions = Permission.where(permissible: permissible, user_id: user.id)
 
@@ -178,7 +178,7 @@ describe Permission do
 
         granted_user_ids = [user2.id, user3.id]
         expect { 
-          Permission.grant_all(permissible: permissible, user_ids: granted_user_ids)
+          permissible.grant_all(user_ids: granted_user_ids)
         }.to change(Permission, :count).by(Permission::PERMISSIONS_HASH.length * 2)
 
         expect(Permission.where(permissible: permissible, user: user).count).to eq(1)
@@ -198,7 +198,7 @@ describe Permission do
       
       it 'revokes all permissions and sets NO_PERMIT_BIT' do
         expect {
-          Permission.revoke_all(permissible: permissible, user_ids: user.id)
+          permissible.revoke_all(user_ids: user.id)
         }.to change(Permission, :count).by(-2)
 
         permissions = Permission.where(permissible: permissible, user_id: user.id)
@@ -211,7 +211,7 @@ describe Permission do
         @permit = Permission.create(permissible: permissible, user: @other_user, permit: Permission::READ_BIT)
        
         expect {
-          Permission.revoke_all(permissible: permissible, user_ids: user.id)
+          permissible.revoke_all(user_ids: user.id)
         }.not_to change(Permission.where(permissible: permissible, user: @other_user), :count)
 
         permissions = Permission.where(permissible: permissible, user_id: user.id)
@@ -225,7 +225,7 @@ describe Permission do
         @permit = Permission.create(permissible: @other_permissible, user: user, permit: Permission::READ_BIT)
        
         expect {
-          Permission.revoke_all(permissible: permissible, user_ids: user.id)
+          permissible.revoke_all(user_ids: user.id)
         }.not_to change(Permission.where(permissible: @other_permissible, user: user), :count)
 
         permissions = Permission.where(permissible: permissible, user_id: user.id)
@@ -238,11 +238,11 @@ describe Permission do
     context 'when no permissions exist' do
       it 'does not attempt any deletions' do
         expect(Permission).not_to receive(:delete_all)
-        Permission.revoke_all(permissible: permissible, user_ids: user.id)
+        permissible.revoke_all(user_ids: user.id)
       end
 
       it 'does not set a NO_PERMIT_BIT' do
-        Permission.revoke_all(permissible: permissible, user_ids: user.id)
+        permissible.revoke_all(user_ids: user.id)
 
         expect(Permission.count).to eq(0)
         expect(Permission.where(permit: Permission::NO_PERMIT_BIT).empty?).to be true
@@ -261,7 +261,7 @@ describe Permission do
 
       it 'deletes permits and sets NO_PERMIT_BIT for each user' do
         expect { 
-          Permission.revoke_all(permissible: permissible, user_ids: @user_ids)
+          permissible.revoke_all(user_ids: @user_ids)
         }.to change(Permission, :count).to(3)
 
         revoked_permits = Permission.where(permissible: permissible, user_id: @user_ids)
