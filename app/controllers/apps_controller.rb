@@ -79,7 +79,7 @@ class AppsController < ApplicationController
   end
 
   def apps
-    @apps ||= App.accessible_by(Ability.new(current_user))
+    @apps ||= current_user.permitted_apps
     @apps = @apps.find_by_all_tags(tagged_with_params) if tagged_with_params.present?
     if params[:include_deleted].present?
       @apps.order(:descriptive_name)

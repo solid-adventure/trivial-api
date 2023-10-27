@@ -28,6 +28,9 @@ class User < ActiveRecord::Base
   # new permission based associations
   has_many :permissions
   has_many :permitted_apps, through: :permissions, source: :permissible, source_type: 'App'
+  has_many :permitted_manifests, through: :permissions, source: :permissible, source_type: 'Manifest'
+  has_many :permitted_manifest_drafts, through: :permissions, source: :permissible, source_type: 'ManifestDraft'
+  has_many :permitted_credential_sets, through: :permissions, source: :permissible, source_type: 'CredentialSet'
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]

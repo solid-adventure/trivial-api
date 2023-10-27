@@ -57,7 +57,7 @@ class ActivityEntriesController < ApplicationController
   end
 
   def stats
-    app = App.accessible_by(Ability.new(current_user)).find_by_name!(params[:app_id])
+    app = current_user.permitted_apps.find_by_name!(params[:app_id])
     authorize! :read, app
     if app
       render json: ActivityEntry.chart_stats(app.id, 7)
@@ -80,9 +80,9 @@ class ActivityEntriesController < ApplicationController
 
   def app_activity
     if params[:app_id].present?
-      App.accessible_by(Ability.new(current_user)).find_by_name(params[:app_id]).activity_entries
+      current_user.permitted_apps.find_by_name(params[:app_id]).activity_entries
     else
-      ActivityEntry.accessible_by(Ability.new(current_user)).all
+      User.includes(permitted_apps: :activity_entries).find(current_user.id).permitted_apps.flat_map(&:activity_entries)
     end
   end
 
