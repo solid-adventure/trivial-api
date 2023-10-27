@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  resources :permissions
   resources :customers
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
@@ -85,4 +84,10 @@ Rails.application.routes.draw do
   delete 'credential_sets/:id', to: 'credential_sets#destroy'
   put 'credential_sets/:id/api_key', to: 'credential_sets#update_api_key'
 
+  get '/permissions/users/:user_id', to: 'permissions#index_user'
+  get '/permissions/:permissible_type/:permissible_id', to: 'permissions#index_resource'
+  post '/permission/:permit/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#grant'
+  post '/permissions/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#grant_all'
+  delete '/permission/:permit/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#revoke'
+  delete '/permissions/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#revoke_all'
 end
