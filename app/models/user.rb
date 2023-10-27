@@ -8,7 +8,6 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_and_belongs_to_many :customers
-  has_many :webhooks
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
   
