@@ -5,14 +5,14 @@ class PermissionsController < ApplicationController
   # GET /permissions/users/:user_id
   def index_user
     permissions = Permission.where(user: @user)
-    permissions = group_by_user(permissions)
+    permissions = Permission.group_by_user(permissions)
     render json: permissions, status: :ok
   end
 
   # GET /permissions/:permissible_type/:permissible_id
   def index_resource
     permissions = Permission.where(permissible: @permissible)
-    permissions = group_by_resource(permissions)
+    permissions = Permission.group_by_resource(permissions)
     render json: permissions, status: :ok
   end
 
@@ -20,7 +20,7 @@ class PermissionsController < ApplicationController
   def grant
     if @permissible.grant(user_ids: @user.id, permit: params[:permit].to_sym)
       permissions = Permission.where(permissible: @permissible, user: @user)
-      permissions = group_by_user(permissions)
+      permissions = Permission.group_by_user(permissions)
       render json: permissions, status: :ok
     else
       render json: { message: 'Grant Failed' }, status: :unprocessable_entity
@@ -31,7 +31,7 @@ class PermissionsController < ApplicationController
   def grant_all
     if @permissible.grant_all(user_ids: @user.id)
       permissions = Permission.where(permissible: @permissible, user: @user)
-      permissions = group_by_user(permissions)
+      permissions = Permission.group_by_user(permissions)
       render json: permissions, status: :ok
     else
       render json: { message: 'Grant Failed' }, status: :unprocessable_entity
@@ -76,59 +76,5 @@ class PermissionsController < ApplicationController
     # Only allow a list of trusted parameters through
     def permission_params
       params.require(:permission).permit(:permissible_type, :permissible_id, :user_id, :permit)
-    end
-
-    def group_by_user(permissions)
-      permissions = permissions.group_by(&:user_id)
-
-      json_return = permissions.map do |user_id, user_permits|
-      {
-        user_id: user_id,
-        permissions: user_permits.group_by { 
-          |permission| [permission.permissible_type, permission.permissible_id] 
-        }.map do |(permissible_type, permissible_id), permissions|
-          permits = permissions.pluck(:permit).map { |permit| Permission::PERMISSIONS_HASH.key(permit) }
-          permission_ids = permissions.pluck(:id)
-          {
-            permissible_type: permissible_type,
-            permissible_id: permissible_id,
-            permits: permits,
-            ids: permission_ids
-          }
-        end
-      }
-      end
-
-      if json_return.length == 1
-        json_return.first
-      else 
-        json_return
-      end
-    end
-
-    def group_by_resource(permissions)
-      permissions = permissions.group_by { |permission| [permission.permissible_type, permission.permissible_id] }
-
-      json_return = permissions.map do |(permissible_type, permissible_id), user_permits|
-      {
-        permissible_type: permissible_type,
-        permissible_id: permissible_id,
-        permissions: user_permits.group_by(&:user_id).map do |user_id, permissions|
-          permits = permissions.pluck(:permit).map { |permit| Permission::PERMISSIONS_HASH.key(permit) }
-          permission_ids = permissions.pluck(:id)
-          {
-            user_id: user_id,
-            permits: permits,
-            ids: permission_ids
-          }
-        end
-      }
-      end
-
-      if json_return.length == 1
-        json_return.first
-      else 
-        json_return
-      end
     end
 end
