@@ -4,7 +4,7 @@ class PermissionsData < ActiveRecord::Migration[7.0]
     # Permit users full control of th their own apps
     User.all.each do |user|
       user.apps.each do |app|
-        app.grant_all(user_ids: [user.id])
+        app.transfer_ownership(new_owner: user)
       end
     end
 
