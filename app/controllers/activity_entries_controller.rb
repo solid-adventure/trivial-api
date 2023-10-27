@@ -22,6 +22,7 @@ class ActivityEntriesController < ApplicationController
     @entry.owner = current_user
     @entry.app = current_user.apps.kept.find_by_name!(params[:app_id])
     @entry.save!
+    @entry.grant_all(user_ids: current_user.id)
     render status: :created, json: @entry.activity_attributes
   end
 
@@ -33,6 +34,7 @@ class ActivityEntriesController < ApplicationController
     @entry.activity_type = 'request'
     @entry.normalize_json
     @entry.save!
+    @entry.grant_all(user_ids: current_user.id)
     render status: :created, json: @entry.legacy_attributes
   end
 

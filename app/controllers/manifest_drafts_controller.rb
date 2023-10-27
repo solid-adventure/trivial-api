@@ -6,6 +6,7 @@ class ManifestDraftsController < ApplicationController
 
   def create
     @manifest_draft = ManifestDraft.create_for_manifest!(manifest, manifest_draft_params)
+    @manifest_draft.grant_all(user_ids: @manifest_draft.owner.id)
     render json: @manifest_draft
   end
 

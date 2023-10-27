@@ -8,7 +8,7 @@ class Permission < ApplicationRecord
   validates :permissible, presence: true
   validates :permit, presence: true
 
-  def group_by_user(permissions)
+  def self.group_by_user(permissions)
     permissions = permissions.group_by(&:user_id)
 
     json_return = permissions.map do |user_id, user_permits|
@@ -36,7 +36,7 @@ class Permission < ApplicationRecord
     end
   end
 
-  def group_by_resource(permissions)
+  def self.group_by_resource(permissions)
     permissions = permissions.group_by { |permission| [permission.permissible_type, permission.permissible_id] }
 
     json_return = permissions.map do |(permissible_type, permissible_id), user_permits|

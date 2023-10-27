@@ -1,8 +1,19 @@
 class ManifestDraft < ApplicationRecord
-  belongs_to :user, inverse_of: :manifest_drafts
-  belongs_to :owner, polymorphic: true, inverse_of: :manifest_drafts
+  include Ownable
+  include Permissible
+
   belongs_to :app
   belongs_to :manifest
+  
+  # old user association to be deprecated for ownership and permissions
+  belongs_to :user, inverse_of: :manifest_drafts
+  
+  # new owner based association
+  belongs_to :owner, polymorphic: true, inverse_of: :manifest_drafts
+
+  # new permission based multi-user association
+  has_many :permissions, as: :permissible
+  has_many :permitted_users, through: :permissions, source: :user
 
   scope :expired, -> { where('expires_at <= ?', Time.now) }
   scope :unexpired, -> { where('expires_at > ?', Time.now) }
