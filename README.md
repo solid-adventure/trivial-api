@@ -10,7 +10,7 @@ Documentation at [trivial-js.org](https://trivial-js.org)
 
 ### STOP
 
-First, verify that you need to configure this repository locally. Most development can be done with a local copy of lupin pointed at the staging API server. You should only need to install this Rails application if you will be making changes to the API itself.
+First, verify that you need to configure this repository locally. Unless you are working on the API itself, most development can be done with a local copy of trivial-ui pointed at the staging API server.
 
 If you are certain you need to set up this app, follow the instructions below.
 
