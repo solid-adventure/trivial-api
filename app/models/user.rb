@@ -25,6 +25,10 @@ class User < ActiveRecord::Base
   has_many :owned_manifest_drafts, class_name: 'ManifestDraft', as: :owner
   has_many :owned_activity_entries, class_name: 'ActivityEntry', as: :owner
   has_many :owned_credential_sets, class_name: 'CredentialSet', as: :owner
+  
+  # new permission based associations
+  has_many :permissions
+  has_many :permitted_apps, through: :permissions, source: :permissible, source_type: 'App'
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]
@@ -57,5 +61,4 @@ class User < ActiveRecord::Base
       self.approval = 'approved'
     end
   end
-
 end

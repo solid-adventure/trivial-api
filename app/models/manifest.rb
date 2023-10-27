@@ -1,11 +1,21 @@
 class Manifest < ApplicationRecord
+    include Ownable
+    include Permissible
     validates :app_id, presence: true
     validates :user_id, presence: true
     validates :content, presence: true
 
-    belongs_to :user
-    belongs_to :owner, polymorphic: true
     belongs_to :app, foreign_key: :internal_app_id, inverse_of: :manifests
+    
+    # old user association to be deprecated for ownership and permissions
+    belongs_to :user
+    
+    # new owner based association
+    belongs_to :owner, polymorphic: true
+    
+    # new permission based multi-user association
+    has_many :permissions, as: :permissible
+    has_many :permitted_users, through: :permissions, source: :user
 
     has_one_attached :bundle
 
@@ -48,5 +58,4 @@ class Manifest < ApplicationRecord
             end
         end
     end
-
 end

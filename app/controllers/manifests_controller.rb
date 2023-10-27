@@ -11,6 +11,7 @@ class ManifestsController < ApplicationController
         manifest.user_id = current_user.id
         manifest.owner = current_user
         if manifest.save
+            manifest.grant_all(user_ids: current_user.id)
             render json: manifest, adapter: :attributes, status: :created
         else
             render_bad_request manifest
@@ -49,5 +50,4 @@ class ManifestsController < ApplicationController
       @app ||= App.find_by_name(params[:app_id])
       authorize! :read, @app
     end
-
 end

@@ -13,6 +13,7 @@ class CredentialSetsController < ApplicationController
     if params.has_key?(:credentials)
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
+      @credential_set.grant_all(user_ids: current_user.id)
     end
     render json: {credential_set: @credential_set.api_attrs}
   end
