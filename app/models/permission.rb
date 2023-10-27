@@ -11,7 +11,7 @@ class Permission < ApplicationRecord
   def self.group_by_user(permissions)
     permissions = permissions.group_by(&:user_id)
 
-    json_return = permissions.map do |user_id, user_permits|
+    output = permissions.map do |user_id, user_permits|
     {
       user_id: user_id,
       permissions: user_permits.group_by { 
@@ -29,17 +29,17 @@ class Permission < ApplicationRecord
     }
     end
 
-    if json_return.length == 1
-      json_return.first
+    if output.length == 1
+      output.first
     else 
-      json_return
+      output
     end
   end
 
   def self.group_by_resource(permissions)
     permissions = permissions.group_by { |permission| [permission.permissible_type, permission.permissible_id] }
 
-    json_return = permissions.map do |(permissible_type, permissible_id), user_permits|
+    output = permissions.map do |(permissible_type, permissible_id), user_permits|
     {
       permissible_type: permissible_type,
       permissible_id: permissible_id,
@@ -55,10 +55,10 @@ class Permission < ApplicationRecord
     }
     end
 
-    if json_return.length == 1
-      json_return.first
+    if output.length == 1
+      output.first
     else 
-      json_return
+      output
     end
   end
 end
