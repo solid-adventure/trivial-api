@@ -2,9 +2,6 @@ require 'uri'
 require 'net/http'
 
 class ActivityEntry < ApplicationRecord
-  include Ownable
-  include Permissible
-
   validates :source, presence: true, if: :is_request?
 
   belongs_to :app
@@ -14,10 +11,6 @@ class ActivityEntry < ApplicationRecord
 
   # new owner based association
   belongs_to :owner, polymorphic: true
-
-  # new permission based multi-user association
-  has_many :permissions, as: :permissible
-  has_many :permitted_users, through: :permissions, source: :user
 
   before_create :generate_update_id
 

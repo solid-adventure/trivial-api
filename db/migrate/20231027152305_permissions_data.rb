@@ -12,9 +12,6 @@ class PermissionsData < ActiveRecord::Migration[7.0]
       user.manifest_drafts.each do |manifest_draft|
         manifest_draft.transfer_ownership(new_owner: user)
       end
-      user.activity_entries.each do |activity_entry|
-        activity_entry.transfer_ownership(new_owner: user)
-      end
       user.credential_sets.each do |credential_set|
         credential_set.transfer_ownership(new_owner: user)
       end
@@ -31,9 +28,6 @@ class PermissionsData < ActiveRecord::Migration[7.0]
         end
         user.manifest_drafts.each do |manifest_draft|
           manifest_draft.grant(permit: :read, user_ids: org.users.pluck(:id))
-        end
-        user.activity_entries.each do |activity_entry|
-          activity_entry.grant(permit: :read, user_ids: org.users.pluck(:id))
         end
         user.credential_sets.each do |credential_set|
           credential_set.grant(permit: :read, user_ids: org.users.pluck(:id))
