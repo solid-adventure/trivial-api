@@ -21,8 +21,7 @@ If you are certain you need to set up this app, follow the instructions below.
 ```shell
 
 git clone git@github.com:solid-adventure/trivial-api.git
-
-cd project
+cd trivial-api
 
 ```
 
