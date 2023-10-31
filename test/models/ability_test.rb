@@ -54,7 +54,8 @@ class AbilityTest < ActiveSupport::TestCase
 
     test 'user cannot access apps owned by a customer account they are not a member of' do
       @customer.users << @user1
-      apps = App.accessible_by(Ability.new(@user1))
+      # apps = App.accessible_by(Ability.new(@user1))
+      apps = @user1.permitted_apps
       assert_not_includes apps.pluck(:id), @app_user2.id
     end
 
