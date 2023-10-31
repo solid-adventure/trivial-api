@@ -33,27 +33,59 @@ class Ability
       organization.org_roles.find_by(user: user)&.role == 'admin'
     end
 
-    
-    can :manage, ActivityEntry, owner: user
-    can :manage, App, owner: user
-    can :manage, CredentialSet, owner: user
-    can :manage, Manifest, owner: user
-    can :manage, ManifestDraft, owner: user
-
+    # ActivityEntry blocks Permission Blocks
     can :read, ActivityEntry do |entry|
       Permission.find_by(permissible: entry.app, user: user, permit: READ_BIT)
     end
+    can :update, ActivityEntry do |entry|
+      Permission.find_by(permissible: entry.app, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, ActivityEntry do |entry|
+      Permission.find_by(permissible: entry.app, user: user, permit: DELETE_BIT)
+    end
+
+    # App Permission Blocks
     can :read, App do |app|
       Permission.find_by(permissible: app, user: user, permit: READ_BIT)
     end
+    can :update, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: DELETE_BIT)
+    end
+
+    # CredentialSet Permission Blocks
     can :read, CredentialSet do |credential|
       Permission.find_by(permissible: credential, user: user, permit: READ_BIT)
     end
+    can :update, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: DELETE_BIT)
+    end
+
+    # Manifest Permission Blocks
     can :read, Manifest do |manifest|
       Permission.find_by(permissible: manifest, user: user, permit: READ_BIT)
     end
+    can :update, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: DELETE_BIT)
+    end
+    
+    # ManifestDraft Permission Blocks
     can :read, ManifestDraft do |draft|
       Permission.find_by(permissible: draft, user: user, permit: READ_BIT)
+    end
+    can :update, ManifestDraft do |draft|
+      Permission.find_by(permissible: draft, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, ManifestDraft do |draft|
+      Permission.find_by(permissible: draft, user: user, permit: DELETE_BIT)
     end
   end
 end

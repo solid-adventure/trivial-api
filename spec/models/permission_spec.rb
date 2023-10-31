@@ -4,7 +4,7 @@ describe Permission do
   let(:user) { FactoryBot.create(:user) }
   let(:user2) { FactoryBot.create(:user) }
   let(:user3) { FactoryBot.create(:user) }
-  let(:permissible) { FactoryBot.create(:app) }
+  let!(:permissible) { FactoryBot.create(:app) }
 
   describe 'grant' do
     context 'with valid input' do
@@ -244,8 +244,9 @@ describe Permission do
       it 'does not set a NO_PERMIT_BIT' do
         permissible.revoke_all(user_ids: user.id)
 
-        expect(Permission.count).to eq(0)
-        expect(Permission.where(permit: Permission::NO_PERMIT_BIT).empty?).to be true
+        permissions = Permission.where(permissible: permissible, user: user)
+        expect(permissions.count).to eq(0)
+        expect(permissions.where(permit: Permission::NO_PERMIT_BIT).empty?).to be true
       end
     end
 
@@ -262,7 +263,7 @@ describe Permission do
       it 'deletes permits and sets NO_PERMIT_BIT for each user' do
         expect { 
           permissible.revoke_all(user_ids: @user_ids)
-        }.to change(Permission, :count).to(3)
+        }.to change(Permission.where(permissible: permissible, user_id: @user_ids), :count).to(3)
 
         revoked_permits = Permission.where(permissible: permissible, user_id: @user_ids)
         expect(revoked_permits.pluck(:permit)).to eq([Permission::NO_PERMIT_BIT, Permission::NO_PERMIT_BIT, Permission::NO_PERMIT_BIT])

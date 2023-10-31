@@ -6,7 +6,7 @@ describe Ownable do
   let(:user3) { FactoryBot.create(:user) }
   let(:organization1) { FactoryBot.create(:organization, admin: user1, members_count: 2) }
   let(:organization2) { FactoryBot.create(:organization, admin: user2, members_count: 2) }
-  let(:ownable) { FactoryBot.create(:app, :permissible, custom_owner: old_owner) }
+  let(:ownable) { FactoryBot.create(:app, custom_owner: old_owner) }
 
   describe '#transfer_ownership' do
     describe "previous permissions" do

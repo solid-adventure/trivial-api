@@ -1,8 +1,8 @@
 class ManifestsController < ApplicationController
-
-    load_and_authorize_resource
+    load_resource
 
     def index
+        authorize! :read, manifests
         render json: manifests, adapter: :attributes
     end
 
@@ -19,10 +19,12 @@ class ManifestsController < ApplicationController
     end
 
     def show
+        authorize! :read, manifest
         render json: manifest, adapter: :attributes
     end
 
     def update
+        authorize! :update, manifest
         if manifest.update(manifest_params)
             render json: manifest, adapter: :attributes
         else

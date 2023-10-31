@@ -70,7 +70,7 @@ describe 'Permissions API' do
 
   before do
     @owner = user
-    @permissible = FactoryBot.create(:app, :permissible, custom_owner: @owner)
+    @permissible = FactoryBot.create(:app, custom_owner: @owner)
   end
 
   path '/permissions/users/{user_id}' do

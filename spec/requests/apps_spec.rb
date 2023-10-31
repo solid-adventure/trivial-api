@@ -7,7 +7,7 @@ describe 'Apps API' do
   let(:client) { user.tokens.keys.first }
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
-  let!(:user_app) { FactoryBot.create(:app, user: user) }
+  let!(:user_app) { FactoryBot.create(:app, custom_owner: user) }
 
   def self.app_schema
     {
