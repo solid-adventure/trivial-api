@@ -16,11 +16,13 @@ class ActivityEntriesController < ApplicationController
   end
 
   def create
-    authorize! :create, ActivityEntry
+    @app = current_user.permitted_apps.kept.find_by_name!(params[:app_id])
+    authorize! :update, @app
+
     @entry = ActivityEntry.new(activity_entry_params)
     @entry.user = current_user
     @entry.owner = current_user
-    @entry.app = current_user.apps.kept.find_by_name!(params[:app_id])
+    @entry.app = @app
     @entry.save!
     render status: :created, json: @entry.activity_attributes
   end

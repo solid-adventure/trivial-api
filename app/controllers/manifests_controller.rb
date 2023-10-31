@@ -1,9 +1,9 @@
 class ManifestsController < ApplicationController
-    load_resource
 
     def index
-        authorize! :read, manifests
-        render json: manifests, adapter: :attributes
+        byebug
+        @manifests = current_user.permitted_manifests
+        render json: @manifests, adapter: :attributes
     end
 
     def create
@@ -35,13 +35,7 @@ class ManifestsController < ApplicationController
     private
 
     def manifest
-        # @manifest is already loaded and authorized
-        @manifest
-    end
-
-    def manifests
-        # @manifests is already loaded and authorized
-        @manifests.where(app_id: params[:app_id]).order(created_at: :desc)
+        @manifest ||= Manifest.find(params[:id])
     end
 
     def manifest_params

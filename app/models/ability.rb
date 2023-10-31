@@ -54,6 +54,12 @@ class Ability
     can :destroy, App do |app|
       Permission.find_by(permissible: app, user: user, permit: DELETE_BIT)
     end
+    can :grant, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: REVOKE_BIT)
+    end
 
     # CredentialSet Permission Blocks
     can :read, CredentialSet do |credential|
@@ -64,6 +70,12 @@ class Ability
     end
     can :destroy, CredentialSet do |credential|
       Permission.find_by(permissible: credential, user: user, permit: DELETE_BIT)
+    end
+    can :grant, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: REVOKE_BIT)
     end
 
     # Manifest Permission Blocks
@@ -76,6 +88,12 @@ class Ability
     can :destroy, Manifest do |manifest|
       Permission.find_by(permissible: manifest, user: user, permit: DELETE_BIT)
     end
+    can :grant, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: REVOKE_BIT)
+    end
     
     # ManifestDraft Permission Blocks
     can :read, ManifestDraft do |draft|
@@ -86,6 +104,12 @@ class Ability
     end
     can :destroy, ManifestDraft do |draft|
       Permission.find_by(permissible: draft, user: user, permit: DELETE_BIT)
+    end
+    can :grant, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: REVOKE_BIT)
     end
   end
 end
