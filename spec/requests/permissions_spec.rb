@@ -267,8 +267,7 @@ describe 'Permissions API' do
 
         run_test! do
           permissions = Permission.where(user: permitted_user)
-          expect(permissions.count).to eq(1)
-          expect(permissions.first.permit).to eq(Permission::NO_PERMIT_BIT)
+          expect(permissions.count).to eq(0)
         end
       end
     end

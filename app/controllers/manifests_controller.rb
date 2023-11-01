@@ -1,9 +1,7 @@
 class ManifestsController < ApplicationController
 
     def index
-        byebug
-        @manifests = current_user.permitted_manifests
-        render json: @manifests, adapter: :attributes
+        render json: manifests, adapter: :attributes
     end
 
     def create
@@ -36,6 +34,14 @@ class ManifestsController < ApplicationController
 
     def manifest
         @manifest ||= Manifest.find(params[:id])
+    end
+
+    def manifests
+        current_user.permitted_manifests
+            .where(
+                permissions: { permit: Permission::READ_BIT }, 
+                app_id: params[:app_id]
+            ).order(created_at: :desc)
     end
 
     def manifest_params

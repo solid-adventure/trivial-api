@@ -30,9 +30,7 @@ describe Ownable do
         it 'revokes all previous permissions' do
           expect {
             ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
-          }.to change(@previous_permissions, :count).to(@permitted_users.length)
-
-          expect(@previous_permissions.distinct.pluck(:permit)).to eq([Permission::NO_PERMIT_BIT])
+          }.to change(@previous_permissions, :count).to(0)
         end
       end
 
