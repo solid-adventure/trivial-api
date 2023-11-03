@@ -6,7 +6,6 @@ class Ability
 
   def initialize(user)
 
-
     # all users can read public apps
     can :read, App, readable_by: 'public'
     can :read, Manifest, :app => { readable_by: 'public' }
@@ -34,6 +33,9 @@ class Ability
     end
 
     # ActivityEntry blocks Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], ActivityEntry do |entry|
+      entry.app.admin?(user)
+    end
     can :read, ActivityEntry do |entry|
       Permission.find_by(permissible: entry.app, user: user, permit: READ_BIT)
     end
@@ -45,6 +47,9 @@ class Ability
     end
 
     # App Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], App do |app|
+      app.admin?(user)
+    end
     can :read, App do |app|
       Permission.find_by(permissible: app, user: user, permit: READ_BIT)
     end
@@ -62,6 +67,9 @@ class Ability
     end
 
     # CredentialSet Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], CredentialSet do |credential|
+      credential.admin?(user)
+    end
     can :read, CredentialSet do |credential|
       Permission.find_by(permissible: credential, user: user, permit: READ_BIT)
     end
@@ -79,6 +87,9 @@ class Ability
     end
 
     # Manifest Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], Manifest do |manifest|
+      manifest.admin?(user)
+    end
     can :read, Manifest do |manifest|
       Permission.find_by(permissible: manifest, user: user, permit: READ_BIT)
     end
@@ -96,6 +107,9 @@ class Ability
     end
     
     # ManifestDraft Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], ManifestDraft do |draft|
+      draft.admin?(user)
+    end
     can :read, ManifestDraft do |draft|
       Permission.find_by(permissible: draft, user: user, permit: READ_BIT)
     end

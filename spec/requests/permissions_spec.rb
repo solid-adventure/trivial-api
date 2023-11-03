@@ -88,7 +88,7 @@ describe 'Permissions API' do
 
         before do
           @permissible2 = FactoryBot.create(:app)
-          @permissible2.grant(user_ids: @owner.id, permit: :read)
+          @permissible2.grant_all(user_ids: @owner.id)
         end
 
         run_test! do |response|
@@ -96,13 +96,12 @@ describe 'Permissions API' do
           expect(data['user_id']).to eq(user_id)
           
           permissions = data['permissions']
-          expect(permissions.length).to eq(2)
+          expect(permissions.length).to eq(1)
           
-          expect(permissions.first['permissible_type']).to eq(@permissible.class.to_s)
-          expect(permissions.first['permissible_id']).to eq(@permissible.id)
+          expect(permissions.first['permissible_type']).to eq(@permissible2.class.to_s)
+          expect(permissions.first['permissible_id']).to eq(@permissible2.id)
 
           expect(permissions.first['permits']).to eq(Permission::PERMISSIONS_HASH.keys.map(&:to_s))
-          expect(permissions.last['permits']).to eq(['read'])
         end
       end
 
@@ -129,8 +128,9 @@ describe 'Permissions API' do
       response '200', 'Permissions retrieved successfully' do
         schema type: :resource_permission_schema
 
-        before do  
+        before do
           @permitted_user = FactoryBot.create(:user)
+          @permissible.grant_all(user_ids: user.id)
           @permissible.grant(user_ids: @permitted_user.id, permit: :read)
         end
 

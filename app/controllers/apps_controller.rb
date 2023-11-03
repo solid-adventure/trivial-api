@@ -30,7 +30,6 @@ class AppsController < ApplicationController
     @app.user = current_user
     @app.owner = current_user
     @app.save!
-    @app.grant_all(user_ids: current_user.id)
     render json: @app.as_json(methods: [:aws_role])
   end
 
@@ -79,7 +78,7 @@ class AppsController < ApplicationController
   end
 
   def apps
-    @apps ||= current_user.permitted_apps
+    @apps ||= current_user.associated_apps
     @apps = @apps.find_by_all_tags(tagged_with_params) if tagged_with_params.present?
     if params[:include_deleted].present?
       @apps.order(:descriptive_name)

@@ -11,6 +11,7 @@ class User < ActiveRecord::Base
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
   
+  ASSOCIATED_RESOURCES = ['apps', 'credential_sets', 'manifests', 'manifest_drafts']
   # to be deprecated associations upon ownership transfer
   has_many :apps
   has_many :manifests
@@ -53,6 +54,30 @@ class User < ActiveRecord::Base
 
   def set_trial_expires_at
     self.trial_expires_at = Time.now + 14.day
+  end
+
+  # FIXME split into separated methods
+  ASSOCIATED_RESOURCES.each do |resource_type|
+    define_method("associated_#{resource_type}") do
+      model_class = resource_type.classify.constantize
+
+      orgs = self.organizations.where(org_roles: { role: 'admin' })
+      admin_associated = model_class.where(owner: [self] + orgs)
+      
+      permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
+      
+      admin_associated.or(permitted)
+    end
+  end
+
+  # specially defined due to association differences
+  def associated_activity_entries
+    orgs = self.organizations.where(org_roles: { role: 'admin' })
+    admin_associated = ActivityEntry.where(app: App.where(owner: [self] + orgs))
+    
+    permitted = ActivityEntry.where(app: App.where(id: self.permitted_apps.pluck(:id)))
+    
+    admin_associated.or(permitted)
   end
 
   private

@@ -17,10 +17,6 @@ FactoryBot.define do
       manifest.owner = manifest.app.owner
     end
 
-    after(:create) do |manifest, _evaluator|
-      manifest.grant_all(user_ids: manifest.owner.id)
-    end
-
     trait :org_owner do
       association :owner, factory: :organization
     end

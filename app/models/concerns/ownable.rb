@@ -11,14 +11,17 @@ module Ownable
     end
     self.update(owner: new_owner)
 
-    if new_owner.is_a?(User)
-      self.grant_all(user_ids: new_owner.id)
-    else # new_owner is Organization
-      admins = new_owner.org_roles.where(role: 'admin').pluck(:user_id)
+    if new_owner.is_a?(Organization)
       members = new_owner.org_roles.where(role: 'member').pluck(:user_id)
-
-      self.grant_all(user_ids: admins)
       self.grant(user_ids: members, permit: :read)
+    end
+  end
+
+  def admin?(user)
+    if self.owner.is_a?(User)
+      self.owner == user
+    else # owner is Organization
+      self.owner.org_roles.exists?(user: user, role: 'admin')
     end
   end
 end
