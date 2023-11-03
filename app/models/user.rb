@@ -56,18 +56,8 @@ class User < ActiveRecord::Base
     self.trial_expires_at = Time.now + 14.day
   end
 
-  # FIXME split into separated methods
-  ASSOCIATED_RESOURCES.each do |resource_type|
-    define_method("associated_#{resource_type}") do
-      model_class = resource_type.classify.constantize
-
-      orgs = self.organizations.where(org_roles: { role: 'admin' })
-      admin_associated = model_class.where(owner: [self] + orgs)
-      
-      permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
-      
-      admin_associated.or(permitted)
-    end
+  def associated_apps
+    associated_resources('apps')
   end
 
   # specially defined due to association differences
@@ -79,8 +69,32 @@ class User < ActiveRecord::Base
     
     admin_associated.or(permitted)
   end
+  
+  def associated_credential_sets
+    associated_resources('credential_sets')
+  end
+
+  def associated_manifests
+    associated_resources('manifests')
+  end
+
+  def associated_manifest_drafts
+    associated_resources('manifest_drafts')
+  end
+
 
   private
+
+  def associated_resources(resource_type)
+    model_class = resource_type.classify.constantize
+
+    orgs = self.organizations.where(org_roles: { role: 'admin' })
+    admin_associated = model_class.where(owner: [self] + orgs)
+    
+    permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
+    
+    admin_associated.or(permitted)
+  end
 
   def set_values_for_individual
     if !admin?
