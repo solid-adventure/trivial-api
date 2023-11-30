@@ -52,6 +52,20 @@ class User < ActiveRecord::Base
     self.trial_expires_at = Time.now + 14.day
   end
 
+  def accept_role!
+    if invitation_metadata
+      metadata = eval(invitation_metadata)
+      OrgRole.create(
+        organization: Organization.find(metadata["org_id"]), 
+        user: self, 
+        role: metadata["role"]
+      )
+      self.update_column(:invitation_metadata, nil)
+    else 
+      raise ActiveRecord::RecordNotFound
+    end
+  end
+
   private
 
   def set_values_for_individual
