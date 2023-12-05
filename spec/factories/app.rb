@@ -17,21 +17,12 @@ FactoryBot.define do
       association :owner, factory: :organization
     end
 
-    trait :permissible do
-      after(:create) do |app, _evaluator|
-        if app.owner.is_a?(User)
-          app.grant_all(
-            user_ids: app.owner.id
-          )
-        else # owner is an Organization
-          app.grant_all(
-            user_ids: app.owner.org_roles.where(role: 'admin').pluck(:user_id)
-          )
-          app.grant(
-            user_ids: app.owner.org_roles.where(role: 'member').pluck(:user_id),
-            permit: :read
-          )
-        end
+    after(:create) do |app, _evaluator|
+      if app.owner.is_a?(Organization)
+        app.grant(
+          user_ids: app.owner.org_roles.where(role: 'member').pluck(:user_id),
+          permit: :read
+        )
       end
     end
   end

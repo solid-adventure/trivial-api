@@ -6,7 +6,7 @@ describe Ownable do
   let(:user3) { FactoryBot.create(:user) }
   let(:organization1) { FactoryBot.create(:organization, admin: user1, members_count: 2) }
   let(:organization2) { FactoryBot.create(:organization, admin: user2, members_count: 2) }
-  let(:ownable) { FactoryBot.create(:app, :permissible, custom_owner: old_owner) }
+  let(:ownable) { FactoryBot.create(:app, custom_owner: old_owner) }
 
   describe '#transfer_ownership' do
     describe "previous permissions" do
@@ -30,9 +30,7 @@ describe Ownable do
         it 'revokes all previous permissions' do
           expect {
             ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
-          }.to change(@previous_permissions, :count).to(@permitted_users.length)
-
-          expect(@previous_permissions.distinct.pluck(:permit)).to eq([Permission::NO_PERMIT_BIT])
+          }.to change(@previous_permissions, :count).to(0)
         end
       end
 
@@ -62,17 +60,6 @@ describe Ownable do
             ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
           }.to change(ownable, :owner).to(new_owner)
         end
-
-        it 'grants the correct permissions to the new owner' do
-          new_owner_permits = Permission.where(permissible: ownable, user_id: new_owner.id)
-          expect(new_owner_permits.count).to eq(0)
-
-          expect {
-            ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
-          }.to change(new_owner_permits, :count).to(Permission::PERMISSIONS_HASH.length)
-
-          expect(new_owner_permits.pluck(:permit)).to eq(Permission::PERMISSIONS_HASH.values)
-        end
       end
 
       context 'transfer ownership to an Organization' do
@@ -83,25 +70,42 @@ describe Ownable do
             ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
           }.to change(ownable, :owner).to(new_owner)
         end
+      end
+    end
+  end
 
-        it 'grants the correct permissions to the new owner' do
-          admins = new_owner.org_roles.where(role: 'admin').pluck(:user_id)
-          members = new_owner.org_roles.where(role: 'member').pluck(:user_id)
-          admin_permits = Permission.where(permissible: ownable, user_id: admins)
-          member_permits = Permission.where(permissible: ownable, user_id: members)
+  describe '#admin?' do
+    context 'resource owner is User' do
+      before do
+        @owner = FactoryBot.create(:user)
+        @ownable = FactoryBot.create(:app, custom_owner: @owner)
+      end
 
-          expect(admin_permits.count).to eq(0)
-          expect(member_permits.count).to eq(0)
+      it 'returns true if user is owner' do
+        expect(@ownable.admin?(@owner)).to eq true
+      end
+      it 'returns false if user is not owner' do
+        @other = FactoryBot.create(:user)
+        expect(@ownable.admin?(@other)).to eq false
+      end
+    end
+    context 'resource owner is Organization' do
+      before do
+        @org = FactoryBot.create(:organization, members_count: 1)
+        @ownable = FactoryBot.create(:app, custom_owner: @org)
+      end
 
-          ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
-
-          admin_permits.reload
-          member_permits.reload
-          expect(admin_permits.count).to eq(admins.length * Permission::PERMISSIONS_HASH.length)
-          expect(member_permits.count).to eq(members.length)
-          expect(admin_permits.pluck(:permit)).to eq((Permission::PERMISSIONS_HASH.values * admins.count).flatten)
-          expect(member_permits.pluck(:permit)).to eq(([Permission::READ_BIT] * members.count).flatten)
-        end
+      it 'returns true if user is admin of org' do
+        admin = @org.users.find_by(org_roles: { role: 'admin' })
+        expect(@ownable.admin?(admin)).to eq true
+      end
+      it 'returns false if user is member of org' do
+        member = @org.users.find_by(org_roles: { role: 'member' })
+        expect(@ownable.admin?(member)).to eq false
+      end
+      it 'returns false if user is not part of org' do
+        other = FactoryBot.create(:user)
+        expect(@ownable.admin?(other)).to eq false
       end
     end
   end

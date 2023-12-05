@@ -2,9 +2,9 @@
 
 class Ability
   include CanCan::Ability
+  include PermissionConstants
 
   def initialize(user)
-
 
     # all users can read public apps
     can :read, App, readable_by: 'public'
@@ -32,61 +32,111 @@ class Ability
       organization.org_roles.find_by(user: user)&.role == 'admin'
     end
 
-    # Until we have UI in place to support admin filtering by customer, this would be too much
-    # Admins can manage everything
-    # if user.admin?
-    #   can :manage, :all
-    # end
-
-    # Users with no customers can manage their own resources
-    can :manage, ActivityEntry, user: user
-    can :manage, App, user: user
-    can :manage, CredentialSet, user: user
-    can :manage, Manifest, user: user
-    can :manage, ManifestDraft, user: user
-
-    # Users with customers can read their teammates' resources
-    return unless user.customers.length > 0
-    can :read, ActivityEntry, user_id: shared_customer_scope(user)
-    can :read, App, user_id: shared_customer_scope(user)
-    can :read, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
-    can :read, Manifest, user_id: shared_customer_scope(user)
-
-    if user.admin?
-      can :manage, ActivityEntry, user_id: shared_customer_scope(user)
-      can :manage, App, user_id: shared_customer_scope(user)
-      can :manage, CredentialSet, user_id: shared_customer_scope(user) # exposes the existance of the credentialSet, but not the values
-      can :manage, Manifest, user_id: shared_customer_scope(user)
+    # ActivityEntry blocks Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], ActivityEntry do |entry|
+      entry.app.admin?(user)
+    end
+    can [:read], ActivityEntry do |entry|
+      entry.app.member?(user)
+    end
+    can :read, ActivityEntry do |entry|
+      Permission.find_by(permissible: entry.app, user: user, permit: READ_BIT)
+    end
+    can :update, ActivityEntry do |entry|
+      Permission.find_by(permissible: entry.app, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, ActivityEntry do |entry|
+      Permission.find_by(permissible: entry.app, user: user, permit: DELETE_BIT)
     end
 
-    # Define abilities for the user here. For example:
-    #
-    #   return unless user.present?
-    #   can :read, :all
-    #   return unless user.admin?
-    #   can :manage, :all
-    #
-    # The first argument to `can` is the action you are giving the user
-    # permission to do.
-    # If you pass :manage it will apply to every action. Other common actions
-    # here are :read, :create, :update and :destroy.
-    #
-    # The second argument is the resource the user can perform the action on.
-    # If you pass :all it will apply to every resource. Otherwise pass a Ruby
-    # class of the resource.
-    #
-    # The third argument is an optional hash of conditions to further filter the
-    # objects.
-    # For example, here the user can only update published articles.
-    #
-    #   can :update, Article, published: true
-    #
-    # See the wiki for details:
-    # https://github.com/CanCanCommunity/cancancan/blob/develop/docs/define_check_abilities.md
-  end
+    # App Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], App do |app|
+      app.admin?(user)
+    end
+    can [:read], App do |app|
+      app.member?(user)
+    end
+    can :read, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: READ_BIT)
+    end
+    can :update, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: DELETE_BIT)
+    end
+    can :grant, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, App do |app|
+      Permission.find_by(permissible: app, user: user, permit: REVOKE_BIT)
+    end
 
-  def shared_customer_scope(user)
-     user.customers.map{ |c| c.users.map{ |u| u.id }}.flatten
-  end
+    # CredentialSet Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], CredentialSet do |credential|
+      credential.admin?(user)
+    end
+    # What you do not see is CredentialSet :read via org membership. This is deliberate.
+    can :read, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: READ_BIT)
+    end
+    can :update, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: DELETE_BIT)
+    end
+    can :grant, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, CredentialSet do |credential|
+      Permission.find_by(permissible: credential, user: user, permit: REVOKE_BIT)
+    end
 
+    # Manifest Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], Manifest do |manifest|
+      manifest.admin?(user)
+    end
+    can [:read], Manifest do |manifest|
+      manifest.member?(user)
+    end
+    can :read, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: READ_BIT)
+    end
+    can :update, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: DELETE_BIT)
+    end
+    can :grant, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: REVOKE_BIT)
+    end
+    
+    # ManifestDraft Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], ManifestDraft do |draft|
+      draft.admin?(user)
+    end
+    can [:read], ManifestDraft do |draft|
+      draft.member?(user)
+    end
+    can :read, ManifestDraft do |draft|
+      Permission.find_by(permissible: draft, user: user, permit: READ_BIT)
+    end
+    can :update, ManifestDraft do |draft|
+      Permission.find_by(permissible: draft, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, ManifestDraft do |draft|
+      Permission.find_by(permissible: draft, user: user, permit: DELETE_BIT)
+    end
+    can :grant, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, Manifest do |manifest|
+      Permission.find_by(permissible: manifest, user: user, permit: REVOKE_BIT)
+    end
+  end
 end

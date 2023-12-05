@@ -11,6 +11,7 @@ class PermissionsController < ApplicationController
 
   # GET /permissions/:permissible_type/:permissible_id
   def index_resource
+    authorize! :grant, @permissible
     permissions = Permission.where(permissible: @permissible)
     permissions = Permission.group_by_resource(permissions)
     render json: permissions, status: :ok
@@ -18,6 +19,7 @@ class PermissionsController < ApplicationController
 
   # POST /permission/:permit/:permissible_type/:permissible_id/users/:user_id
   def grant
+    authorize! :grant, @permissible
     if @permissible.grant(user_ids: @user.id, permit: params[:permit].to_sym)
       permissions = Permission.where(permissible: @permissible, user: @user)
       permissions = Permission.group_by_user(permissions)
@@ -29,6 +31,7 @@ class PermissionsController < ApplicationController
 
   # POST /permissions/:permissible_type/:permissible_id/users/:user_id
   def grant_all
+    authorize! :grant, @permissible
     if @permissible.grant_all(user_ids: @user.id)
       permissions = Permission.where(permissible: @permissible, user: @user)
       permissions = Permission.group_by_user(permissions)
@@ -40,6 +43,7 @@ class PermissionsController < ApplicationController
 
   # DELETE /permission/:permit/:permissible_type/:permissible_id/users/:user_id
   def revoke
+    authorize! :revoke, @permissible
     if @permissible.revoke(user_ids: @user.id, permit: params[:permit].to_sym)
       render json: { message: 'Revoke OK' }, status: :no_content
     else 
@@ -49,6 +53,7 @@ class PermissionsController < ApplicationController
 
   # DELETE /permissions/:permissible_type/:permissible_id/users/:user_id
   def revoke_all
+    authorize! :revoke, @permissible
     if @permissible.revoke_all(user_ids: @user.id)
       render json: { message: 'Revoke All OK' }, status: :no_content
     else 

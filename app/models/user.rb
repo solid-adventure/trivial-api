@@ -11,6 +11,7 @@ class User < ActiveRecord::Base
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
   
+  ASSOCIATED_RESOURCES = ['apps', 'credential_sets', 'manifests', 'manifest_drafts']
   # to be deprecated associations upon ownership transfer
   has_many :apps
   has_many :manifests
@@ -27,7 +28,10 @@ class User < ActiveRecord::Base
   
   # new permission based associations
   has_many :permissions
-  has_many :permitted_apps, through: :permissions, source: :permissible, source_type: 'App'
+  has_many :permitted_apps, -> { distinct }, through: :permissions, source: :permissible, source_type: 'App'
+  has_many :permitted_manifests, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Manifest'
+  has_many :permitted_manifest_drafts, -> { distinct }, through: :permissions, source: :permissible, source_type: 'ManifestDraft'
+  has_many :permitted_credential_sets, -> { distinct }, through: :permissions, source: :permissible, source_type: 'CredentialSet'
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]
@@ -70,7 +74,49 @@ class User < ActiveRecord::Base
     end
   end
 
+  def associated_apps
+    associated_resources('apps')
+  end
+
+  def associated_activity_entries
+    associated_resources_via_app('activity_entries')
+  end
+  
+  # Only explicitly shared credential sets are exposed and are  not visibile via org membership alone
+  def associated_credential_sets
+    associated_resources('credential_sets', 'admin')
+  end
+
+  def associated_manifests
+    associated_resources_via_app('manifests')
+  end
+
+  def associated_manifest_drafts
+    associated_resources_via_app('manifest_drafts')
+  end
+
+
   private
+
+  def associated_resources(resource_type, roles=['admin', 'member'])
+    model_class = resource_type.classify.constantize
+
+    orgs = self.organizations.where(org_roles: { role: roles })
+    membership_associated = model_class.where(owner: [self] + orgs)
+    permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
+
+    membership_associated.or(permitted)
+  end
+
+  def associated_resources_via_app(resource_type, roles=['admin', 'member'])
+    model_class = resource_type.classify.constantize
+
+    orgs = self.organizations.where(org_roles: { role: roles })
+    membership_associated = model_class.where(app: App.where(owner: [self] + orgs))
+    permitted = model_class.where(app: App.where(id: self.permitted_apps.pluck(:id)))
+
+    membership_associated.or(permitted)
+  end
 
   def set_values_for_individual
     if !admin?
