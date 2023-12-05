@@ -1,7 +1,5 @@
 class ManifestsController < ApplicationController
 
-    load_and_authorize_resource
-
     def index
         render json: manifests, adapter: :attributes
     end
@@ -11,7 +9,6 @@ class ManifestsController < ApplicationController
         manifest.user_id = current_user.id
         manifest.owner = current_user
         if manifest.save
-            manifest.grant_all(user_ids: current_user.id)
             render json: manifest, adapter: :attributes, status: :created
         else
             render_bad_request manifest
@@ -19,10 +16,12 @@ class ManifestsController < ApplicationController
     end
 
     def show
+        authorize! :read, manifest
         render json: manifest, adapter: :attributes
     end
 
     def update
+        authorize! :update, manifest
         if manifest.update(manifest_params)
             render json: manifest, adapter: :attributes
         else
@@ -33,13 +32,11 @@ class ManifestsController < ApplicationController
     private
 
     def manifest
-        # @manifest is already loaded and authorized
-        @manifest
+        @manifest ||= Manifest.find(params[:id])
     end
 
     def manifests
-        # @manifests is already loaded and authorized
-        @manifests.where(app_id: params[:app_id]).order(created_at: :desc)
+        current_user.associated_manifests.where(app_id: params[:app_id]).order(created_at: :desc)
     end
 
     def manifest_params

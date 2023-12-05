@@ -9,8 +9,8 @@ describe 'manifests', type: :request do
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
 
-  let!(:user_app) { FactoryBot.create(:app, user: user ) }
-  let!(:user_manifest) { FactoryBot.create(:manifest, user: user, owner: user, app_id: user_app.name, internal_app_id: user_app.id) }
+  let!(:user_app) { FactoryBot.create(:app, custom_owner: user ) }
+  let!(:user_manifest) { FactoryBot.create(:manifest, custom_app: user_app) }
 
   path '/manifests?app_id={appId}' do
     get('list manifests') do

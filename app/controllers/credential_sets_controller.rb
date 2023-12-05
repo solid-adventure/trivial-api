@@ -3,7 +3,7 @@ class CredentialSetsController < ApplicationController
   before_action :authenticate_app!, only: [:patch]
 
   def index
-    render json: {credential_sets: current_user.credential_sets.order(:id).map(&:api_attrs)}
+    render json: {credential_sets: current_user.associated_credential_sets.order(:id).map(&:api_attrs)}
   end
 
   def create
@@ -13,7 +13,6 @@ class CredentialSetsController < ApplicationController
     if params.has_key?(:credentials)
       @credential_set.credentials.secret_value = params[:credentials]
       @credential_set.credentials.save!
-      @credential_set.grant_all(user_ids: current_user.id)
     end
     render json: {credential_set: @credential_set.api_attrs}
   end
@@ -70,11 +69,11 @@ class CredentialSetsController < ApplicationController
   private
 
   def credential_set
-    @credential_set ||= current_user.credential_sets.find_by_external_id!(params[:id])
+    @credential_set ||= current_user.associated_credential_sets.find_by_external_id!(params[:id])
   end
 
   def patchable_credential_set
-    @credential_set ||= current_app.user.credential_sets.find_by_external_id!(params[:id])
+    @credential_set ||= current_app.user.associated_credential_sets.find_by_external_id!(params[:id])
   end
 
   def credential_set_params
