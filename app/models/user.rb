@@ -60,40 +60,40 @@ class User < ActiveRecord::Base
     associated_resources('apps')
   end
 
-  # specially defined due to association differences
   def associated_activity_entries
-    orgs = self.organizations.where(org_roles: { role: 'admin' })
-    admin_associated = ActivityEntry.where(app: App.where(owner: [self] + orgs))
-    
-    permitted = ActivityEntry.where(app: App.where(id: self.permitted_apps.pluck(:id)))
-    
-    admin_associated.or(permitted)
+    associated_resources_via_app('manifests')
   end
   
+  # Only explicitly shared credential sets are exposed and are  not visibile via org membership alone
   def associated_credential_sets
-    associated_resources('credential_sets')
+    associated_resources('credential_sets', 'admin')
   end
 
   def associated_manifests
-    associated_resources('manifests')
+    associated_resources_via_app('manifests')
   end
 
   def associated_manifest_drafts
-    associated_resources('manifest_drafts')
+    associated_resources_via_app('manifest_drafts')
   end
 
 
   private
 
-  def associated_resources(resource_type)
+  def associated_resources(resource_type, roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
-
-    orgs = self.organizations.where(org_roles: { role: 'admin' })
-    admin_associated = model_class.where(owner: [self] + orgs)
-    
+    orgs = self.organizations.where(org_roles: { role: roles })
+    membership_associated = model_class.where(owner: [self] + orgs)
     permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
-    
-    admin_associated.or(permitted)
+    membership_associated.or(permitted)
+  end
+
+  def associated_resources_via_app(resource_type, roles=['admin', 'member'])
+    model_class = resource_type.classify.constantize
+    orgs = self.organizations.where(org_roles: { role: roles })
+    membership_associated = model_class.where(app: App.where(owner: [self] + orgs))
+    permitted = model_class.where(app: App.where(id: "permitted_apps").pluck(:id))
+    membership_associated.or(permitted)
   end
 
   def set_values_for_individual

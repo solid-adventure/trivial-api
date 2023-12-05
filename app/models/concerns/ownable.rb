@@ -24,4 +24,13 @@ module Ownable
       self.owner.org_roles.exists?(user: user, role: 'admin')
     end
   end
+
+  def member?(user)
+    if self.owner.is_a?(User)
+      self.owner == user
+    else # owner is Organization
+      self.owner.org_roles.exists?(user: user, role: 'member')
+    end
+  end
+
 end
