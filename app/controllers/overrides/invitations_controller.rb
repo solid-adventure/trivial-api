@@ -5,6 +5,8 @@ module Overrides
     before_action :resource_from_invitation_token, only: [:edit, :update]
 
     def create
+      authorize! :grant, @organization
+
       if invited_user = User.find_by(email: params[:email])
         invited_user.update_column(:invitation_metadata, invite_params[:invitation_metadata])
         invited_user.invite!()
@@ -48,7 +50,7 @@ module Overrides
         return
       end
 
-      unless Organization.find_by(id: metadata[:org_id])
+      unless @organization = Organization.find_by(id: metadata[:org_id])
         render json: { errors: ['Invalid Organization for Invite']}, status: :unprocessable_entity
         return
       end
