@@ -5,7 +5,12 @@ module Overrides
     before_action :resource_from_invitation_token, only: [:edit, :update]
 
     def create
-      invited_user = invite_resource
+      if invited_user = User.find_by(email: params[:email])
+        invited_user.update_column(:invitation_metadata, invite_params[:invitation_metadata])
+        invited_user.invite!()
+      else 
+        invited_user = invite_resource
+      end
       
       resource_invited = invited_user.errors.empty?
 

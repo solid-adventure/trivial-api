@@ -54,12 +54,16 @@ class User < ActiveRecord::Base
 
   def accept_role!
     if invitation_metadata
-      metadata = eval(invitation_metadata)
-      OrgRole.create(
-        organization: Organization.find(metadata["org_id"]), 
-        user: self, 
-        role: metadata["role"]
-      )
+      if role = OrgRole.find_by(organization_id: invitation_metadata["org_id"], user: self)
+        role.update_column(:role, invitation_metadata["role"]) unless role.role == invitation_metadata["role"]
+      else
+        OrgRole.create(
+          organization_id: invitation_metadata["org_id"],
+          user: self,
+          role: invitation_metadata["role"]
+        )
+      end
+
       self.update_column(:invitation_metadata, nil)
     else 
       raise ActiveRecord::RecordNotFound
