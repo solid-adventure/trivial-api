@@ -9,12 +9,8 @@ module Ownable
 
       self.revoke_all(user_ids: previously_permitted_users)
     end
-    self.update(owner: new_owner)
 
-    if new_owner.is_a?(Organization)
-      members = new_owner.org_roles.where(role: 'member').pluck(:user_id)
-      self.grant(user_ids: members, permit: :read)
-    end
+    self.update(owner: new_owner)
   end
 
   def admin?(user)

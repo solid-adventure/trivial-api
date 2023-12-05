@@ -61,7 +61,7 @@ class User < ActiveRecord::Base
   end
 
   def associated_activity_entries
-    associated_resources_via_app('manifests')
+    associated_resources_via_app('activity_entries')
   end
   
   # Only explicitly shared credential sets are exposed and are  not visibile via org membership alone
@@ -82,17 +82,21 @@ class User < ActiveRecord::Base
 
   def associated_resources(resource_type, roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
+
     orgs = self.organizations.where(org_roles: { role: roles })
     membership_associated = model_class.where(owner: [self] + orgs)
     permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
+
     membership_associated.or(permitted)
   end
 
   def associated_resources_via_app(resource_type, roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
+
     orgs = self.organizations.where(org_roles: { role: roles })
     membership_associated = model_class.where(app: App.where(owner: [self] + orgs))
-    permitted = model_class.where(app: App.where(id: "permitted_apps").pluck(:id))
+    permitted = model_class.where(app: App.where(id: self.permitted_apps.pluck(:id)))
+
     membership_associated.or(permitted)
   end
 
