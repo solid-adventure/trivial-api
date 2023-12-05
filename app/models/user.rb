@@ -4,7 +4,7 @@ class User < ActiveRecord::Base
   extend Devise::Models
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable, :validatable, :recoverable
+  devise :invitable, :database_authenticatable, :registerable, :validatable, :recoverable
   include DeviseTokenAuth::Concerns::User
 
   has_and_belongs_to_many :customers
@@ -54,6 +54,24 @@ class User < ActiveRecord::Base
 
   def set_trial_expires_at
     self.trial_expires_at = Time.now + 14.day
+  end
+
+  def accept_role!
+    if invitation_metadata
+      if role = OrgRole.find_by(organization_id: invitation_metadata["org_id"], user: self)
+        role.update_column(:role, invitation_metadata["role"]) unless role.role == invitation_metadata["role"]
+      else
+        OrgRole.create(
+          organization_id: invitation_metadata["org_id"],
+          user: self,
+          role: invitation_metadata["role"]
+        )
+      end
+
+      self.update_column(:invitation_metadata, nil)
+    else 
+      raise ActiveRecord::RecordNotFound
+    end
   end
 
   def associated_apps

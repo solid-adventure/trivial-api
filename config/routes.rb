@@ -8,7 +8,14 @@ Rails.application.routes.draw do
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
     registrations: 'overrides/registrations',
     sessions: 'overrides/sessions'
-  }, skip: [:token_validations]
+  }, skip: [:token_validations, :invitations]
+
+  # only generate the manually designated routes
+  devise_for :users, path: "auth", only: [], controllers: { invitations: 'overrides/invitations' }
+  devise_scope :user do
+    post 'auth/invitation', to: 'overrides/invitations#create', as: :user_invite
+    put 'auth/invitation', to: 'overrides/invitations#update', as: :accept_invite
+  end
 
   resources :users
   resources :organizations do
