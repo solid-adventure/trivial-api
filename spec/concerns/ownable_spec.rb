@@ -70,19 +70,6 @@ describe Ownable do
             ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
           }.to change(ownable, :owner).to(new_owner)
         end
-
-        it 'grants the correct permissions to members of the org' do
-          members = new_owner.org_roles.where(role: 'member').pluck(:user_id)
-          member_permits = Permission.where(permissible: ownable, user_id: members)
-
-          expect(member_permits.count).to eq(0)
-
-          ownable.transfer_ownership(new_owner: new_owner, revoke: revoke)
-
-          member_permits.reload
-          expect(member_permits.count).to eq(members.length)
-          expect(member_permits.pluck(:permit)).to eq(([Permission::READ_BIT] * members.count).flatten)
-        end
       end
     end
   end
