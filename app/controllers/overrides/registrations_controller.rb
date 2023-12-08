@@ -3,8 +3,10 @@
 module Overrides
   class RegistrationsController < DeviseTokenAuth::RegistrationsController
     skip_before_action :authenticate_user!, only: [:create]
-  end
+    before_action :validate_password_strength!, only: [:create]
+
   protected 
+  
   def after_update_path_for(resource)
     user_path(current_user)
   end
