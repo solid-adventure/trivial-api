@@ -2,7 +2,8 @@
 
 module Overrides
   class PasswordsController < DeviseTokenAuth::PasswordsController
-    include PasswordStrengthValidator
+    include PasswordValidator
+
     before_action :validate_password_strength!, only: [:update]
     
     private

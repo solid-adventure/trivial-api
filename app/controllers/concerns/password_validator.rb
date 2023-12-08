@@ -1,11 +1,11 @@
-# app/validators/password_strength_validator.rb
+# app/validators/password_validator.rb
 
-module PasswordStrengthValidator
+module PasswordValidator
   extend ActiveSupport::Concern
 
   private
 
-  def validate_password_strength
+  def validate_password_strength!
     password = params[:password]
 
     unless password.match?(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]).{12,}$/)

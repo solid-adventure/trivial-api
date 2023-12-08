@@ -2,8 +2,11 @@
 
 module Overrides
   class RegistrationsController < DeviseTokenAuth::RegistrationsController
+    include PasswordValidator
+
     skip_before_action :authenticate_user!, only: [:create]
     before_action :validate_password_strength!, only: [:create]
+  end
 
   protected 
   
