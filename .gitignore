@@ -34,3 +34,4 @@
 # Ignore .env file
 .env
 .env.*
+/.idea/

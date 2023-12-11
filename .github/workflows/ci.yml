@@ -1,53 +1,17 @@
 # This workflow will install a prebuilt Ruby version, install dependencies, and
 # run tests and linters.
-name: "Whiplash Payments Build Workflow"
+name: "Trivial API Build Workflow"
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DB_HOST: '127.0.0.1'
-      DB_DATABASE: 'whiplash_payments_test'
-      DB_USER: ${{secrets.POSTGRES_USER}}
-      DB_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
-      DB_PORT: '5432'
-      
-      BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM}}
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      WHIPLASH_API_URL: 'http://127.0.0.1:3000'
-      WHIPLASH_CLIENT_ID: ${{secrets.WHIPLASH_CLIENT_ID}}
-      WHIPLASH_CLIENT_SECRET: ${{secrets.WHIPLASH_CLIENT_SECRET}}
-      WHIPLASH_CLIENT_SCOPE: ${{secrets.WHIPLASH_CLIENT_SCOPE}}
-      REDIS_URL: 'redis://127.0.0.1:6379/5'
-    
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: ${{env.DB_DATABASE}}
-          POSTGRES_PASSWORD: ${{env.DB_PASSWORD}}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis
-        ports:
-          - "6379:6379"
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5 
 
     steps:
       - name: Checkout code
@@ -58,38 +22,11 @@ jobs:
       - name: Install ruby and gems
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7.7'
+          ruby-version: '3.1.2'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      
-      - name: Replace database.yml file content
-        run: cp config/database.yml.githubci config/database.yml
-
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-client
       
       - name: Create tmp/cache folder
         run: mkdir -p tmp/cache
-          
-      - name: Load database schema
-        run: RAILS_ENV=test bundle exec rake db:schema:load
 
       - name: Run tests
         run: RAILS_ENV=test bundle exec rspec
-        
-      - name: Slack Notification
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,pullRequest,author
-          custom_payload: |
-            {
-              attachments: [{
-                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-                text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} for (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR} ${{ job.status }} in ${process.env.AS_TOOK}`,
-              }]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
-        if: always() #Pick up events even if the job fails or is canceled.

@@ -12,9 +12,9 @@ jobs:
     uses: whiplashmerch/workflows/.github/workflows/destroy-superstructure.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
-      ecr_repo: ${{ vars.PAYMENTS_ECR_REPO }}
-      service_key: ${{ vars.PAYMENTS_SERVICE_KEY }}
-      service_name: ${{ vars.PAYMENTS_SERVICE_NAME }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
     secrets:
       tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
       tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
