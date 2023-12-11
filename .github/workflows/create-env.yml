@@ -1,0 +1,60 @@
+name: Create/Update Environment
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build:
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.PAYMENTS_ECR_REPO }}
+      service_key: ${{ vars.PAYMENTS_SERVICE_KEY }}
+      service_name: ${{ vars.PAYMENTS_SERVICE_NAME }}
+    secrets:
+      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
+      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
+      BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
+
+  infra:
+    if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
+    needs: [ build ]
+    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.PAYMENTS_ECR_REPO }}
+      service_key: ${{ vars.PAYMENTS_SERVICE_KEY }}
+      service_name: ${{ vars.PAYMENTS_SERVICE_NAME }}
+    secrets:
+      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
+      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      pr_confluent_kafka_cluster_api_key: ${{ secrets.PR_CONFLUENT_KAFKA_API_KEY }}
+      pr_confluent_kafka_cluster_api_secret: ${{ secrets.PR_CONFLUENT_KAFKA_API_SECRET }}
+      pr_env_stripe_private_key: ${{ secrets.PR_ENV_STRIPE_PRIVATE_KEY }}
+      pr_env_stripe_public_key: ${{ secrets.PR_ENV_STRIPE_PUBLIC_KEY }}
+      pr_env_stripe_webhook_secret: ${{ secrets.PR_ENV_STRIPE_WEBHOOK_SECRET }}
+
+  update:
+    needs: [ build, infra ]
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
+    uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.PAYMENTS_ECR_REPO }}
+      service_key: ${{ vars.PAYMENTS_SERVICE_KEY }}
+      service_name: ${{ vars.PAYMENTS_SERVICE_NAME }}
+    secrets:
+      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
+      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+
