@@ -21,6 +21,13 @@ namespace :tasks do
     puts "Completed Scheduled Every #{interval} apps."
   end
 
+  # rake "tasks:issue_client_key"
+  desc "Issue a long-lived, unscoped client key"
+  task :issue_client_key, [:user_id] => :environment do |t, args|
+    key = ApiKeys.issue_client_key!
+    puts key
+  end
+
   # rake "tasks:reassign_app_owner["123", "456"]"
   desc "Move an app and it's history into a new user account"
   task :reassign_app_owner, [:app_name, :new_user_id] => :environment do |t, args|
