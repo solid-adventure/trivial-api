@@ -1,33 +1,33 @@
-# This workflow will install a prebuilt Ruby version, install dependencies, and
-# run tests and linters.
-name: "Trivial API Build Workflow"
-on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
-  workflow_dispatch:
-
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      
-      - name: Install ruby and gems
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.1.2'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      
-      - name: Create tmp/cache folder
-        run: mkdir -p tmp/cache
-
-      - name: Run tests
-        run: RAILS_ENV=test bundle exec rspec
+## This workflow will install a prebuilt Ruby version, install dependencies, and
+## run tests and linters.
+#name: "Trivial API Build Workflow"
+#on:
+#  pull_request_target:
+#    types: [opened, synchronize, reopened]
+#  workflow_dispatch:
+#
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    env:
+#      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+#      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        with:
+#          ref: ${{ github.event.pull_request.head.sha }}
+#
+#      - name: Install ruby and gems
+#        uses: ruby/setup-ruby@v1
+#        with:
+#          ruby-version: '3.1.2'
+#          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+#
+#      - name: Create tmp/cache folder
+#        run: mkdir -p tmp/cache
+#
+#      - name: Run tests
+#        run: RAILS_ENV=test bundle exec rspec

@@ -3,12 +3,11 @@ name: Create/Update Environment
 on:
   pull_request:
     branches:
-      - master
       - develop
   push:
     branches:
-      - master
       - develop
+      - main
 
 jobs:
   build:
