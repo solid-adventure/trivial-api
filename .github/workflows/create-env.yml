@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    uses: whiplashmerch/workflows/.github/workflows/build-vue-image.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
