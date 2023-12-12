@@ -27,7 +27,7 @@ jobs:
   infra:
     if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/main'
     needs: [ build ]
-    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@bb/adds_default_tags
+    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
@@ -44,7 +44,7 @@ jobs:
   update:
     needs: [ build, infra ]
     if: github.ref == 'refs/heads/main'
-    uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@bb/adds_default_tags
+    uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
