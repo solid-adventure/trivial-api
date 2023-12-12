@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/adds_default_tags
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
