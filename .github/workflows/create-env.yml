@@ -21,6 +21,8 @@ jobs:
       tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
       npm_token: ${{ secrets.NPM_TOKEN }}
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
+      BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
   infra:
     if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/main'
