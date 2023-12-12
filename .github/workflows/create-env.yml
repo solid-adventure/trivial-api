@@ -3,7 +3,7 @@ name: Create/Update Environment
 on:
   pull_request:
     branches:
-      - develop
+      - main
   push:
     branches:
       - develop
@@ -24,7 +24,7 @@ jobs:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
 
   infra:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/develop'
+    if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/main'
     needs: [ build ]
     uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@main
     with:
@@ -41,7 +41,7 @@ jobs:
 
   update:
     needs: [ build, infra ]
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main'
     uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
