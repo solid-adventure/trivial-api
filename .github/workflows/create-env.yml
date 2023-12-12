@@ -19,7 +19,6 @@ jobs:
     secrets:
       tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
       tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
-      npm_token: ${{ secrets.NPM_TOKEN }}
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
