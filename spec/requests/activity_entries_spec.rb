@@ -90,5 +90,4 @@ describe 'Activity Entries API' do
       end
     end
   end
-
 end
