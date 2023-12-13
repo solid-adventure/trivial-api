@@ -113,6 +113,9 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
+    devise_invitable (2.0.9)
+      actionmailer (>= 5.0)
+      devise (>= 4.6)
     devise_token_auth (1.2.2)
       bcrypt (~> 3.0)
       devise (> 3.5.2, < 5)
@@ -288,6 +291,7 @@ DEPENDENCIES
   bootsnap
   byebug
   cancancan
+  devise_invitable (~> 2.0)
   devise_token_auth
   discard (~> 1.2)
   dotenv-rails
