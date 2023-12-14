@@ -41,7 +41,7 @@ describe 'Auth API' do
       }
 
       let(:email) { 'jane.doe@example.test' }
-      let(:password) { 'supersecret' }
+      let(:password) { '5uperSecret!' }
       let(:name) { 'Jane Doe' }
       let(:user) { {
         email: email,
