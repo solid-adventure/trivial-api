@@ -1,8 +1,10 @@
 module Overrides
   class InvitationsController < Devise::InvitationsController
     include InvitableMethods
+    include PasswordValidator
+
     before_action :authenticate_user!, :validate_metadata!, only: :create 
-    before_action :resource_from_invitation_token, only: [:edit, :update]
+    before_action :resource_from_invitation_token, :validate_password_strength!, only: [:update]
 
     def create
       authorize! :grant, @organization
@@ -10,7 +12,7 @@ module Overrides
       if invited_user = User.find_by(email: params[:email])
         invited_user.update_column(:invitation_metadata, invite_params[:invitation_metadata])
         invited_user.invite!()
-      else 
+      else
         invited_user = invite_resource
       end
       
@@ -20,7 +22,7 @@ module Overrides
 
       if resource_invited
         render json: { success: ['Invite Created.'] }, status: :created
-      else 
+      else
         render json: { errors: ['Invite Failed']}, status: :unprocessable_entity
       end
     end
