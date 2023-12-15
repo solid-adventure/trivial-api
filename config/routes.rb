@@ -7,7 +7,8 @@ Rails.application.routes.draw do
 
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
     registrations: 'overrides/registrations',
-    sessions: 'overrides/sessions'
+    sessions: 'overrides/sessions',
+    passwords: 'overrides/passwords'
   }, skip: [:token_validations, :invitations]
 
   # only generate the manually designated routes
