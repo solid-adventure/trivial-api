@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/adds_tapi
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
