@@ -1,6 +1,7 @@
 class PermissionsController < ApplicationController
   before_action :set_resource, except: %i[ index_user ]
-  before_action :set_user, except: %i[ index_resource ]
+  before_action :set_user, except: %i[ index_resource transfer ]
+  before_action :set_owner, only %i[ transfer ]
 
   # GET /permissions/users/:user_id
   def index_user
@@ -60,6 +61,16 @@ class PermissionsController < ApplicationController
     end
   end
 
+  # PUT permissions/:permissible_type/:permissible_id/:owner_type/:owner_id
+  def transfer
+    authorize! :tranfer, @permissible
+    if @permissible.transfer_ownership(new_owner: @owner)
+      render json { message: 'Tranfer Ownership OK'}, status: :ok
+    else
+      render json: { message: 'Tranfer Ownership Failed' }, status: :unprocessable_entity
+    end
+  end
+
   private
     # Use callback to set the resource to determine permission actions
     def set_resource
@@ -68,13 +79,23 @@ class PermissionsController < ApplicationController
         permissible_id = params[:permissible_id]
         @permissible = permissible_class.find(permissible_id)
       rescue NameError => e
-        render json: { message: "#{params[:permissible_type]} class type Not Found" }, status: :unprocessable_entity
+        render json: { message: "#{params[:permissible_type]} Class Type Not Found" }, status: :unprocessable_entity
       end
     end
 
     # Use callback to set the user to determine permission actions
     def set_user
       @user = User.find(params[:user_id])
+    end
+
+    def set_owner
+      begin
+        owner_class = params[:owner_type].classify.constantize
+        owner_id = params[:owner_id]
+        @owner = owner_class.find(owner_id)
+      rescue NameError => e
+        render json: { message: "#{params[:permissible_type]} Class Type Not Found" }, status: :unprocessable_entity
+      end
     end
 
     # Only allow a list of trusted parameters through

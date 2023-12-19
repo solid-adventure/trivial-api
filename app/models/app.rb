@@ -106,6 +106,15 @@ class App < ApplicationRecord
     end
   end
 
+  # overwrites Ownable method
+  def transfer_ownership(new_owner:, revoke: false)
+    super(new_owner: new_owner, revoke: revoke)
+
+    ActivityEntry.update(ActivityEntry.where(app: self).pluck(:id), owner: @owner)
+    Manifest.update(Manifest.where(app: self).pluck(:id), owner: @owner)
+    ManifestDraft.update(ManifestDraft.where(app: self).pluck(:id), owner: @owner)
+  end
+
   private
 
   def credentials_name

@@ -98,6 +98,7 @@ Rails.application.routes.draw do
   post '/permissions/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#grant_all'
   delete '/permission/:permit/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#revoke'
   delete '/permissions/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#revoke_all'
+  put '/permissions/:permissible_type/:permissible_id/:owner_type/:owner_id', to: 'permissions#transfer'
 
   get '/up', to: 'health_check#show'
 end
