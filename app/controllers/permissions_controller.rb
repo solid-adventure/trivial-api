@@ -63,7 +63,9 @@ class PermissionsController < ApplicationController
 
   # PUT permissions/:permissible_type/:permissible_id/:owner_type/:owner_id
   def transfer
-    authorize! :tranfer, @permissible
+    authorize! :transfer, @permissible
+    render json: { message: 'Transfer to Owner Unauthorized' }, status: :unauthorized unless authorize_transfer!
+
     if @permissible.transfer_ownership(new_owner: @owner)
       render json: { message: 'Tranfer Ownership OK'}, status: :ok
     else
@@ -72,6 +74,12 @@ class PermissionsController < ApplicationController
   end
 
   private
+    def authorize_transfer!
+      return true if @owner == current_user
+      return false unless @owner.is_a?(Organization) && current_user.organizations.exists?(@owner)
+      true
+    end
+
     # Use callback to set the resource to determine permission actions
     def set_resource
       begin
