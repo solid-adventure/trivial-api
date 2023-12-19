@@ -1,7 +1,7 @@
 class PermissionsController < ApplicationController
   before_action :set_resource, except: %i[ index_user ]
   before_action :set_user, except: %i[ index_resource transfer ]
-  before_action :set_owner, only %i[ transfer ]
+  before_action :set_owner, only: %i[ transfer ]
 
   # GET /permissions/users/:user_id
   def index_user
@@ -65,7 +65,7 @@ class PermissionsController < ApplicationController
   def transfer
     authorize! :tranfer, @permissible
     if @permissible.transfer_ownership(new_owner: @owner)
-      render json { message: 'Tranfer Ownership OK'}, status: :ok
+      render json: { message: 'Tranfer Ownership OK'}, status: :ok
     else
       render json: { message: 'Tranfer Ownership Failed' }, status: :unprocessable_entity
     end
