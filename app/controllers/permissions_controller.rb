@@ -1,6 +1,6 @@
 class PermissionsController < ApplicationController
-  before_action :set_resource, except: %i[ index_user ]
-  before_action :set_user, except: %i[ index_resource ]
+  before_action :set_resource, except: %i[ show_user ]
+  before_action :set_user, except: %i[ show_resource ]
 
   # GET /users/:user_id/permissions
   def show_user

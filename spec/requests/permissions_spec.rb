@@ -73,7 +73,7 @@ describe 'Permissions API' do
     @app = FactoryBot.create(:app, owner: @owner)
   end
 
-  path '/permissions/users/{user_id}' do
+  path '/users/{user_id}/permissions' do
     parameter name: 'user_id', in: :path, type: :integer
     
     let(:user_id) { user.id }
@@ -122,7 +122,7 @@ describe 'Permissions API' do
     end
   end
 
-  path '/permissions/{permissible_type}/{permissible_id}' do
+  path '/{permissible_type}/{permissible_id}/permissions' do
     parameter name: 'permissible_type', in: :path, type: :string
     parameter name: 'permissible_id', in: :path, type: :integer
 
@@ -172,7 +172,7 @@ describe 'Permissions API' do
     end
   end
 
-  path '/permission/{permit}/{permissible_type}/{permissible_id}/users/{user_id}' do
+  path '/{permissible_type}/{permissible_id}/permission/{permit}/users/{user_id}' do
     parameter name: 'permit', in: :path, type: :string
     parameter name: 'permissible_type', in: :path, type: :string
     parameter name: 'permissible_id', in: :path, type: :integer
@@ -231,7 +231,7 @@ describe 'Permissions API' do
     end
   end
 
-  path '/permissions/{permissible_type}/{permissible_id}/users/{user_id}' do
+  path '/{permissible_type}/{permissible_id}/permissions/users/{user_id}' do
     parameter name: 'permissible_type', in: :path, type: :string
     parameter name: 'permissible_id', in: :path, type: :integer
     parameter name: 'user_id', in: :path, type: :integer
