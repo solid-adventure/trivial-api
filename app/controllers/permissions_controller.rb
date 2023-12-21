@@ -98,8 +98,8 @@ class PermissionsController < ApplicationController
 
     def set_new_owner
       begin
-        owner_class = params[:owner_type].classify.constantize
-        owner_id = params[:owner_id]
+        owner_class = params[:new_owner_type].classify.constantize
+        owner_id = params[:new_owner_id]
         @new_owner = owner_class.find(owner_id)
       rescue NameError => e
         render json: { message: "#{params[:permissible_type]} Class Type Not Found" }, status: :unprocessable_entity
