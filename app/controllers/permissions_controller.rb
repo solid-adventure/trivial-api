@@ -76,7 +76,7 @@ class PermissionsController < ApplicationController
   private
     def authorize_transfer!
       return true if @new_owner == current_user # This line is necessary for allowing a user to transfer from an Organization to themselves
-      @new_owner.is_a?(Organization) && current_user.organizations.exists?(@new_owner)
+      @new_owner.is_a?(Organization) && current_user.organizations.exists?(@new_owner.id)
     end
 
     # Use callback to set the resource to determine permission actions

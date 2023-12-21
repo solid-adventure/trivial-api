@@ -282,5 +282,31 @@ describe 'Permissions API' do
       end
     end
   end
+  
+  path '/{permissible_type}/{permissible_id}/transfer/{new_owner_type}/{new_owner_id}' do
+    parameter name: 'permissible_type', in: :path, type: :string
+    parameter name: 'permissible_id', in: :path, type: :integer
+    parameter name: 'new_owner_type', in: :path, type: :string
+    parameter name: 'new_owner_id', in: :path, type: :integer
+    
+    let(:permissible_type) { @app.class.to_s.tableize }
+    let(:permissible_id) { @app.id }
+    
+    let!(:new_owner) { FactoryBot.create(:organization) }
+    let(:new_owner_type) { new_owner.class.to_s.tableize }
+    let(:new_owner_id) { new_owner.id }
+    
+    put 'Transfer Ownership to Organization' do
+      tags 'Permissions'
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      produces 'permission/json'
+
+      response '200', 'Tranfer Ownership Successful' do
+        run_test! do
+          expect(@app.reload.owner).to eq(new_owner)
+        end
+      end
+    end
+  end
 end
 
