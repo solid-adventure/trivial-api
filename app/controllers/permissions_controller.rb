@@ -1,7 +1,7 @@
 class PermissionsController < ApplicationController
   before_action :set_resource, except: %i[ index_user ]
   before_action :set_user, except: %i[ index_resource transfer ]
-  before_action :set_owner, only: %i[ transfer ]
+  before_action :set_new_owner, only: %i[ transfer ]
 
   # GET /permissions/users/:user_id
   def index_user
@@ -66,7 +66,7 @@ class PermissionsController < ApplicationController
     authorize! :transfer, @permissible
     render json: { message: 'Transfer to Owner Unauthorized' }, status: :unauthorized unless authorize_transfer!
 
-    if @permissible.transfer_ownership(new_owner: @owner)
+    if @permissible.transfer_ownership(new_owner: @new_owner)
       render json: { message: 'Tranfer Ownership OK'}, status: :ok
     else
       render json: { message: 'Tranfer Ownership Failed' }, status: :unprocessable_entity
@@ -75,8 +75,8 @@ class PermissionsController < ApplicationController
 
   private
     def authorize_transfer!
-      return true if @owner == current_user
-      return false unless @owner.is_a?(Organization) && current_user.organizations.exists?(@owner)
+      return true if @new_owner == current_user
+      return false unless @new_owner.is_a?(Organization) && current_user.organizations.exists?(@new_owner)
       true
     end
 
@@ -96,11 +96,11 @@ class PermissionsController < ApplicationController
       @user = User.find(params[:user_id])
     end
 
-    def set_owner
+    def set_new_owner
       begin
         owner_class = params[:owner_type].classify.constantize
         owner_id = params[:owner_id]
-        @owner = owner_class.find(owner_id)
+        @new_owner = owner_class.find(owner_id)
       rescue NameError => e
         render json: { message: "#{params[:permissible_type]} Class Type Not Found" }, status: :unprocessable_entity
       end
