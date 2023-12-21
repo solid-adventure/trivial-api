@@ -75,7 +75,7 @@ class PermissionsController < ApplicationController
 
   private
     def authorize_transfer!
-      return true if @new_owner == current_user # This line is necessary for allowing a user to transfer from an Organization to themselves
+      return true if @new_owner == current_user # This line is necessary to allow users transferring a resource from an Organization to themselves
       @new_owner.is_a?(Organization) && current_user.organizations.exists?(@new_owner.id)
     end
 
@@ -101,7 +101,7 @@ class PermissionsController < ApplicationController
         owner_id = params[:new_owner_id]
         @new_owner = owner_class.find(owner_id)
       rescue NameError => e
-        render json: { message: "#{params[:permissible_type]} Class Type Not Found" }, status: :unprocessable_entity
+        render json: { message: "#{params[:new_owner_type]} Class Type Not Found" }, status: :unprocessable_entity
       end
     end
 
