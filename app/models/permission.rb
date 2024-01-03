@@ -18,8 +18,8 @@ class Permission < ApplicationRecord
     }
 
     # id apps by name
-    owned_apps = user.owned_apps.pluck(:name)
-    managed_apps = App.where(owner: user.organizations.where(org_roles: { role: "admin" })).pluck(:name)
+    owned_apps = user.owned_apps.kept.pluck(:name)
+    managed_apps = App.kept.where(owner: user.organizations.where(org_roles: { role: "admin" })).pluck(:name)
 
     # id credential_sets by id
     owned_credentials = user.owned_credential_sets.pluck(:id)
@@ -32,7 +32,7 @@ class Permission < ApplicationRecord
       permitted_app_ids = Permission
         .where(permission_conditions.merge(permissible_type: "App"))
         .pluck(:permissible_id)
-      permitted_apps = App.where(id: permitted_app_ids).pluck(:name)
+      permitted_apps = App.kept.where(id: permitted_app_ids).pluck(:name)
 
       permitted_credentials = Permission
         .where(permission_conditions.merge(permissible_type: "CredentialSet"))
