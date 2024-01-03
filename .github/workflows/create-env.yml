@@ -1,0 +1,55 @@
+name: Create/Update Environment
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/adds_tapi
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
+    secrets:
+      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
+      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
+      BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
+
+  infra:
+    if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/main'
+    needs: [ build ]
+    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@bb/adds_tapi
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
+      tf_branch: "bb/adds_tapi"
+    secrets:
+      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
+      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      pr_confluent_kafka_cluster_api_key: ${{ secrets.PR_CONFLUENT_KAFKA_API_KEY }}
+      pr_confluent_kafka_cluster_api_secret: ${{ secrets.PR_CONFLUENT_KAFKA_API_SECRET }}
+
+  update:
+    needs: [ build, infra ]
+    if: github.ref == 'refs/heads/main'
+    uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@bb/adds_tapi
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
+    secrets:
+      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
+      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
