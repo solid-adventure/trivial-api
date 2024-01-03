@@ -86,6 +86,3 @@ test:
 #
 production:
   <<: *default
-  database: trivial_production
-  username: trivial
-  password: <%= ENV['TRIVIAL_DATABASE_PASSWORD'] %>
