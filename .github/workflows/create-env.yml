@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/adds_tapi
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
@@ -26,13 +26,12 @@ jobs:
   infra:
     if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/main'
     needs: [ build ]
-    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@bb/adds_tapi
+    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
       service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
       service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
-      tf_branch: "bb/adds_tapi"
     secrets:
       tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
       tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
@@ -43,7 +42,7 @@ jobs:
   update:
     needs: [ build, infra ]
     if: github.ref == 'refs/heads/main'
-    uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@bb/adds_tapi
+    uses: whiplashmerch/workflows/.github/workflows/update-ecs.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
