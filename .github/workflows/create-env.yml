@@ -1,6 +1,5 @@
 name: Create/Update Environment
 
-
 on:
   pull_request:
     branches:
@@ -8,7 +7,6 @@ on:
   push:
     branches:
       - main
-
 
 jobs:
   build:
