@@ -10,8 +10,6 @@ RUN bundle binstubs --all
 
 COPY . .
 
-#COPY docker/entrypoint.sh /usr/bin/
-
 RUN chmod +x docker/entrypoint.sh
 RUN chmod +x docker/start-web.sh
 
