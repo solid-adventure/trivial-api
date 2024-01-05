@@ -18,4 +18,3 @@ ENTRYPOINT ["./docker/entrypoint.sh"]
 CMD ["./docker/start-web.sh"]
 
 EXPOSE 3000
-EXPOSE 80
