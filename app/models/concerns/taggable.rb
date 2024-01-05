@@ -13,6 +13,12 @@ module Taggable
     def removeTag!(context, tag)
       self.tags.where(context: context, name: tag).delete_all
     end
+
+    def copyTagsTo(new_taggable)
+      self.tags.each do |tag|
+        new_taggable.addTag!(tag.context, tag.name)
+      end
+    end
   end
 
   class_methods do
