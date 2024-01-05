@@ -9,5 +9,17 @@ RUN bundle binstubs --all
 
 
 COPY . .
+
+#COPY docker/entrypoint.sh /usr/bin/
+
+RUN chmod +x docker/entrypoint.sh
+RUN chmod +x docker/start-sidekiq.sh
+RUN chmod +x docker/start-web.sh
+RUN chmod +x docker/setup-db.sh
+
+ENTRYPOINT ["./docker/entrypoint.sh"]
+
+CMD ["./docker/start-web.sh"]
+
 EXPOSE 3000
-CMD ["rails", "server", "-b", "0.0.0.0"]
+EXPOSE 80
