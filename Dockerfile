@@ -13,9 +13,7 @@ COPY . .
 #COPY docker/entrypoint.sh /usr/bin/
 
 RUN chmod +x docker/entrypoint.sh
-RUN chmod +x docker/start-sidekiq.sh
 RUN chmod +x docker/start-web.sh
-RUN chmod +x docker/setup-db.sh
 
 ENTRYPOINT ["./docker/entrypoint.sh"]
 
