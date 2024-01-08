@@ -61,7 +61,7 @@ class PermissionsController < ApplicationController
     end
   end
 
-  # PUT permissions/:permissible_type/:permissible_id/:owner_type/:owner_id
+  # PUT permissions/:permissible_type/:permissible_id/:new_owner_type/:new_owner_id
   def transfer
     authorize! :transfer, @permissible
     render json: { message: 'Transfer to Owner Unauthorized' }, status: :unauthorized unless authorize_transfer!

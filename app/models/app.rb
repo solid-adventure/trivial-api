@@ -110,9 +110,12 @@ class App < ApplicationRecord
   def transfer_ownership(new_owner:, revoke: false)
     super(new_owner: new_owner, revoke: revoke)
 
-    ActivityEntry.update(ActivityEntry.where(app: self).pluck(:id), owner: @owner)
-    Manifest.update(Manifest.where(app: self).pluck(:id), owner: @owner)
-    ManifestDraft.update(ManifestDraft.where(app: self).pluck(:id), owner: @owner)
+    activity_entries.each do |entry|
+      entry.update(owner: new_owner)
+    end
+    manifests.each do |manifest|
+      manifest.update(owner: new_owner)
+    end
   end
 
   private
