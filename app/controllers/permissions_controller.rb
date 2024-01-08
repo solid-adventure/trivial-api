@@ -1,22 +1,22 @@
 class PermissionsController < ApplicationController
-  before_action :set_resource, except: %i[ index_user ]
-  before_action :set_user, except: %i[ index_resource ]
+  before_action :set_resource, except: %i[ show_user ]
+  before_action :set_user, except: %i[ show_resource ]
 
-  # GET /permissions/users/:user_id
-  def index_user
+  # GET /users/:user_id/permissions
+  def show_user
     permissions = Permission.permissions_for(@user)
     render json: permissions, status: :ok
   end
 
-  # GET /permissions/:permissible_type/:permissible_id
-  def index_resource
+  # GET /:permissible_type/:permissible_id/permissions
+  def show_resource
     authorize! :grant, @permissible
     permissions = Permission.where(permissible: @permissible)
     permissions = Permission.group_by_resource(permissions)
     render json: permissions, status: :ok
   end
 
-  # POST /permission/:permit/:permissible_type/:permissible_id/users/:user_id
+  # POST /:permissible_type/:permissible_id/permission/:permit/users/:user_id
   def grant
     authorize! :grant, @permissible
     if @permissible.grant(user_ids: @user.id, permit: params[:permit].to_sym)
@@ -28,7 +28,7 @@ class PermissionsController < ApplicationController
     end
   end
 
-  # POST /permissions/:permissible_type/:permissible_id/users/:user_id
+  # POST /:permissible_type/:permissible_id/permissions/users/:user_id
   def grant_all
     authorize! :grant, @permissible
     if @permissible.grant_all(user_ids: @user.id)
@@ -40,7 +40,7 @@ class PermissionsController < ApplicationController
     end
   end
 
-  # DELETE /permission/:permit/:permissible_type/:permissible_id/users/:user_id
+  # DELETE /:permissible_type/:permissible_id/permission/:permit/users/:user_id
   def revoke
     authorize! :revoke, @permissible
     if @permissible.revoke(user_ids: @user.id, permit: params[:permit].to_sym)
@@ -50,7 +50,7 @@ class PermissionsController < ApplicationController
     end
   end
 
-  # DELETE /permissions/:permissible_type/:permissible_id/users/:user_id
+  # DELETE /:permissible_type/:permissible_id/permissions/users/:user_id
   def revoke_all
     authorize! :revoke, @permissible
     if @permissible.revoke_all(user_ids: @user.id)
