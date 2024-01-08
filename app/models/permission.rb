@@ -1,6 +1,8 @@
 class Permission < ApplicationRecord
   include PermissionConstants
 
+  audited
+
   belongs_to :user
   belongs_to :permissible, polymorphic: true
 

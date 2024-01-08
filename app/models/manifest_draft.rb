@@ -2,6 +2,8 @@ class ManifestDraft < ApplicationRecord
   include Ownable
   include Permissible
 
+  audited
+
   belongs_to :app
   belongs_to :manifest
   
