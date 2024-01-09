@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
+ActiveRecord::Schema[7.0].define(version: 2024_01_08_182428) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -44,7 +44,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
   end
 
   create_table "activity_entries", force: :cascade do |t|
-    t.bigint "user_id", null: false
     t.bigint "app_id"
     t.uuid "update_id"
     t.string "activity_type", null: false
@@ -60,11 +59,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
     t.index ["app_id"], name: "index_activity_entries_on_app_id"
     t.index ["owner_type", "owner_id"], name: "index_activity_entries_on_owner"
     t.index ["update_id"], name: "index_activity_entries_on_update_id"
-    t.index ["user_id"], name: "index_activity_entries_on_user_id"
   end
 
   create_table "apps", force: :cascade do |t|
-    t.bigint "user_id", null: false
     t.string "name", null: false
     t.integer "port", null: false
     t.datetime "created_at", null: false
@@ -83,12 +80,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
     t.index ["name"], name: "index_apps_on_name", unique: true
     t.index ["owner_type", "owner_id"], name: "index_apps_on_owner"
     t.index ["port"], name: "index_apps_on_port", unique: true
-    t.index ["user_id"], name: "index_apps_on_user_id"
   end
 
   create_table "credential_sets", force: :cascade do |t|
     t.uuid "external_id", null: false
-    t.bigint "user_id", null: false
     t.string "name", null: false
     t.string "credential_type", null: false
     t.datetime "created_at", null: false
@@ -97,7 +92,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
     t.bigint "owner_id"
     t.index ["external_id"], name: "index_credential_sets_on_external_id", unique: true
     t.index ["owner_type", "owner_id"], name: "index_credential_sets_on_owner"
-    t.index ["user_id"], name: "index_credential_sets_on_user_id"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -116,7 +110,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
   end
 
   create_table "manifest_drafts", force: :cascade do |t|
-    t.bigint "user_id", null: false
     t.bigint "app_id", null: false
     t.bigint "manifest_id", null: false
     t.jsonb "content"
@@ -131,13 +124,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
     t.index ["manifest_id"], name: "index_manifest_drafts_on_manifest_id"
     t.index ["owner_type", "owner_id"], name: "index_manifest_drafts_on_owner"
     t.index ["token"], name: "index_manifest_drafts_on_token", unique: true
-    t.index ["user_id"], name: "index_manifest_drafts_on_user_id"
   end
 
   create_table "manifests", force: :cascade do |t|
     t.string "app_id"
     t.jsonb "content"
-    t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "internal_app_id"
@@ -225,12 +216,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_17_172505) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_entries", "apps"
-  add_foreign_key "activity_entries", "users"
-  add_foreign_key "apps", "users"
-  add_foreign_key "credential_sets", "users"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
-  add_foreign_key "manifest_drafts", "users"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
   add_foreign_key "org_roles", "organizations"
   add_foreign_key "org_roles", "users"
