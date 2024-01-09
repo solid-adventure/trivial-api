@@ -3,8 +3,7 @@ require 'test_helper'
 class ActivityEntryTest < ActiveSupport::TestCase
   def setup
     @app = App.new
-    @app.user = User.create(name: 'bilbo', email: 'bilbo@example.test', password: '12345678')
-    @app.owner = @app.user
+    @app.owner = User.create(name: 'bilbo', email: 'bilbo@example.test', password: '12345678')
     @app.descriptive_name = "Bilbo's App"
     @app.save!
 
@@ -12,8 +11,7 @@ class ActivityEntryTest < ActiveSupport::TestCase
     @entry.app = @app
     @entry.activity_type = 'request'
     @entry.source = 'sample'
-    @entry.user = @app.user
-    @entry.owner = @app.user
+    @entry.owner = @app.owner
     @entry.save!
   end
 
@@ -35,10 +33,10 @@ class ActivityEntryTest < ActiveSupport::TestCase
     assert_equal @entry.errors[:source], ["can't be blank"]
   end
 
-  test 'invalid without user_id' do
-    @entry.user_id = nil
+  test 'invalid without owner_id' do
+    @entry.owner_id = nil
     @entry.valid?
 
-    assert_equal @entry.errors[:user], ["must exist"]
+    assert_equal @entry.errors[:owner], ["must exist"]
   end
 end
