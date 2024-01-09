@@ -6,7 +6,6 @@ class ManifestsController < ApplicationController
 
     def create
         manifest = Manifest.new(manifest_params.merge(app: app))
-        manifest.user_id = current_user.id
         manifest.owner = current_user
         if manifest.save
             render json: manifest, adapter: :attributes, status: :created
