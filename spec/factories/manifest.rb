@@ -1,7 +1,6 @@
 FactoryBot.define do
   factory :manifest do
     content { '{}'}
-    association :user, factory: :user
     association :owner, factory: :user
     association :app, factory: :app
 
