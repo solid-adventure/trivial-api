@@ -2,13 +2,7 @@ class CredentialSet < ApplicationRecord
   include Ownable
   include Permissible
 
-  # old user association to be deprecated for ownership and permissions
-  belongs_to :user, inverse_of: :credential_sets
-  
-  # new owner based association
   belongs_to :owner, polymorphic: true
-  
-  # new permission based multi-user association
   has_many :permissions, as: :permissible
   has_many :permitted_users, through: :permissions, source: :user
 
@@ -17,7 +11,7 @@ class CredentialSet < ApplicationRecord
   before_create :set_external_id
 
   def credentials
-    @credentials ||= CredentialSetCredentials.find_or_build_by_user_and_name user, credentials_name
+    @credentials ||= CredentialSetCredentials.find_or_build_by_user_and_name owner, credentials_name
   end
 
   def api_attrs
@@ -39,5 +33,4 @@ class CredentialSet < ApplicationRecord
   def set_external_id
     self.external_id = SecureRandom.uuid
   end
-
 end

@@ -2,18 +2,10 @@ class Manifest < ApplicationRecord
     include Ownable
     include Permissible
     validates :app_id, presence: true
-    validates :user_id, presence: true
     validates :content, presence: true
 
     belongs_to :app, foreign_key: :internal_app_id, inverse_of: :manifests
-    
-    # old user association to be deprecated for ownership and permissions
-    belongs_to :user
-    
-    # new owner based association
     belongs_to :owner, polymorphic: true
-    
-    # new permission based multi-user association
     has_many :permissions, as: :permissible
     has_many :permitted_users, through: :permissions, source: :user
 
@@ -22,7 +14,6 @@ class Manifest < ApplicationRecord
     def copy_to_app!(new_app)
         new_manifest = self.dup
         new_manifest.app_id = new_app.name
-        new_manifest.user_id = new_app.user_id
         new_manifest.owner = new_app.owner
         new_manifest.internal_app_id = new_app.id
         new_manifest.set_content_app_id
