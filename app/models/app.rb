@@ -7,6 +7,9 @@ class App < ApplicationRecord
 
   MINIMUM_PORT_NUMBER = 3001
 
+  audited
+  has_associated_audits
+  
   belongs_to :owner, polymorphic: true
   has_many :permissions, as: :permissible
   has_many :permitted_users, through: :permissions, source: :user

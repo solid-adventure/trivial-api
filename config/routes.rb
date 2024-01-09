@@ -92,12 +92,12 @@ Rails.application.routes.draw do
   delete 'credential_sets/:id', to: 'credential_sets#destroy'
   put 'credential_sets/:id/api_key', to: 'credential_sets#update_api_key'
 
-  get '/permissions/users/:user_id', to: 'permissions#index_user'
-  get '/permissions/:permissible_type/:permissible_id', to: 'permissions#index_resource'
-  post '/permission/:permit/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#grant'
-  post '/permissions/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#grant_all'
-  delete '/permission/:permit/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#revoke'
-  delete '/permissions/:permissible_type/:permissible_id/users/:user_id', to: 'permissions#revoke_all'
+  get '/users/:user_id/permissions', to: 'permissions#show_user'
+  get '/:permissible_type/:permissible_id/permissions', to: 'permissions#show_resource'
+  post '/:permissible_type/:permissible_id/permission/:permit/users/:user_id', to: 'permissions#grant'
+  post '/:permissible_type/:permissible_id/permissions/users/:user_id', to: 'permissions#grant_all'
+  delete '/:permissible_type/:permissible_id/permission/:permit/users/:user_id', to: 'permissions#revoke'
+  delete '/:permissible_type/:permissible_id/permissions/users/:user_id', to: 'permissions#revoke_all'
 
   get '/up', to: 'health_check#show'
 end

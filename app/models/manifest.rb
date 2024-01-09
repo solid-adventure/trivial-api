@@ -1,6 +1,9 @@
 class Manifest < ApplicationRecord
     include Ownable
     include Permissible
+
+    audited associated_with: :app
+
     validates :app_id, presence: true
     validates :content, presence: true
 

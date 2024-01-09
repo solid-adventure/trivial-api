@@ -7,6 +7,8 @@ class User < ActiveRecord::Base
   devise :invitable, :database_authenticatable, :registerable, :validatable, :recoverable
   include DeviseTokenAuth::Concerns::User
 
+  audited
+
   has_and_belongs_to_many :customers
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles

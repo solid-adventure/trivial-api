@@ -2,6 +2,8 @@ class CredentialSet < ApplicationRecord
   include Ownable
   include Permissible
 
+  audited
+
   belongs_to :owner, polymorphic: true
   has_many :permissions, as: :permissible
   has_many :permitted_users, through: :permissions, source: :user
