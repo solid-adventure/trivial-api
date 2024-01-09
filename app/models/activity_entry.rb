@@ -5,11 +5,6 @@ class ActivityEntry < ApplicationRecord
   validates :source, presence: true, if: :is_request?
 
   belongs_to :app
-
-  # old user association to be deprecated for ownership and permissions
-  belongs_to :user
-
-  # new owner based association
   belongs_to :owner, polymorphic: true
 
   before_create :generate_update_id
@@ -49,7 +44,6 @@ class ActivityEntry < ApplicationRecord
   def legacy_attributes
     {
       id: self.id,
-      user_id: self.user_id,
       owner_id: self.owner_id,
       owner_type: self.owner_type,
       app_id: self.app.name,
@@ -67,7 +61,6 @@ class ActivityEntry < ApplicationRecord
   def activity_attributes
     {
       id: self.id,
-      user_id: self.user_id,
       owner_id: self.owner_id,
       owner_type: self.owner_type,
       app_id: self.app.name,
@@ -85,7 +78,6 @@ class ActivityEntry < ApplicationRecord
   def activity_attributes_for_index
     {
       id: self.id,
-      user_id: self.user_id,
       owner_id: self.owner_id,
       owner_type: self.owner_type,
       app_id: self.app.name,
@@ -125,45 +117,45 @@ class ActivityEntry < ApplicationRecord
   end
 
   def self.chart_stats(app_id, number_of_days)
-      return self.get_chart_stats(app_id,number_of_days)
+    return self.get_chart_stats(app_id,number_of_days)
   end
 
   private
 
   def self.get_chart_stats(app_id, number_of_days)
-      stats = ActivityEntry.requests.where("app_id = ? AND created_at > ?", app_id, number_of_days.days.ago).group("DATE_TRUNC('day', created_at)").group(:status).count(:all)
-      self.format_chart_stats(stats, number_of_days)
+    stats = ActivityEntry.requests.where("app_id = ? AND created_at > ?", app_id, number_of_days.days.ago).group("DATE_TRUNC('day', created_at)").group(:status).count(:all)
+    self.format_chart_stats(stats, number_of_days)
   end
 
   def self.format_chart_stats(stats, number_of_days)
-      chart_stats = []
-      (0..number_of_days-1).each {|i|
-          key = Time.parse((Date.today - i.days).to_s)
-          count = self.webhook_by_date(i, stats, key)
-          if count.empty?
-              chart_stats.push({
-                  date: key.strftime("%m/%d/%Y"),
-                  count: {}
-              })
-          else
-              count_concat = {}
-              count.keys.each do |c|
-                  count_concat[c.second] = count[c]
-              end
-              chart_stats.push({
-                  date: key.strftime("%m/%d/%Y"),
-                  count: count_concat
-              })
-          end
-      }
-      return chart_stats
+    chart_stats = []
+    (0..number_of_days-1).each {|i|
+      key = Time.parse((Date.today - i.days).to_s)
+      count = self.webhook_by_date(i, stats, key)
+      if count.empty?
+        chart_stats.push({
+          date: key.strftime("%m/%d/%Y"),
+          count: {}
+        })
+      else
+        count_concat = {}
+        count.keys.each do |c|
+          count_concat[c.second] = count[c]
+        end
+        chart_stats.push({
+          date: key.strftime("%m/%d/%Y"),
+          count: count_concat
+        })
+      end
+    }
+    return chart_stats
   end
 
   def self.webhook_by_date(index, stats, key)
-      count = stats.select{ |w|
-          ws = w[0].strftime("%Y-%m-%d");
-          ks = key.strftime("%Y-%m-%d");
-          ws == ks
-      }
+    count = stats.select{ |w|
+      ws = w[0].strftime("%Y-%m-%d");
+      ks = key.strftime("%Y-%m-%d");
+      ws == ks
+    }
   end
 end

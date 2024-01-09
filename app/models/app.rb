@@ -10,16 +10,9 @@ class App < ApplicationRecord
   audited
   has_associated_audits
 
-  # old user association to be deprecated for ownership and permissions
-  belongs_to :user
-
-  # new owner based association
   belongs_to :owner, polymorphic: true
-
-  # new permission based multi-user association
   has_many :permissions, as: :permissible
   has_many :permitted_users, through: :permissions, source: :user
-  
   has_many :manifests, foreign_key: :internal_app_id, inverse_of: :app
   has_many :activity_entries, inverse_of: :app
   has_many :tags, as: :taggable
@@ -36,9 +29,7 @@ class App < ApplicationRecord
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
-    if user
-      unique = user.apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
-    elsif owner
+    if owner
       unique = owner.owned_apps.kept.where(descriptive_name: descriptive_name).where.not(id: id).size == 0
     else 
       return false
@@ -54,8 +45,9 @@ class App < ApplicationRecord
     base.to_s
   end
 
+  # returns nil for Organization owners
   def aws_role
-    user.ensure_aws_role!
+    owner.try(:ensure_aws_role!)
   end
 
   def credentials
@@ -93,7 +85,6 @@ class App < ApplicationRecord
   def copy!(new_user=nil, descriptive_name)
     new_app = self.dup
     new_app.unset_defaults
-    new_app.user = new_user if new_user
     new_app.owner = new_user if new_user
     new_app.descriptive_name = descriptive_name
     if new_app.save!
@@ -159,7 +150,7 @@ class App < ApplicationRecord
       AND date_trunc(#{connection.quote interval_name}, w.created_at) >= #{connection.quote since_time}
       AND date_trunc(#{connection.quote interval_name}, w.created_at) <= #{connection.quote until_time}
     WHERE
-      a.user_id = #{connection.quote user.id}
+      a.owner_id = #{connection.quote user.id}
       AND a.discarded_at IS NULL
     GROUP BY a.id, a.name, a.descriptive_name, period, last_run
     ORDER BY a.descriptive_name, a.id, period
@@ -188,5 +179,4 @@ class App < ApplicationRecord
 
     {start_range: since_time, end_range: until_time, stats: out}
   end
-
 end
