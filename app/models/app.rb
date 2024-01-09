@@ -142,6 +142,7 @@ class App < ApplicationRecord
       AND date_trunc(#{connection.quote interval_name}, w.created_at) <= #{connection.quote until_time}
     WHERE
       a.owner_id = #{connection.quote user.id}
+      AND a.owner_type = 'User'
       AND a.discarded_at IS NULL
     GROUP BY a.id, a.name, a.descriptive_name, period, last_run
     ORDER BY a.descriptive_name, a.id, period
