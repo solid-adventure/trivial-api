@@ -99,6 +99,7 @@ class App < ApplicationRecord
     if new_app.save!
       manifest = self.manifests.order("created_at DESC").first
       manifest.copy_to_app!(new_app) if manifest
+      self.copyTagsTo(new_app)
     end
     return new_app
   end
