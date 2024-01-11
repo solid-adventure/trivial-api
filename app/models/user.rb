@@ -44,6 +44,7 @@ class User < ActiveRecord::Base
   before_create :set_trial_expires_at
 
   def ensure_aws_role!
+    return "" unless aws_env_set?
     name = "#{ENV['AWS_ROLE_PREFIX'] || ''}lambda-ex-#{id.to_s(36)}"
     update!(aws_role: Role.create!(name: name).arn) if aws_role.blank?
     aws_role
@@ -99,6 +100,13 @@ class User < ActiveRecord::Base
 
 
   private
+  def aws_env_set?
+    return false if ENV['LAMBDA_POLICY_ARN'].blank?
+    return false if ENV['AWS_REGION'].blank?
+    return false if ENV['AWS_ACCESS_KEY_ID'].blank?
+    return false if ENV['AWS_SECRET_ACCESS_KEY'].blank?
+    true
+  end
 
   def associated_resources(resource_type, org_roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
