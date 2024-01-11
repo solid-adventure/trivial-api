@@ -103,6 +103,8 @@ class User < ActiveRecord::Base
   def associated_resources(resource_type, roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
 
+    return model_class.all if self.role == 'client'
+
     orgs = self.organizations.where(org_roles: { role: roles })
     membership_associated = model_class.where(owner: [self] + orgs)
     permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
@@ -112,6 +114,8 @@ class User < ActiveRecord::Base
 
   def associated_resources_via_app(resource_type, roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
+    
+    return model_class.all if self.role == 'client'
 
     orgs = self.organizations.where(org_roles: { role: roles })
     membership_associated = model_class.where(app: App.where(owner: [self] + orgs))
