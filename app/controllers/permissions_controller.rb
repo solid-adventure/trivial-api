@@ -4,8 +4,7 @@ class PermissionsController < ApplicationController
 
   # GET /permissions/users/:user_id
   def index_user
-    permissions = Permission.where(user: @user)
-    permissions = Permission.group_by_user(permissions)
+    permissions = Permission.permissions_for(@user)
     render json: permissions, status: :ok
   end
 

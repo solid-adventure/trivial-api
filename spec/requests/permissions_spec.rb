@@ -70,7 +70,7 @@ describe 'Permissions API' do
 
   before do
     @owner = user
-    @permissible = FactoryBot.create(:app, custom_owner: @owner)
+    @app = FactoryBot.create(:app, owner: @owner)
   end
 
   path '/permissions/users/{user_id}' do
@@ -84,24 +84,34 @@ describe 'Permissions API' do
       produces 'permission/json'
 
       response '200', 'Permissions retrieved successfully' do
-        schema type: :user_permission_schema
-
         before do
-          @permissible2 = FactoryBot.create(:app)
-          @permissible2.grant_all(user_ids: @owner.id)
+          @org = FactoryBot.create(:organization, admin: @owner)
+          @app2 = FactoryBot.create(:app)
+          @app2.grant(user_ids: @owner.id, permit: :update)
+          @app3 = FactoryBot.create(:app, owner: @org)
+
+          @credential = FactoryBot.create(:credential_set, owner: @owner)
+          @credential2 = FactoryBot.create(:credential_set)
+          @credential2.grant(user_ids: @owner.id, permit: :update)
         end
 
         run_test! do |response|
           data = JSON.parse(response.body)
-          expect(data['user_id']).to eq(user_id)
-          
-          permissions = data['permissions']
-          expect(permissions.length).to eq(1)
-          
-          expect(permissions.first['permissible_type']).to eq(@permissible2.class.to_s)
-          expect(permissions.first['permissible_id']).to eq(@permissible2.id)
 
-          expect(permissions.first['permits']).to eq(Permission::PERMISSIONS_HASH.keys.map(&:to_s))
+          update = data["update"]
+          destroy = data["destroy"]
+          grant = data["grant"]
+          transfer = data["transfer"]
+          
+          expect(update["app_names"]).to contain_exactly(@app.name, @app2.name, @app3.name)
+          expect(destroy["app_names"]).to contain_exactly(@app.name, @app3.name)
+          expect(grant["app_names"]).to contain_exactly(@app.name, @app3.name)
+          expect(transfer["app_names"]).to contain_exactly(@app.name, @app3.name)
+          
+          expect(update["credential_set_ids"]).to contain_exactly(@credential.id, @credential2.id)
+          expect(destroy["credential_set_ids"]).to contain_exactly(@credential.id)
+          expect(grant["credential_set_ids"]).to contain_exactly(@credential.id)
+          expect(transfer["credential_set_ids"]).to contain_exactly(@credential.id)
         end
       end
 
@@ -116,8 +126,8 @@ describe 'Permissions API' do
     parameter name: 'permissible_type', in: :path, type: :string
     parameter name: 'permissible_id', in: :path, type: :integer
 
-    let(:permissible_type) { @permissible.class.to_s.tableize }
-    let(:permissible_id) { @permissible.id }
+    let(:permissible_type) { @app.class.to_s.tableize }
+    let(:permissible_id) { @app.id }
 
     
     get 'Retrieve permissions associated with a resource' do
@@ -130,14 +140,14 @@ describe 'Permissions API' do
 
         before do
           @permitted_user = FactoryBot.create(:user)
-          @permissible.grant_all(user_ids: user.id)
-          @permissible.grant(user_ids: @permitted_user.id, permit: :read)
+          @app.grant_all(user_ids: user.id)
+          @app.grant(user_ids: @permitted_user.id, permit: :read)
         end
 
         run_test! do |response|
           data = JSON.parse(response.body)
-          expect(data['permissible_type']).to eq(@permissible.class.to_s)
-          expect(data['permissible_id']).to eq(@permissible.id)
+          expect(data['permissible_type']).to eq(@app.class.to_s)
+          expect(data['permissible_id']).to eq(@app.id)
           
           permissions = data['permissions']
           expect(permissions.length).to eq(2)
@@ -156,7 +166,7 @@ describe 'Permissions API' do
       end
       
       response '404', 'Permissible ID not found' do
-        let(:permissible_id) { @permissible.id + 999 }
+        let(:permissible_id) { @app.id + 999 }
         run_test!
       end
     end
@@ -169,8 +179,8 @@ describe 'Permissions API' do
     parameter name: 'user_id', in: :path, type: :integer
     
     let(:permit) { 'update' }
-    let(:permissible_type) { @permissible.class.to_s.tableize }
-    let(:permissible_id) { @permissible.id }
+    let(:permissible_type) { @app.class.to_s.tableize }
+    let(:permissible_id) { @app.id }
     
     let!(:permitted_user) { FactoryBot.create(:user) }
     let(:user_id) { permitted_user.id }
@@ -184,7 +194,7 @@ describe 'Permissions API' do
         schema type: :user_permission_schema
 
         before do
-          @permissible.grant(user_ids: permitted_user.id, permit: :read)
+          @app.grant(user_ids: permitted_user.id, permit: :read)
         end
 
         run_test! do |response|
@@ -194,8 +204,8 @@ describe 'Permissions API' do
           permissions = data['permissions']
           expect(permissions.length).to eq(1)
           
-          expect(permissions.first['permissible_type']).to eq(@permissible.class.to_s)
-          expect(permissions.first['permissible_id']).to eq(@permissible.id)
+          expect(permissions.first['permissible_type']).to eq(@app.class.to_s)
+          expect(permissions.first['permissible_id']).to eq(@app.id)
 
           expect(permissions.first['permits']).to eq(['read', 'update'])
         end
@@ -208,8 +218,8 @@ describe 'Permissions API' do
 
       response '204', 'No Content' do
         before do
-          @permissible.grant(user_ids: permitted_user.id, permit: :read)
-          @permissible.grant(user_ids: permitted_user.id, permit: :update)
+          @app.grant(user_ids: permitted_user.id, permit: :read)
+          @app.grant(user_ids: permitted_user.id, permit: :update)
         end
 
         run_test! do
@@ -226,8 +236,8 @@ describe 'Permissions API' do
     parameter name: 'permissible_id', in: :path, type: :integer
     parameter name: 'user_id', in: :path, type: :integer
     
-    let(:permissible_type) { @permissible.class.to_s.tableize }
-    let(:permissible_id) { @permissible.id }
+    let(:permissible_type) { @app.class.to_s.tableize }
+    let(:permissible_id) { @app.id }
     
     let!(:permitted_user) { FactoryBot.create(:user) }
     let(:user_id) { permitted_user.id }
@@ -247,8 +257,8 @@ describe 'Permissions API' do
           permissions = data['permissions']
           expect(permissions.length).to eq(1)
 
-          expect(permissions.first['permissible_type']).to eq(@permissible.class.to_s)
-          expect(permissions.first['permissible_id']).to eq(@permissible.id)
+          expect(permissions.first['permissible_type']).to eq(@app.class.to_s)
+          expect(permissions.first['permissible_id']).to eq(@app.id)
 
           expect(permissions.first['permits']).to eq(Permission::PERMISSIONS_HASH.keys.map(&:to_s))
         end
@@ -261,8 +271,8 @@ describe 'Permissions API' do
 
       response '204', 'No Content' do
         before do
-          @permissible.grant(user_ids: permitted_user.id, permit: :read)
-          @permissible.grant(user_ids: permitted_user.id, permit: :update)
+          @app.grant(user_ids: permitted_user.id, permit: :read)
+          @app.grant(user_ids: permitted_user.id, permit: :update)
         end
 
         run_test! do
