@@ -1,6 +1,7 @@
 class PermissionsController < ApplicationController
   before_action :set_resource, except: %i[ show_user ]
-  before_action :set_user, except: %i[ show_resource ]
+  before_action :set_user, except: %i[ show_resource transfer ]
+  before_action :set_new_owner, only: %i[ transfer ]
 
   # GET /users/:user_id/permissions
   def show_user
@@ -60,7 +61,27 @@ class PermissionsController < ApplicationController
     end
   end
 
+  # PUT permissions/:permissible_type/:permissible_id/:new_owner_type/:new_owner_id
+  def transfer
+    authorize! :transfer, @permissible
+    unless authorize_transfer!
+      render json: { message: 'Transfer to Owner Unauthorized' }, status: :unauthorized
+      return
+    end
+
+    if @permissible.transfer_ownership(new_owner: @new_owner)
+      render json: { message: 'Tranfer Ownership OK'}, status: :ok
+    else
+      render json: { message: 'Tranfer Ownership Failed' }, status: :unprocessable_entity
+    end
+  end
+
   private
+    def authorize_transfer!
+      return true if @new_owner == current_user # This line is necessary to allow users transferring a resource from an Organization to themselves
+      @new_owner.is_a?(Organization) && current_user.organizations.exists?(@new_owner.id)
+    end
+
     # Use callback to set the resource to determine permission actions
     def set_resource
       begin
@@ -68,13 +89,23 @@ class PermissionsController < ApplicationController
         permissible_id = params[:permissible_id]
         @permissible = permissible_class.find(permissible_id)
       rescue NameError => e
-        render json: { message: "#{params[:permissible_type]} class type Not Found" }, status: :unprocessable_entity
+        render json: { message: "#{params[:permissible_type]} Class Type Not Found" }, status: :unprocessable_entity
       end
     end
 
     # Use callback to set the user to determine permission actions
     def set_user
       @user = User.find(params[:user_id])
+    end
+
+    def set_new_owner
+      begin
+        owner_class = params[:new_owner_type].classify.constantize
+        owner_id = params[:new_owner_id]
+        @new_owner = owner_class.find(owner_id)
+      rescue NameError => e
+        render json: { message: "#{params[:new_owner_type]} Class Type Not Found" }, status: :unprocessable_entity
+      end
     end
 
     # Only allow a list of trusted parameters through

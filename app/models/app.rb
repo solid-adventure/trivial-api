@@ -110,6 +110,14 @@ class App < ApplicationRecord
     end
   end
 
+  # overwrites Ownable method
+  def transfer_ownership(new_owner:, revoke: false)
+    super(new_owner: new_owner, revoke: revoke)
+
+    manifests.update_all(owner_id: new_owner.id, owner_type: new_owner.class.name)
+    activity_entries.update_all(owner_id: new_owner.id, owner_type: new_owner.class.name)
+  end
+
   private
 
   def credentials_name
