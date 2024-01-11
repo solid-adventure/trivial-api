@@ -2,6 +2,11 @@ require 'test_helper'
 
 class AppTest < ActiveSupport::TestCase
     def setup
+      ENV['LAMBDA_POLICY_ARN'] = 'arn:aws:iam::aws:policy/service-role/FakeRole'
+      ENV['AWS_REGION'] = 'us-east-1'
+      ENV['AWS_ACCESS_KEY_ID'] = '987FAKEKEY'
+      ENV['AWS_SECRET_ACCESS_KEY'] = '123FAKEKEY'
+
       @user = User.create!(name: 'test', email: 'test@example.test', password: 'password')
       @user2 = User.create!(name: 'test2', email: 'test2@example.test', password: 'password2')
       @existing = App.create!(user: @user, owner: @user, descriptive_name: 'Existing App')
