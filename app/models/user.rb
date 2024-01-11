@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
   end
 
   def active_for_authentication?
-    ensure_aws_role!
+    ensure_aws_role! if aws_env_set?
     super
   end
 
@@ -99,6 +99,13 @@ class User < ActiveRecord::Base
 
 
   private
+  def aws_env_set?
+    return false if ENV['LAMBDA_POLICY_ARN'].blank?
+    return false if ENV['AWS_REGION'].blank?
+    return false if ENV['AWS_ACCESS_KEY_ID'].blank?
+    return false if ENV['AWS_SECRET_ACCESS_KEY'].blank?
+    true
+  end
 
   def associated_resources(resource_type, org_roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
