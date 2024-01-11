@@ -7,6 +7,9 @@ class App < ApplicationRecord
 
   MINIMUM_PORT_NUMBER = 3001
 
+  audited
+  has_associated_audits
+
   # old user association to be deprecated for ownership and permissions
   belongs_to :user
 

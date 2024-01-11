@@ -7,6 +7,8 @@ class User < ActiveRecord::Base
   devise :invitable, :database_authenticatable, :registerable, :validatable, :recoverable
   include DeviseTokenAuth::Concerns::User
 
+  audited
+
   has_and_belongs_to_many :customers
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
@@ -98,20 +100,24 @@ class User < ActiveRecord::Base
 
   private
 
-  def associated_resources(resource_type, roles=['admin', 'member'])
+  def associated_resources(resource_type, org_roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
 
-    orgs = self.organizations.where(org_roles: { role: roles })
+    return model_class.all if self.role == 'client'
+
+    orgs = self.organizations.where(org_roles: { role: org_roles })
     membership_associated = model_class.where(owner: [self] + orgs)
     permitted = model_class.where(id: self.send("permitted_#{resource_type}").pluck(:id))
 
     membership_associated.or(permitted)
   end
 
-  def associated_resources_via_app(resource_type, roles=['admin', 'member'])
+  def associated_resources_via_app(resource_type, org_roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
+    
+    return model_class.all if self.role == 'client'
 
-    orgs = self.organizations.where(org_roles: { role: roles })
+    orgs = self.organizations.where(org_roles: { role: org_roles })
     membership_associated = model_class.where(app: App.where(owner: [self] + orgs))
     permitted = model_class.where(app: App.where(id: self.permitted_apps.pluck(:id)))
 
