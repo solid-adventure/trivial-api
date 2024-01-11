@@ -44,13 +44,14 @@ class User < ActiveRecord::Base
   before_create :set_trial_expires_at
 
   def ensure_aws_role!
+    return unless aws_env_set?
     name = "#{ENV['AWS_ROLE_PREFIX'] || ''}lambda-ex-#{id.to_s(36)}"
     update!(aws_role: Role.create!(name: name).arn) if aws_role.blank?
     aws_role
   end
 
   def active_for_authentication?
-    ensure_aws_role! if aws_env_set?
+    ensure_aws_role!
     super
   end
 
