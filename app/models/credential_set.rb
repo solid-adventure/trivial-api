@@ -2,6 +2,8 @@ class CredentialSet < ApplicationRecord
   include Ownable
   include Permissible
 
+  audited
+
   # old user association to be deprecated for ownership and permissions
   belongs_to :user, inverse_of: :credential_sets
   
