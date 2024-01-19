@@ -57,7 +57,7 @@ class ApplicationController < ActionController::API
   end
 
   def render_env_error(err)
-    render json: { error: err.message }, status: :unprocessable_entity
+    render json: { error: err.message }, status: :internal_server_error
   end
 
   def auth_key
