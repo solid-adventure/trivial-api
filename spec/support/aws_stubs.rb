@@ -14,7 +14,6 @@ shared_context "aws_credentials" do
   end
 end
 
-
 shared_context "aws_role" do
   include_context "stubbed_env"
 
@@ -32,5 +31,12 @@ shared_context "aws_role" do
     allow(iam_client_inst).to receive(:create_role).and_return(create_role_response)
     allow(iam_client_inst).to receive(:attach_role_policy).and_return(nil)
     stub_const('Role::AFTER_CREATE_DELAY', 0)
+  end
+end
+
+shared_context "aws_env" do |klass|
+  before do
+    allow(klass).to receive(:aws_env_set?).and_return(nil)
+    allow_any_instance_of(klass).to receive(:aws_env_set?).and_return(nil)
   end
 end
