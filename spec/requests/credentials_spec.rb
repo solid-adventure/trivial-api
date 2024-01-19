@@ -4,6 +4,7 @@ describe 'Credentials API' do
 
   include_context "jwt"
   include_context 'aws_credentials'
+  include_context 'aws_env', CredentialsBase
 
   path '/apps/{id}/credentials' do
     parameter name: :id, in: :path, type: :string
