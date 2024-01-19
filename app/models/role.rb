@@ -1,7 +1,4 @@
-require 'env_handler'
-
 class Role
-  include EnvHandler
 
   AFTER_CREATE_DELAY = 1.5
 
@@ -34,7 +31,6 @@ class Role
   private
 
   def self.aws_client
-    aws_env_set?
     @aws_client ||= Aws::IAM::Client.new
   end
 

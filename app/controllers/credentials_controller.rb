@@ -3,11 +3,7 @@ class CredentialsController < ApplicationController
   before_action :authenticate_app!, only: [:patch]
 
   def show
-    begin
-      render json: { credentials: app.credentials.secret_value }
-    rescue EnvHandler::MissingEnvVariableError
-      render json: { credentials: [] }, status: :ok
-    end
+    render json: {credentials: app.credentials.secret_value}
   end
 
   def update

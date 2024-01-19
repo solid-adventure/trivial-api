@@ -1,7 +1,4 @@
-require 'env_handler'
-
 class CredentialsBase
-  include EnvHandler
 
   class InvalidPatch < StandardError
     def initialize
@@ -102,12 +99,10 @@ class CredentialsBase
   end
 
   def aws_client
-    aws_env_set?
     @aws_client ||= Aws::SecretsManager::Client.new
   end
 
   def self.aws_client
-    aws_env_set?
     Aws::SecretsManager::Client.new
   end
 
