@@ -4,6 +4,7 @@ describe 'Credential Sets API' do
 
   include_context "jwt"
   include_context 'aws_credentials'
+  include_context 'aws_env', CredentialsBase
 
   let(:user) { FactoryBot.create(:user, :logged_in) }
   let('access-token') { user.tokens[client]['token_unhashed'] }
