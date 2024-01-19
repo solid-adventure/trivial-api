@@ -4,6 +4,7 @@ describe ApiKeys do
 
   include_context 'jwt'
   include_context 'aws_credentials'
+  include_context 'aws_env', CredentialsBase
 
   let(:app) { FactoryBot.create(:app) }
 
