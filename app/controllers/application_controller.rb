@@ -1,8 +1,10 @@
 # frozen_string_literal: true
+require 'env_handler'
 
 class ApplicationController < ActionController::API
   include DeviseTokenAuth::Concerns::SetUserByToken
   include Pagy::Backend
+  include EnvHandler
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :authenticate_user!, unless: :devise_controller?
@@ -10,6 +12,7 @@ class ApplicationController < ActionController::API
   rescue_from ActiveRecord::RecordInvalid, with: :render_invalid_record
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from CanCan::AccessDenied, with: :render_unauthorized
+  rescue_from EnvHandler::MissingEnvVariableError, with: :render_env_error
 
   protected
 
@@ -51,6 +54,10 @@ class ApplicationController < ActionController::API
 
   def render_not_found(err)
     render status: :not_found
+  end
+
+  def render_env_error(err)
+    render json: { error: err.message }, status: :unprocessable_entity
   end
 
   def auth_key
