@@ -6,7 +6,7 @@ class CredentialsController < ApplicationController
     begin
       render json: { credentials: app.credentials.secret_value }
     rescue EnvHandler::MissingEnvVariableError
-      render json: { credentials: [] }, status: :ok
+      render json: { credentials: {} }, status: :ok
     end
   end
 
