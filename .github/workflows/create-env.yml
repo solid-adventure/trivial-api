@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/trying_env_vars
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
@@ -27,12 +27,13 @@ jobs:
   infra:
     if: contains(github.event.pull_request.labels.*.name, 'pr-env') || github.ref == 'refs/heads/develop'
     needs: [ build ]
-    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/superstructure.yml@bb/trying_env_vars
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
       service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
       service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
+      tf_branch: "bb/trying_env_vars"
     secrets:
       tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
       tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
