@@ -33,7 +33,6 @@ jobs:
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
       service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
       service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
-      tf_branch: "bb/trying_env_vars"
     secrets:
       tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
       tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
