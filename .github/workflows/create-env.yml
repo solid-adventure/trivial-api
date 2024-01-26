@@ -39,6 +39,7 @@ jobs:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
       pr_confluent_kafka_cluster_api_key: ${{ secrets.PR_CONFLUENT_KAFKA_API_KEY }}
       pr_confluent_kafka_cluster_api_secret: ${{ secrets.PR_CONFLUENT_KAFKA_API_SECRET }}
+      trivial_api_jwt_private_key: ${{ secrets.TRIVIAL_API_JWT_PRIVATE_KEY }}
 
   update:
     needs: [ build, infra ]
