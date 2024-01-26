@@ -4,6 +4,7 @@ class ApiKeys
 
   ALGORITHM = 'RS256'
   DURATION = 1.week
+  CLIENT_KEY_ALGORITHM = 'HS256'
 
   attr_accessor :app
 
@@ -16,11 +17,11 @@ class ApiKeys
     JWT.encode payload, private_key, ALGORITHM
   end
 
-  ## Issue a non-expiring key with permissions to all resources. Use with care.
+  # Issue a non-expiring key with unscoped permissions to all resources. Use with care.
   def issue_client_key!
     key_id = SecureRandom.hex(15)
     payload = {key_id: key_id}
-    key_access_token = JWT.encode payload, private_key, ALGORITHM
+    key_access_token = JWT.encode payload, client_secret, CLIENT_KEY_ALGORITHM
     return {
       key_id: key_id,
       key_access_token: key_access_token
@@ -29,7 +30,7 @@ class ApiKeys
 
   # ApiKeys.assert_client_key_valid!(key_access_token)
   def assert_client_key_valid!(key_access_token)
-    payload, header = JWT.decode key_access_token, public_key, true, {algorithm: ALGORITHM}
+    payload, header = JWT.decode key_access_token, client_secret, true, {algorithm: CLIENT_KEY_ALGORITHM}
     raise "Invalid Client Key" unless payload["key_id"] && valid_client_keys.include?(payload["key_id"])
   end
 
@@ -113,6 +114,10 @@ class ApiKeys
 
   def self.assert_client_key_valid!(key_access_token)
     ApiKeys.new().assert_client_key_valid!(key_access_token)
+  end
+
+  def client_secret
+    ENV['CLIENT_SECRET'] || raise("CLIENT_SECRET not set")
   end
 
   def private_key
