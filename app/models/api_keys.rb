@@ -1,4 +1,7 @@
+require 'env_handler'
+
 class ApiKeys
+  include EnvHandler
 
   class OutdatedKeyError < StandardError; end
 
@@ -117,7 +120,8 @@ class ApiKeys
   end
 
   def client_secret
-    ENV['CLIENT_SECRET'] || raise("CLIENT_SECRET not set")
+    client_secret_set?
+    ENV['CLIENT_SECRET']
   end
 
   def private_key
