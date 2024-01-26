@@ -70,9 +70,9 @@ class PermissionsController < ApplicationController
     end
 
     if @permissible.transfer_ownership(new_owner: @new_owner)
-      render json: { message: 'Tranfer Ownership OK'}, status: :ok
+      render json: { message: 'Transfer Ownership OK'}, status: :ok
     else
-      render json: { message: 'Tranfer Ownership Failed' }, status: :unprocessable_entity
+      render json: { message: 'Transfer Ownership Failed' }, status: :unprocessable_entity
     end
   end
 
