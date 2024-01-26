@@ -3,7 +3,7 @@ module EnvHandler
   end
 
   # set any ENV variables that need to be checked here
-  VARIABLES = ['LAMBDA_POLICY_ARN', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'].freeze
+  VARIABLES = %w[LAMBDA_POLICY_ARN AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY CLIENT_SECRET].freeze
 
   def self.included(base)
     base.extend(EnvMethods)
