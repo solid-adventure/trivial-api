@@ -30,12 +30,12 @@ class AppsController < ApplicationController
     @app.user = current_user
     @app.owner = current_user
     @app.save!
-    render json: @app.as_json(methods: [:aws_role])
+    render json: @app, adapter: :attributes
   end
 
   def show
     authorize! :read, app
-    render json: app.as_json(methods: [:aws_role])
+    render json: app, adapter: :attributes
   end
 
   def update
