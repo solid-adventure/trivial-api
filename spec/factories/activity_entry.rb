@@ -1,7 +1,6 @@
 FactoryBot.define do
 
   factory :activity_entry do
-    association :user, factory: :user
     association :owner, factory: :user
     app { FactoryBot.create(:app, user: user) }
   end

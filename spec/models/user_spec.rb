@@ -6,8 +6,8 @@ describe User do
   let(:org) { FactoryBot.create(:organization, admin: user, members_count: 1) }
 
   describe '#associated_apps' do
-    let(:user_app) { FactoryBot.create(:app, custom_owner: user) }
-    let(:org_app) { FactoryBot.create(:app, custom_owner: org) }
+    let(:user_app) { FactoryBot.create(:app, owner: user) }
+    let(:org_app) { FactoryBot.create(:app, owner: org) }
     let(:permitted_app) { FactoryBot.create(:app) }
     let!(:unrelated_app) { FactoryBot.create(:app) }
   
@@ -40,8 +40,8 @@ describe User do
   end
 
     describe '#associated_credential_sets' do
-    let(:user_credential) { FactoryBot.create(:credential_set, custom_owner: user) }
-    let(:org_credential) { FactoryBot.create(:credential_set, custom_owner: org) }
+    let(:user_credential) { FactoryBot.create(:credential_set, owner: user) }
+    let(:org_credential) { FactoryBot.create(:credential_set, owner: org) }
     let(:permitted_credential) { FactoryBot.create(:credential_set) }
     let!(:unrelated_credential) { FactoryBot.create(:credential_set) }
   

@@ -9,7 +9,7 @@ describe 'Webhooks API' do
   let(:client) { user.tokens.keys.first }
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
-  let!(:user_app) { FactoryBot.create(:app, user: user, owner: user) }
+  let!(:user_app) { FactoryBot.create(:app, owner: user) }
 
   def self.webhook_schema
     {
@@ -60,8 +60,8 @@ describe 'Webhooks API' do
 
       let(:app_id) { user_app.name }
       let(:limit) { 10 }
-      let!(:build_entry) { FactoryBot.create(:activity_entry, :build, user: user, owner: user, app: user_app) }
-      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, owner: user, app: user_app) }
+      let!(:build_entry) { FactoryBot.create(:activity_entry, :build, owner: user, app: user_app) }
+      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, owner: user, app: user_app) }
 
       response '200', 'Request listing returned' do
         schema type: :array, items: webhook_schema_for_index
@@ -126,7 +126,7 @@ describe 'Webhooks API' do
       produces 'application/json'
       parameter name: "webhookId", in: :path, type: :string
 
-      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, app: user_app) }
+      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, owner: user, app: user_app) }
       let(:webhookId) { request_entry.id }
 
       response '200', 'Request log details returned' do
@@ -145,7 +145,7 @@ describe 'Webhooks API' do
       produces 'application/json'
       parameter name: "webhookId", in: :path, type: :string
 
-      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, owner: user, app: user_app, status: nil, diagnostics: nil, duration_ms: nil) }
+      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, owner: user, app: user_app, status: nil, diagnostics: nil, duration_ms: nil) }
       let(:webhookId) { request_entry.update_id }
 
       parameter name: :webhook_properties, in: :body, schema: {
@@ -232,7 +232,7 @@ describe 'Webhooks API' do
       produces 'application/json'
       parameter name: "webhookId", in: :path, type: :string
 
-      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, owner: user, app: user_app) }
+      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, owner: user, app: user_app) }
       let(:webhookId) { request_entry.id }
 
       response '200', 'Request re-sent' do

@@ -11,17 +11,17 @@ class AbilityTest < ActiveSupport::TestCase
 
     OrgRole.create(organization: @org1, user: @user1, role: 'admin')
 
-    @app_user1 = App.create(user: @user1, owner: @user1, descriptive_name: 'New App, User 1')
-    @manifest_user1 = Manifest.create(user: @user1, owner: @user1, app_id: '123ABC', content: "{}", internal_app_id: @app_user1.id)
+    @app_user1 = App.create(owner: @user1, descriptive_name: 'New App, User 1')
+    @manifest_user1 = Manifest.create(owner: @user1, app_id: '123ABC', content: "{}", internal_app_id: @app_user1.id)
 
-    @app_user2 = App.create(user: @user2, owner: @user2, descriptive_name: 'New App, User 2')
-    @manifest_user2 = Manifest.create(user: @user2, owner: @user2, app_id: '456XYZ', content: "{}", internal_app_id: @app_user2.id)
+    @app_user2 = App.create(owner: @user2, descriptive_name: 'New App, User 2')
+    @manifest_user2 = Manifest.create(owner: @user2, app_id: '456XYZ', content: "{}", internal_app_id: @app_user2.id)
     
-    @app_user3 = App.create(user: @user3, owner: @user3, descriptive_name: 'New App, User 3')
-    @manifest_user3 = Manifest.create(user: @user3, owner: @user3, app_id: '789MNO', content: "{}", internal_app_id: @app_user3.id)
+    @app_user3 = App.create(owner: @user3, descriptive_name: 'New App, User 3')
+    @manifest_user3 = Manifest.create(owner: @user3, app_id: '789MNO', content: "{}", internal_app_id: @app_user3.id)
     
-    @app_org1 = App.create(user: @user1, owner: @org1, descriptive_name: 'New App, Org 1')
-    @manifest_org1 = Manifest.create(user: @user1, owner: @org1, app_id: 'CBA321', content: "{}", internal_app_id: @app_org1.id)
+    @app_org1 = App.create(owner: @org1, descriptive_name: 'New App, Org 1')
+    @manifest_org1 = Manifest.create(owner: @org1, app_id: 'CBA321', content: "{}", internal_app_id: @app_org1.id)
 
     Permission.create(permissible: @app_user3, user: @user1, permit: Permission::READ_BIT)
     Permission.create(permissible: @manifest_user3, user: @user1, permit: Permission::READ_BIT)

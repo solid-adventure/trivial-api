@@ -5,9 +5,8 @@ class ManifestTest < ActiveSupport::TestCase
         @manifest = Manifest.new
         @manifest.app_id = 'BrownShirt'
         @manifest.content = '{"x":1}'
-        @manifest.user = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
-        @manifest.owner = @manifest.user
-        @manifest.app = App.create(user: @manifest.user, owner: @manifest.user, name: 'BrownShirt')
+        @manifest.owner = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
+        @manifest.app = App.create(owner: @manifest.owner, name: 'BrownShirt')
         @manifest.save!
         @user2 = User.create(name: 'gandolf', email: 'gandolf@gmail.com', password: '12345678')
     end
@@ -30,11 +29,11 @@ class ManifestTest < ActiveSupport::TestCase
         assert_equal @manifest.errors[:content], ["can't be blank"]
     end
 
-    test 'invalid without user_id' do
-        @manifest.user_id = nil
+    test 'invalid without owner_id' do
+        @manifest.owner_id = nil
         @manifest.valid?
 
-        assert_equal @manifest.errors[:user_id], ["can't be blank"]
+        assert_equal @manifest.errors[:owner], ["must exist"]
     end
 
     test 'content app id updates to app_id' do
@@ -45,14 +44,11 @@ class ManifestTest < ActiveSupport::TestCase
 
     test 'copy_to_app! updates app and user' do
         new_app = App.new(descriptive_name: "Hold Steady")
-        new_app.user = @user2
         new_app.owner = @user2
         new_app.save!
 
         new_manifest = @manifest.copy_to_app!(new_app)
-        assert_equal new_manifest.user, @user2
+        assert_equal new_manifest.owner, @user2
         assert_equal new_manifest.app, new_app
-
     end
-
 end

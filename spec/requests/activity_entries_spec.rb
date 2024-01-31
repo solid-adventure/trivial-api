@@ -9,7 +9,7 @@ describe 'Activity Entries API' do
   let(:client) { user.tokens.keys.first }
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
-  let!(:user_app) { FactoryBot.create(:app, user: user, owner: user) }
+  let!(:user_app) { FactoryBot.create(:app, owner: user) }
 
   def self.activity_schema
     {
@@ -36,8 +36,8 @@ describe 'Activity Entries API' do
 
       let(:app_id) { user_app.name }
       let(:limit) { 10 }
-      let!(:build_entry) { FactoryBot.create(:activity_entry, :build, user: user, owner: user, app: user_app) }
-      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, user: user, owner: user, app: user_app) }
+      let!(:build_entry) { FactoryBot.create(:activity_entry, :build, owner: user, app: user_app) }
+      let!(:request_entry) { FactoryBot.create(:activity_entry, :request, owner: user, app: user_app) }
 
       response '200', 'Activity listing returned' do
         schema type: :array, items: activity_schema

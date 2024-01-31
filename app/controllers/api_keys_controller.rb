@@ -18,7 +18,7 @@ class ApiKeysController < ApplicationController
 
   def app(for_user = true)
     if for_user
-      @app ||= current_user.apps.kept.find_by_name!(params[:app_id])
+      @app ||= current_user.associated_apps.kept.find_by_name!(params[:app_id])
     else
       @app ||= App.kept.find_by_name!(params[:app_id])
     end
