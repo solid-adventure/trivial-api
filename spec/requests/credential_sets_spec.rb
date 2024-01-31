@@ -12,7 +12,7 @@ describe 'Credential Sets API' do
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
 
-  let!(:existing_credential) { FactoryBot.create(:credential_set, user: user, owner: user) }
+  let!(:existing_credential) { FactoryBot.create(:credential_set, owner: user) }
 
   def self.credential_definition_schema
     {
@@ -218,7 +218,7 @@ describe 'Credential Sets API' do
 
       let(:Authorization) { "Bearer #{key}" }
       let(:key) { user_app.api_keys.issue! }
-      let(:user_app) { FactoryBot.create(:app, user: user) }
+      let(:user_app) { FactoryBot.create(:app, owner: user) }
       let(:path) { ['code_grant', 'access_token'] }
       let(:current_value) { 'Whe8Y5poyQo=' }
       let(:new_value) { 'zTeYlkd9yzo=' }
@@ -289,7 +289,7 @@ describe 'Credential Sets API' do
 
       let(:Authorization) { "Bearer #{key}" }
       let(:key) { user_app.api_keys.issue! }
-      let(:user_app) { FactoryBot.create(:app, user: user) }
+      let(:user_app) { FactoryBot.create(:app, owner: user) }
       let(:stored_path) { {path: 'api_key'} }
       let(:stored_key) { key }
       let(:stored_credentials) { "{\"api_key\":\"#{stored_key}\"}" }

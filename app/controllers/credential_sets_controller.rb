@@ -7,7 +7,7 @@ class CredentialSetsController < ApplicationController
   end
 
   def create
-    @credential_set = current_user.credential_sets.new(credential_set_params)
+    @credential_set = CredentialSet.new(credential_set_params)
     @credential_set.owner = current_user
     @credential_set.save!
     if params.has_key?(:credentials)
@@ -55,7 +55,7 @@ class CredentialSetsController < ApplicationController
 
   def update_api_key
     @keys = ApiKeys.for_key!(auth_key)
-    @credential_set = @keys.app.user.credential_sets.find_by_external_id!(params[:id])
+    @credential_set = @keys.app.owner.owned_credential_sets.find_by_external_id!(params[:id])
     render json: {
       api_key: @keys.refresh_in_credential_set!(@credential_set, auth_key, params[:path])
     }
@@ -73,7 +73,7 @@ class CredentialSetsController < ApplicationController
   end
 
   def patchable_credential_set
-    @credential_set ||= current_app.user.associated_credential_sets.find_by_external_id!(params[:id])
+    @credential_set ||= current_app.owner.owned_credential_sets.find_by_external_id!(params[:id])
   end
 
   def credential_set_params

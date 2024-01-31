@@ -9,8 +9,8 @@ class AppTest < ActiveSupport::TestCase
 
       @user = User.create!(name: 'test', email: 'test@example.test', password: 'password')
       @user2 = User.create!(name: 'test2', email: 'test2@example.test', password: 'password2')
-      @existing = App.create!(user: @user, owner: @user, descriptive_name: 'Existing App')
-      @app = App.new(user: @user, owner: @user, descriptive_name: 'New App')
+      @existing = App.create!(owner: @user, descriptive_name: 'Existing App')
+      @app = App.new(owner: @user, descriptive_name: 'New App')
     end
 
     test 'passes validation with all required files' do
@@ -27,8 +27,8 @@ class AppTest < ActiveSupport::TestCase
       assert @app.port >= App::MINIMUM_PORT_NUMBER
     end
 
-    test 'invalid without user' do
-        @app.user_id = nil
+    test 'invalid without owner' do
+        @app.owner_id = nil
         assert ! @app.valid?
     end
 
@@ -57,13 +57,13 @@ class AppTest < ActiveSupport::TestCase
 
     test 'valid with duplicate descriptive across users' do
       @app.descriptive_name = @existing.descriptive_name
-      @app.user = @user2
+      @app.owner = @user2
       assert @app.valid?
     end
 
     test 'assigns different roles to apps under different users' do
       Role.stub :create!, -> (n) { Role.new(name: n[:name], arn: "arn:x:#{n[:name]}") } do
-        @other_app = App.new(user: @user2, descriptive_name: 'Other App')
+        @other_app = App.new(owner: @user2, descriptive_name: 'Other App')
         assert_not_equal @app.aws_role, @other_app.aws_role
       end
     end
@@ -72,17 +72,17 @@ class AppTest < ActiveSupport::TestCase
       new_app = @app.copy!(nil, @app.descriptive_name + ' Copy')
       new_app.valid?
       assert_not_equal @app.name, new_app.name
-      assert_equal @app.user, new_app.user
+      assert_equal @app.owner, new_app.owner
     end
 
     test 'copies into new user account' do
       new_app = @app.copy!(@user2, @app.descriptive_name + ' Copy')
       new_app.valid?
-      assert_equal new_app.user, @user2
+      assert_equal new_app.owner, @user2
     end
 
     test 'copy includes manifest' do
-      manifest = Manifest.new(app_id: @existing.name, internal_app_id: @existing.id, user_id: @user.id, owner: @user, content: {app_id: @existing.name}.to_json)
+      manifest = Manifest.new(app_id: @existing.name, internal_app_id: @existing.id, owner: @user, content: {app_id: @existing.name}.to_json)
       assert manifest.valid?
       @existing.manifests << manifest
       @existing.save!

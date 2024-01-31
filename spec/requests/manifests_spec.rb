@@ -9,7 +9,7 @@ describe 'manifests', type: :request do
   let(:expiry) { user.tokens[client]['expiry'] }
   let(:uid) { user.uid }
 
-  let!(:user_app) { FactoryBot.create(:app, custom_owner: user ) }
+  let!(:user_app) { FactoryBot.create(:app, owner: user ) }
   let!(:user_manifest) { FactoryBot.create(:manifest, custom_app: user_app) }
 
   path '/manifests?app_id={appId}' do
@@ -149,10 +149,6 @@ describe 'manifests', type: :request do
         let('access-token') { 'invalid-token' }
         run_test!
       end
-
-
     end
-
-
   end
 end
