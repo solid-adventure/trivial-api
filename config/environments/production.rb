@@ -59,8 +59,8 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "api_production"
 
   config.action_mailer.perform_caching = true
-  config.action_mailer.default_options = { from: 'noreply@mg.trivialapps.io' }
-  config.action_mailer.default_url_options = { host: "https://trivial-api-production.herokuapp.com" }
+  config.action_mailer.default_options = { from: "#{ENV['MAILGUN_HANDLE' || 'noreply']}@#{ENV['MAILGUN_DOMAIN']}" }
+  config.action_mailer.default_url_options = { host: ENV['DEFAULT_HOST_URL'] }
 
   ActionMailer::Base.smtp_settings = {
     :port           => ENV['MAILGUN_SMTP_PORT'],
