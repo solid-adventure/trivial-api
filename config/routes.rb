@@ -84,6 +84,8 @@ Rails.application.routes.draw do
 
   resource :profile, only: [:show, :update]
 
+  post 'reports/item_count', to: 'reports#item_count'
+
   get 'credential_sets', to: 'credential_sets#index'
   post 'credential_sets', to: 'credential_sets#create'
   get 'credential_sets/:id', to: 'credential_sets#show'
