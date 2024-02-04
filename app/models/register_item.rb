@@ -43,6 +43,7 @@ class RegisterItem < ApplicationRecord
   end
 
   def self.register_meta_attributes(column_labels)
+    return unless column_labels
     column_labels.keys.each do |attr_name|
 
       label = sanitize(column_labels[attr_name])
