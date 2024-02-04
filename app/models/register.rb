@@ -6,7 +6,7 @@ class Register < ApplicationRecord
   audited
 
   # Register identity basics
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: { scope: :owner }
   validates :sample_type, acceptance: { accept: ['series', 'increment'] }
   validates :owner, presence: true
 

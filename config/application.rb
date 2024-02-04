@@ -31,5 +31,7 @@ module Api
     config.middleware.use config.session_store, config.session_options
     # config.session_store :disabled
 
+    config.autoload_paths << "#{Rails.root}/lib"
+
   end
 end
