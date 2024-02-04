@@ -40,24 +40,16 @@ module Services
         args[:group_by].map { |i| raise "Invalid group by: #{i} is not a meta key for register" unless i.in? whitelisted_groups }
         meta_groups = args[:group_by].map { |i| RegisterItem.meta_column(i, sample.register.meta) }
         results = results.group(meta_groups).__send__(stat ,:amount)
-        results = apply_multiplier(results, sample.multiplier) if stat.in? %w(sum average)
         results = collate_register_names(results) if meta_groups.include? "register_id"
         return {title: "Count by Register", count: results }
       end
 
-      return {title: stat.titleize, count: results.__send__(stat ,:amount) * sample.multiplier } if stat.in? %w(sum average)
-      return {title: stat.titleize, count: results.__send__(stat ,:amount) } if stat.in? %w(count)
+      # return {title: stat.titleize, count: results.__send__(stat ,:amount)  } if stat.in? %w(sum average)
+      return {title: stat.titleize, count: results.__send__(stat ,:amount) } #if stat.in? %w(count)
     end
 
     def validate_single_unit_of_measure(results)
-      results.group(:units).size.keys.length == 1
-    end
-
-    def apply_multiplier(results, multiplier)
-      results.each do |k,v|
-        results[k] = v * multiplier
-      end
-      results
+      results.group(:units).size.keys.length <= 1
     end
 
     # Given {1=>404, 3=>1, 2=>1} with keys being register_ids, replace the ids with register.name
