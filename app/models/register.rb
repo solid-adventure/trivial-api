@@ -21,7 +21,7 @@ class Register < ApplicationRecord
 
   has_many :register_items, dependent: :destroy
 
-  after_initialize :set_defaults
+  before_create :set_defaults
 
   def set_defaults
     self.sample_type ||= 'increment'
