@@ -17,7 +17,7 @@ class RegisterItemTest < ActiveSupport::TestCase
       description: "First transaction",
       income_account: "music",
       owner: User.first,
-      uniqueness_key: "1234"
+      unique_key: "1234"
     )
     assert ri.save
     assert_equal "music", ri.income_account
@@ -30,7 +30,7 @@ class RegisterItemTest < ActiveSupport::TestCase
       description: "First transaction",
       income_account: "music",
       owner: User.first,
-      uniqueness_key: "1234"
+      unique_key: "1234"
     )
     assert ri.save
     assert_equal "music", ri.income_account
@@ -45,7 +45,7 @@ class RegisterItemTest < ActiveSupport::TestCase
       warehouse: "san francisco",
       channel: "retail",
       owner: User.first,
-      uniqueness_key: "1234"
+      unique_key: "1234"
     )
     assert ri.save
     ri.reload

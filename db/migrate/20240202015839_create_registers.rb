@@ -4,7 +4,6 @@ class CreateRegisters < ActiveRecord::Migration[7.0]
       t.string :name
       t.string :sample_type
       t.string :units
-      t.decimal :multiplier
       t.jsonb :meta
       t.string :owner_type
       t.integer :owner_id

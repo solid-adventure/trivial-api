@@ -11,7 +11,6 @@ class Register < ApplicationRecord
   validates :owner, presence: true
 
   # Expected values for items, denormalized to register_items
-  validates :multiplier, presence: true
   validates :units, presence: true
 
   # Ownership and permissions
@@ -25,7 +24,6 @@ class Register < ApplicationRecord
 
   def set_defaults
     self.sample_type ||= 'increment'
-    self.multiplier ||= 1
     self.units ||= 'units'
   end
 
