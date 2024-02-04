@@ -10,6 +10,8 @@ class RegisterItem < ApplicationRecord
   validates :amount, presence: true
   validates :uniqueness_key, uniqueness: { case_sensitive: true, scope: :register_id }
   validates :register, presence: true
+  validates :multiplier, presence: true
+  validates :units, presence: true
 
   # Denormalized from register
   validates :multiplier, presence: true
@@ -19,6 +21,12 @@ class RegisterItem < ApplicationRecord
   belongs_to :owner, polymorphic: true
   has_many :permissions, as: :permissible
   has_many :permitted_users, through: :permissions, source: :user
+
+  # Common scopes for reports
+  scope :between, ->(start_at, end_at) { where("created_at >= ? AND created_at <= ?", start_at, end_at) }
+
+  # Denormalized from register
+  # attr_accessor :multiplier, :units
 
   after_initialize :set_register_attrs
 
