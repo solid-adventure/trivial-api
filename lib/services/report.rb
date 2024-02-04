@@ -20,7 +20,7 @@ module Services
       .between(args[:start_at], args[:end_at])
       results = results.where(register_id: args[:register_ids]) if args[:register_ids]
 
-      # todo: output formatted fot TableView
+      # TODO: output formatted fot TableView
       {title: "All Items", count: results.limit(limit) }
     end
 
@@ -34,10 +34,15 @@ module Services
       sample = results.first
       validate_single_unit_of_measure(results) or raise "Cannot report on multiple units in the same report. Please filter by registers with the same units."
 
-      if args[:group_by] == "register"
-        results = results.group(:register_id).__send__(stat ,:amount)
+      if args[:group_by]
+        whitelisted_groups = sample.register.meta.values + ["register_id"]
+      # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
+        args[:group_by].map { |i| raise "Invalid group by: #{i} is not a meta key for register" unless i.in? whitelisted_groups }
+        meta_groups = args[:group_by].map { |i| RegisterItem.meta_column(i, sample.register.meta) }
+        results = results.group(meta_groups).__send__(stat ,:amount)
         results = apply_multiplier(results, sample.multiplier) if stat.in? %w(sum average)
-        return {title: "Count by Register", count: collate_register_names(results) }
+        results = collate_register_names(results) if meta_groups.include? "register_id"
+        return {title: "Count by Register", count: results }
       end
 
       return {title: stat.titleize, count: results.__send__(stat ,:amount) * sample.multiplier } if stat.in? %w(sum average)

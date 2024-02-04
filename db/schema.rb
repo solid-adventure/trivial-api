@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_02_02_021450) do
+ActiveRecord::Schema[7.0].define(version: 2024_02_04_005427) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -196,10 +196,19 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_02_021450) do
     t.string "units"
     t.string "owner_type"
     t.integer "owner_id"
-    t.jsonb "meta"
     t.string "uniqueness_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "meta0"
+    t.string "meta1"
+    t.string "meta2"
+    t.string "meta3"
+    t.string "meta4"
+    t.string "meta5"
+    t.string "meta6"
+    t.string "meta7"
+    t.string "meta8"
+    t.string "meta9"
     t.index ["register_id"], name: "index_register_items_on_register_id"
     t.index ["uniqueness_key", "register_id"], name: "index_register_items_on_uniqueness_key_and_register_id", unique: true
   end
