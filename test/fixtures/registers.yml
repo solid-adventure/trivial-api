@@ -7,6 +7,7 @@
 one: {
   id: 1,
   name: "register 1 name",
+  units: "USD",
   meta: {
     "meta0": "income_account",
     "meta2": "warehouse",

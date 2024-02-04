@@ -15,6 +15,7 @@ class RegisterItemTest < ActiveSupport::TestCase
       register_id: 1,
       amount: 1.00,
       description: "First transaction",
+      units: 'USD',
       income_account: "music",
       owner: User.first,
       unique_key: "1234"
@@ -28,6 +29,7 @@ class RegisterItemTest < ActiveSupport::TestCase
       register_id: 1,
       amount: 1.00,
       description: "First transaction",
+      units: 'USD',
       income_account: "music",
       owner: User.first,
       unique_key: "1234"
@@ -41,6 +43,7 @@ class RegisterItemTest < ActiveSupport::TestCase
       register_id: 1,
       amount: 1.00,
       description: "First transaction",
+      units: 'USD',
       income_account: "music",
       warehouse: "san francisco",
       channel: "retail",
