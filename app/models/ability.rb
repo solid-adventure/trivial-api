@@ -138,5 +138,51 @@ class Ability
     can :revoke, Manifest do |manifest|
       Permission.find_by(permissible: manifest, user: user, permit: REVOKE_BIT)
     end
+
+    # Register Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], Register do |register|
+      register.admin?(user)
+    end
+    can [:read], Register do |register|
+      register.member?(user)
+    end
+    can :read, Register do |register|
+      Permission.find_by(permissible: register, user: user, permit: READ_BIT)
+    end
+    can :update, Register do |register|
+      Permission.find_by(permissible: register, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, Register do |register|
+      Permission.find_by(permissible: register, user: user, permit: DELETE_BIT)
+    end
+    can :grant, Register do |register|
+      Permission.find_by(permissible: register, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, Register do |register|
+      Permission.find_by(permissible: register, user: user, permit: REVOKE_BIT)
+    end
+
+    # RegisterItem Permission Blocks
+    can [:manage, :grant, :revoke, :transfer], RegisterItem do |item|
+      item.admin?(user)
+    end
+    can [:read], RegisterItem do |item|
+      item.member?(user)
+    end
+    can :read, RegisterItem do |item|
+      Permission.find_by(permissible: item, user: user, permit: READ_BIT)
+    end
+    can :update, RegisterItem do |item|
+      Permission.find_by(permissible: item, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, RegisterItem do |item|
+      Permission.find_by(permissible: item, user: user, permit: DELETE_BIT)
+    end
+    can :grant, RegisterItem do |item|
+      Permission.find_by(permissible: item, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, RegisterItem do |item|
+      Permission.find_by(permissible: item, user: user, permit: REVOKE_BIT)
+    end
   end
 end

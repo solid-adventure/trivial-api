@@ -5,8 +5,7 @@ class RegisterItemsController < ApplicationController
 
   # GET /register_items
   def index
-    authorize! :read
-    @register_items = RegisterItem.all
+    @register_items = current_user.associated_register_items
     render json: @register_items, adapter: :attributes
   end
 
@@ -18,10 +17,10 @@ class RegisterItemsController < ApplicationController
 
   # POST /register_items
   def create
-    authorize! :create
     @register_item = RegisterItem.new(register_item_params)
     @register_item.owner = @register.owner
-    @register_item.unique_key = "ID-ACTION-DATE" #TODO generate a valid unique_key
+
+    authorize! :create, @register_item
     if @register_item.save
       render json: @register_item, adapter: :attributes, status: :created
     else
@@ -40,6 +39,6 @@ class RegisterItemsController < ApplicationController
 
   def register_item_params
     register_meta = @register.meta.symbolize_keys
-    params.require(:register_item).permit(*register_meta.values, :description, :register_id, :amount, :units)
+    params.require(:register_item).permit(*register_meta.values, :unique_key, :description, :register_id, :amount, :units)
   end
 end
