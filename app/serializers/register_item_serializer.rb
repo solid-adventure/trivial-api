@@ -1,5 +1,5 @@
 class RegisterItemSerializer < ActiveModel::Serializer
-  attributes: :id, :register_id, :owner_type, :owner_id, :unique_key, :description, :amount, :units, :created_at
+  attributes :id, :register_id, :owner_type, :owner_id, :unique_key, :description, :amount, :units, :created_at
 
   def attributes(*args)
     data = super
