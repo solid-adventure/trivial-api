@@ -3,8 +3,7 @@ class RegistersController < ApplicationController
 
   # GET /registers
   def index
-    authorize! :read
-    @registers = Register.all
+    @registers = current_user.associated_registers
     render json: @registers, adapter: :attributes
   end
 
@@ -16,10 +15,10 @@ class RegistersController < ApplicationController
 
   # POST /registers
   def create
-    authorize! :create
     @register = Register.new(register_params)
     @register.owner = current_user
 
+    authorize! :create, @register
     if @register.save
       render json: @register, adapter: :attributes
     else
