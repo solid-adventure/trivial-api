@@ -1,7 +1,6 @@
 class RegisterItemsController < ApplicationController
   before_action :set_register
   before_action :set_register_item, only: %i[ show ]
-  before_action :set_meta_columns, only: %i[ create ]
 
   # GET /register_items
   def index
