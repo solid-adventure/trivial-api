@@ -1,7 +1,5 @@
 module Services
   class Report
-
-
     def item_count(args)
       simple_stat_lookup("count", args)
     end
@@ -16,8 +14,11 @@ module Services
 
     def item_list(args)
       limit = args[:limit] || 50
-      results = RegisterItem.where(owner: args[:owner])
-      .between(args[:start_at], args[:end_at])
+
+      user = User.find(args[:user_id])
+      results = user.associated_register_items
+        .between(args[:start_at], args[:end_at])
+
       results = results.where(register_id: args[:register_ids]) if args[:register_ids]
 
       # TODO: output formatted fot TableView
@@ -28,9 +29,13 @@ module Services
 
     def simple_stat_lookup(stat, args)
       return unless stat.in? %w(count sum average)
-      results = RegisterItem.where(owner: args[:owner]) # TODO For records owned by orgs, this needs to be more like accessible_by
-      .between(args[:start_at], args[:end_at])
+
+      user = User.find(args[:user_id])
+      results = user.associated_register_items
+        .between(args[:start_at], args[:end_at])
+
       results = results.where(register_id: args[:register_ids]) if args[:register_ids]
+
       sample = results.first
       validate_single_unit_of_measure(results) or raise "Cannot report on multiple units in the same report. Please filter by registers with the same units."
 

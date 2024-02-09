@@ -7,7 +7,7 @@ class ReportsController < ApplicationController
   def show
     begin
       report = Services::Report.new()
-      render json: report.__send__(params["report_name"], report_params.merge(owner: current_user))
+      render json: report.__send__(params["report_name"], report_params.merge(user_id: current_user.id))
     rescue => e
       Rails.logger.error e
       render json: {error: "Unable to render report"}, status: 500
