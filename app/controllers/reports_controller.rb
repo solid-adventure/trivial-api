@@ -10,7 +10,15 @@ class ReportsController < ApplicationController
       render json: report.__send__(params["report_name"], report_params.merge(user: current_user))
     rescue => e
       Rails.logger.error e
-      render json: {error: "Unable to render report"}, status: 500
+      if e.message.in? [
+        "Unable to compare registers with different meta keys",
+        "Cannot report on multiple units in the same report",
+        "Invalid group by, not a meta key for register"
+      ]
+        render json: {error: e.message}, status: 500
+      else
+        render json: {error: "Unable to render report"}, status: 500
+      end
     end
   end
 
