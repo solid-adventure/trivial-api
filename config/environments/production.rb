@@ -60,7 +60,7 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = true
   config.action_mailer.default_options = { from: "#{ENV['MAILGUN_HANDLE' || 'noreply']}@#{ENV['MAILGUN_DOMAIN']}" }
-  config.action_mailer.default_url_options = { host: ENV['DEFAULT_HOST_URL'] }
+  config.action_mailer.default_url_options = { host: ENV['DEFAULT_URL_HOST'] }
 
   ActionMailer::Base.smtp_settings = {
     :port           => ENV['MAILGUN_SMTP_PORT'],
