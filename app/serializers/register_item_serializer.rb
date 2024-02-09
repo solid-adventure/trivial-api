@@ -3,6 +3,7 @@ class RegisterItemSerializer < ActiveModel::Serializer
 
   def attributes(*args)
     data = super
+    return data unless object.register.meta.present?
     register_meta = object.register.meta.symbolize_keys
     register_meta.values.each do |label|
       data[label] = object.send(label)
