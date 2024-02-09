@@ -37,7 +37,11 @@ class RegisterItemsController < ApplicationController
   end
 
   def register_item_params
-    register_meta = @register.meta.symbolize_keys
-    params.require(:register_item).permit(*register_meta.values, :unique_key, :description, :register_id, :amount, :units)
-  end
+    if @register.meta.present?
+      params.permit(:unique_key, :description, :register_id, :amount, :units, @register.meta.values)
+    else
+      params.permit(:unique_key, :description, :register_id, :amount, :units)
+    end
+   end
+
 end

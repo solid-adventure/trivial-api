@@ -1,5 +1,5 @@
 class RegistersController < ApplicationController
-  before_action :set_register, only: %i[ show ]
+  before_action :set_register, only: %i[ show update ]
 
   # GET /registers
   def index
@@ -26,12 +26,22 @@ class RegistersController < ApplicationController
     end
   end
 
+  # PUT /registers/1
+  def update
+    authorize! :update, @register
+    if @register.update!(register_params)
+      render json: @register, adapter: :attributes
+    else
+      render json: @register.errors, status: :unprocessable_entity
+    end
+  end
+
   private
   def set_register
-    @register = Register.find(param[:id])
+    @register = Register.find(params[:id])
   end
 
   def register_params
-    params.require(:register).permit(:name, :sample_type, :units, meta: {})
+    params.permit(:name, :sample_type, :units, meta: {})
   end
 end
