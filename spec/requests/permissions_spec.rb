@@ -292,7 +292,7 @@ describe 'Permissions API' do
     let(:permissible_type) { @app.class.to_s.tableize }
     let(:permissible_id) { @app.id }
     
-    let!(:new_owner) { FactoryBot.create(:organization) }
+    let!(:new_owner) { FactoryBot.create(:organization, admin: @app.owner) }
     let(:new_owner_type) { new_owner.class.to_s.tableize }
     let(:new_owner_id) { new_owner.id }
     
