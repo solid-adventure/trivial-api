@@ -98,6 +98,11 @@ class User < ActiveRecord::Base
     associated_resources_via_app('manifest_drafts')
   end
 
+  def associated_organizations
+    return Organization.all if self.role == 'client'
+    return self.organizations
+  end
+
   def associated_registers
     associated_resources('registers')
   end

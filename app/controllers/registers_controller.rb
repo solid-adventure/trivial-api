@@ -16,7 +16,7 @@ class RegistersController < ApplicationController
   # POST /registers
   def create
     @register = Register.new(register_params)
-    @register.owner = current_user
+    @register.owner = current_user unless @register.owner # support for client_keys, which pass the owner in the request
 
     authorize! :create, @register
     if @register.save
@@ -42,6 +42,6 @@ class RegistersController < ApplicationController
   end
 
   def register_params
-    params.permit(:name, :sample_type, :units, meta: {})
+    params.permit(:name, :sample_type, :units, :owner_type, :owner_id, meta: {})
   end
 end
