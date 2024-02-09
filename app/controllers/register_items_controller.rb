@@ -18,7 +18,6 @@ class RegisterItemsController < ApplicationController
   def create
     @register_item = RegisterItem.new(register_item_params)
     @register_item.owner = @register.owner
-
     authorize! :create, @register_item
     if @register_item.save
       render json: @register_item, adapter: :attributes, status: :created
