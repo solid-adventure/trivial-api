@@ -30,9 +30,7 @@ class RegisterItem < ApplicationRecord
   def self.new(args)
     super(args)
   rescue ActiveRecord::UnknownAttributeError
-    raise "You must provide a register_id to create register items" unless args[:register_id]
     register = Register.find(args[:register_id])
-    raise "No register found for ID #{args[:register_id]}" unless register
     register_meta_attributes(register.meta)
     super(args)
   end
