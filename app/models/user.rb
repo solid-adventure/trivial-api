@@ -20,12 +20,16 @@ class User < ActiveRecord::Base
   has_many :owned_manifest_drafts, class_name: 'ManifestDraft', as: :owner
   has_many :owned_activity_entries, class_name: 'ActivityEntry', as: :owner
   has_many :owned_credential_sets, class_name: 'CredentialSet', as: :owner
+  has_many :owned_registers, class_name: 'Register', as: :owner
+  has_many :owned_register_items, class_name: 'RegisterItem', as: :owner
   
   has_many :permissions
   has_many :permitted_apps, -> { distinct }, through: :permissions, source: :permissible, source_type: 'App'
   has_many :permitted_manifests, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Manifest'
   has_many :permitted_manifest_drafts, -> { distinct }, through: :permissions, source: :permissible, source_type: 'ManifestDraft'
   has_many :permitted_credential_sets, -> { distinct }, through: :permissions, source: :permissible, source_type: 'CredentialSet'
+  has_many :permitted_registers, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Register'
+  has_many :permitted_register_items, -> { distinct }, through: :permissions, source: :permissible, source_type: 'RegisterItem'
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]
@@ -94,6 +98,18 @@ class User < ActiveRecord::Base
     associated_resources_via_app('manifest_drafts')
   end
 
+  def associated_organizations
+    return Organization.all if self.role == 'client'
+    return self.organizations
+  end
+
+  def associated_registers
+    associated_resources('registers')
+  end
+
+  def associated_register_items
+    associated_resources('register_items')
+  end
 
   private
 

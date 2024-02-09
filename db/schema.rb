@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_08_182428) do
+ActiveRecord::Schema[7.0].define(version: 2024_02_02_021450) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -188,6 +188,42 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_08_182428) do
     t.index ["user_id"], name: "index_permissions_on_user_id"
   end
 
+  create_table "register_items", force: :cascade do |t|
+    t.bigint "register_id", null: false
+    t.string "description"
+    t.decimal "amount"
+    t.string "units"
+    t.string "owner_type"
+    t.integer "owner_id"
+    t.string "unique_key"
+    t.string "meta0"
+    t.string "meta1"
+    t.string "meta2"
+    t.string "meta3"
+    t.string "meta4"
+    t.string "meta5"
+    t.string "meta6"
+    t.string "meta7"
+    t.string "meta8"
+    t.string "meta9"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id"], name: "index_register_items_on_owner_type_and_owner_id"
+    t.index ["register_id"], name: "index_register_items_on_register_id"
+    t.index ["unique_key", "register_id"], name: "index_register_items_on_unique_key_and_register_id", unique: true
+  end
+
+  create_table "registers", force: :cascade do |t|
+    t.string "name"
+    t.string "sample_type"
+    t.string "units"
+    t.jsonb "meta"
+    t.string "owner_type"
+    t.integer "owner_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "context"
     t.string "name"
@@ -244,4 +280,5 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_08_182428) do
   add_foreign_key "org_roles", "organizations"
   add_foreign_key "org_roles", "users"
   add_foreign_key "permissions", "users"
+  add_foreign_key "register_items", "registers"
 end

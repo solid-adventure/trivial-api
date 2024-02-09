@@ -4,14 +4,14 @@
 # model remove the '{}' from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-# admin:
-#   id: 1
-#   name: admin
-#   email: admin@email.com
-#   role: admin
-#   encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
-#   team_id: 1
-#   approval: approved
+admin:
+  id: 1
+  name: admin
+  email: admin@email.com
+  role: admin
+  encrypted_password: $2a$12$g2pZvFwOvHr4MzR6zK7tYu4M3i0gONacob4Gc7e39JmI73Bcbrk0q
+  # team_id: 1
+  # approval: approved
 
 # user1:
 #   id: 2

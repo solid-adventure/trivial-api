@@ -3,7 +3,7 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations
   def index
-    @organizations = current_user.organizations
+    @organizations = current_user.associated_organizations
     if @organizations.any?
       render json: @organizations, adapter: :attributes
     else
