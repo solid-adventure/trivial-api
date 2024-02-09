@@ -15,8 +15,7 @@ module Services
     def item_list(args)
       limit = args[:limit] || 50
 
-      user = User.find(args[:user_id])
-      results = user.associated_register_items
+      results = args[:user].associated_register_items
         .between(args[:start_at], args[:end_at])
 
       results = results.where(register_id: args[:register_ids]) if args[:register_ids]
@@ -30,8 +29,7 @@ module Services
     def simple_stat_lookup(stat, args)
       return unless stat.in? %w(count sum average)
 
-      user = User.find(args[:user_id])
-      results = user.associated_register_items
+      results = args[:user].associated_register_items
         .between(args[:start_at], args[:end_at])
 
       results = results.where(register_id: args[:register_ids]) if args[:register_ids]
