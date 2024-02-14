@@ -11,9 +11,10 @@ module Overrides
 
       if invited_user = User.find_by(email: params[:email])
         invited_user.update_column(:invitation_metadata, invite_params[:invitation_metadata])
-        invited_user.invite!()
+        invited_user.invite!(nil, { trivial_ui_url: invite_params[:trivial_ui_url] })  
       else
-        invited_user = invite_resource
+        trivial_ui_url = params[:invitation].delete(:trivial_ui_url)
+        invited_user = invite_resource({ trivial_ui_url: trivial_ui_url })
       end
       
       resource_invited = invited_user.errors.empty?
@@ -58,8 +59,8 @@ module Overrides
       end
     end
 
-    def invite_resource(&block)
-      User.invite!(invite_params, current_inviter, &block)
+    def invite_resource(options = {}, &block)
+      User.invite!(invite_params, current_inviter, options, &block)
     end
 
     def accept_resource
@@ -67,7 +68,7 @@ module Overrides
     end
 
     def invite_params
-      params.require(:invitation).permit(:name, :email, :invitation_token, :provider, :skip_invitation, invitation_metadata: [:org_id, :role])
+      params.require(:invitation).permit(:name, :email, :invitation_token, :provider, :skip_invitation, :trivial_ui_url, invitation_metadata: [:org_id, :role])
     end
 
     def accept_invite_params
