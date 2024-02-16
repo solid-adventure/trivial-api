@@ -53,8 +53,8 @@ module Services
       register_ids = results.group(:register_id).size.keys
       registers = Register.select(:meta).where(id: register_ids)
       registers.each do |r|
-        r.meta.keys.each_with_index do |k, i|
-          raise "Unable to compare registers with different meta keys" unless k == registers.first.meta.keys[i]
+        r.meta.each do |key, val|
+          raise "Unable to compare registers with different meta keys" unless val == registers.first.meta[key]
         end
       end
       return registers.first.meta.values + ["register_id"]
