@@ -17,7 +17,7 @@ class RegisterItem < ApplicationRecord
   has_many :permitted_users, through: :permissions, source: :user
 
   # Common scopes for reports
-  scope :between, ->(start_at, end_at) { where("created_at >= ? AND created_at <= ?", start_at, end_at) }
+  scope :between, ->(start_at, end_at) { where("originated_at >= ? AND originated_at <= ?", start_at, end_at) }
 
   # Denormalized from register
   before_create :set_register_attrs
