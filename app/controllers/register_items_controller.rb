@@ -37,9 +37,9 @@ class RegisterItemsController < ApplicationController
 
   def register_item_params
     if @register.meta.present?
-      params.permit(:unique_key, :description, :register_id, :amount, :units, @register.meta.values)
+      params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at, @register.meta.values)
     else
-      params.permit(:unique_key, :description, :register_id, :amount, :units)
+      params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
     end
    end
 
