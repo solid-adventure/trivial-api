@@ -37,7 +37,7 @@ module Services
       sample = results.first
       validate_single_unit_of_measure(results) or raise "Cannot report on multiple units in the same report"
 
-      if args[:group_by]
+      if args[:group_by] && sample
       # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
         args[:group_by].map { |i| raise "Invalid group by, not a meta key for register" unless i.in? whitelisted_groups(results) }
         meta_groups = args[:group_by].map { |i| RegisterItem.meta_column(i, sample.register.meta) }
@@ -53,8 +53,8 @@ module Services
       register_ids = results.group(:register_id).size.keys
       registers = Register.select(:meta).where(id: register_ids)
       registers.each do |r|
-        r.meta.keys.each_with_index do |k, i|
-          raise "Unable to compare registers with different meta keys" unless k == registers.first.meta.keys[i]
+        r.meta.each do |key, val|
+          raise "Unable to compare registers with different meta keys" unless val == registers.first.meta[key]
         end
       end
       return registers.first.meta.values + ["register_id"]
