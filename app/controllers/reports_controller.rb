@@ -24,7 +24,7 @@ class ReportsController < ApplicationController
   end
 
   def report_params
-    params.permit(:start_at, :end_at, :register_ids, :group_by_period, group_by: [])
+    params.permit(:start_at, :end_at, :register_ids, :group_by_period, :timezone, group_by: [])
   end
 
 

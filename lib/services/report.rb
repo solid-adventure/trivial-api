@@ -35,20 +35,18 @@ module Services
       sample = results.first
       validate_single_unit_of_measure(results) or raise "Cannot report on multiple units in the same report"
 
-
       if args[:group_by] && sample
       # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
         args[:group_by].map { |i| raise "Invalid group by, not a meta key for register" unless i.in? whitelisted_groups(results) }
         meta_groups = args[:group_by].map { |i| RegisterItem.resolved_column(i, sample.register.meta) }
-
-        results = group_by_period(results, args[:group_by_period], Date.parse(args[:start_at]), Date.parse(args[:end_at]))
+        results = group_by_period(results, *formattated_group_by_period_args(args))
         results = results.group(meta_groups).__send__(stat ,:amount)
         results = collate_register_names(results) if meta_groups.include? "register_id"
         results = format(results)
         return {title: "Count by Register", count: results }
       end
 
-      results = group_by_period(results, args[:group_by_period], Date.parse(args[:start_at]), Date.parse(args[:end_at]))
+      results = group_by_period(results, *formattated_group_by_period_args(args))
       results = results.__send__(stat ,:amount)
       return {title: stat.titleize, count: format(results) }
     end
@@ -90,13 +88,28 @@ module Services
       return results
     end
 
-    def group_by_period(results, period, start_at, end_at)
+    # Given a string in the form "2024-02-14T04:59:59.999Z" and a timezone like "America/Detroit", returns a Time object
+    # of Tue, 13 Feb 2024 23:59:59.999000000 EST -05:00
+    def time_from_string(time_string, timezone)
+      Time.find_zone(timezone).parse(time_string)
+    end
+
+    def formattated_group_by_period_args(args)
+      [
+        args[:group_by_period],
+        time_from_string(args[:start_at], args[:timezone]),
+        time_from_string(args[:end_at], args[:timezone]),
+        args[:timezone]
+      ]
+    end
+
+    def group_by_period(results, period, start_at, end_at, timezone)
       period&.downcase!
-      return results.group_by_day(:created_at, format: "%b %d %Y", range: start_at..end_at) if period == "day"
-      return results.group_by_week(:created_at, format: "%b %d %Y", range: start_at..end_at) if period == "week"
-      return results.group_by_month(:created_at, format: "%b %Y", range: start_at..end_at) if period == "month"
-      return results.group_by_quarter(:created_at, format: "Q%b %Y", range: start_at..end_at) if period == "quarter"
-      return results.group_by_year(:created_at, format: "%Y", range: start_at..end_at) if period == "year"
+      return results.group_by_day(:created_at, time_zone: timezone, format: "%b %d %Y", range: start_at..end_at) if period == "day"
+      return results.group_by_week(:created_at, time_zone: timezone, format: "%b %d %Y", range: start_at..end_at) if period == "week"
+      return results.group_by_month(:created_at, time_zone: timezone, format: "%b %Y", range: start_at..end_at) if period == "month"
+      return results.group_by_quarter(:created_at, time_zone: timezone, format: "Q%b %Y", range: start_at..end_at) if period == "quarter"
+      return results.group_by_year(:created_at, time_zone: timezone, format: "%Y", range: start_at..end_at) if period == "year"
       return results.between(start_at, end_at) # Pass through unchanged if no period or invalid period is specified. "total" would commonly trigger this edge case.
     end
 
