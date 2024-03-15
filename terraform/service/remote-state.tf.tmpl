@@ -1,0 +1,37 @@
+terraform {
+  backend "s3" {
+    dynamodb_table          = "wl-shared-rs-terraform-state-lock"
+    bucket                  = "wl-shared-rs-terraform-state"
+    key                     = "{{ TF_VAR_aws_account }}/{{ TF_VAR_aws_region }}/{{TF_VAR_service_name}}.tfstate"
+    region                  = "us-east-1"
+    profile                  = "whiplash-shared"
+  }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+data "terraform_remote_state" "whiplash-regional" {
+  backend = "s3"
+
+  config = {
+    bucket  = "wl-shared-rs-terraform-state"
+    key     = "{{ TF_VAR_aws_account }}/{{ TF_VAR_aws_region }}.tfstate"
+    region  = "us-east-1"
+    profile  = "whiplash-shared"
+  }
+}
+
+data "terraform_remote_state" "trivial-infra" {
+  backend = "s3"
+
+  config = {
+    bucket = "wl-shared-rs-terraform-state"
+    key = "{{ TF_VAR_aws_account }}/{{ TF_VAR_aws_region }}/trivial-infra.tfstate"
+    region = "us-east-1"
+    profile = "whiplash-shared"
+  }
+}
