@@ -1,7 +1,7 @@
 module Integrations
   class Whiplash
 
-    def getCustomersById(ids='')
+    def get_customers_by_id(ids='')
       fields = 'id,name'
       search = {
         id_in: ids.split(',').map(&:to_i),
@@ -10,7 +10,7 @@ module Integrations
       api.get("/api/v2/customers?fields=#{fields}&search=#{search.to_json}").body
     end
 
-    def getCustomersByName(name='')
+    def get_customers_by_name(name='')
       limit = 5
       fields = 'id,name'
       search = {
