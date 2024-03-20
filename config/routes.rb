@@ -106,4 +106,14 @@ Rails.application.routes.draw do
   put '/:permissible_type/:permissible_id/transfer/:new_owner_type/:new_owner_id', to: 'permissions#transfer'
 
   get '/up', to: 'health_check#show'
+
+
+  #
+  # Start Whiplash customizations
+  #
+  get '/integrations/whiplash/getCustomersById', to: 'integrations/whiplash#get_customers_by_id'
+  get '/integrations/whiplash/getCustomersByName', to: 'integrations#whiplash_get_customers_by_name'
+
+
+
 end
