@@ -10,6 +10,7 @@ jobs:
     name: Generate Docker Image Tag
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - run: echo "image_tag=canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   build:
