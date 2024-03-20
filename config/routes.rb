@@ -112,8 +112,10 @@ Rails.application.routes.draw do
   # Start Whiplash customizations
   #
   get '/integrations/whiplash/getCustomersById', to: 'integrations/whiplash#get_customers_by_id'
-  get '/integrations/whiplash/getCustomersByName', to: 'integrations#whiplash_get_customers_by_name'
-
+  get '/integrations/whiplash/getCustomersByName', to: 'integrations/whiplash#get_customers_by_name'
+  #
+  # End Whiplash customizations
+  #
 
 
 end
