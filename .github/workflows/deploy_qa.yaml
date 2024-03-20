@@ -9,7 +9,7 @@ on:
 
 jobs:
   generate_image_tag:
-    uses: whiplashmerch/workflows/.github/workflows/generate-docker-image-tag/action.yml@bb/updates_rails_image_build
+    uses: whiplashmerch/workflows/.github/actions/generate-docker-image-tag/action.yml@bb/updates_rails_image_build
     with:
       enviroment: canary
 
