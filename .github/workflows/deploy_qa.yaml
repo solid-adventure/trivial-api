@@ -1,0 +1,49 @@
+name: QA Deploy
+
+on:
+  push:
+    branches:
+      - $default-branch
+      - bb/adds_tf
+
+jobs:
+  build:
+    name: "Build & Push Docker Image"
+    needs: classify
+    uses: whiplashmerch/workflows/.github/workflows/build-ruby-image.yml@bb/updates_rails_image_build
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.ECR_REPO }}
+      service_key: "tapi"
+      service_name: "Trivial API"
+      override_image_tags: "canary-$(git rev-parse --short HEAD)"
+    secrets:
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+
+  tag:
+    needs:
+      - classify
+      - build
+    name: "Add RC Git Tags"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ needs.classify.outputs.human_tag }}
+          message: "RC: ${{ needs.classify.outputs.human_tag }}"
+
+
+  deploy:
+    name: "Deploy to Staging"
+    needs: [classify,build]
+    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
+    with:
+      ecr_tag:
+      tf_target: "stable"
+      repo_target: "infra/terraform"
+      tf_action: "apply"
+      gh_environment_name: canary
+    secrets: inherit
