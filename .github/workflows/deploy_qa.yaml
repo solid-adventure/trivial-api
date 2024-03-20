@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: generate_image_tag
-        run: echo "image_tag=canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "image_tag=${{ vars.ECR_REGISTRY }}:canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
 
   build:
@@ -34,12 +34,12 @@ jobs:
 
 
   deploy:
-    name: "Deploy to Staging"
+    name: "Deploy to Canary-QA"
     needs: [generate_image_tag, build]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
-      tf_target: "stable"
+      tf_target: "canary"
       repo_target: "infra/terraform"
       tf_action: "apply"
       gh_environment_name: canary
