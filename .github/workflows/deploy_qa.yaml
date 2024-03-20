@@ -23,9 +23,9 @@ jobs:
     needs: [generate_image_tag]
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
-      ecr_repo: ${{ vars.ECR_REPO }}
-      service_key: "tapi"
-      service_name: "Trivial API"
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
       override_image_tags: ${{ needs.generate_image_tag.outputs.image_tag }}
     secrets:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
