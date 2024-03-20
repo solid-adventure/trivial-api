@@ -15,6 +15,7 @@ jobs:
   build:
     name: "Build & Push Docker Image"
     uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/updates_rails_image_build
+    needs: [generate_image_tag]
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.ECR_REPO }}
@@ -29,7 +30,7 @@ jobs:
 
   deploy:
     name: "Deploy to Staging"
-    needs: [classify, build]
+    needs: [generate_image_tag, build]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
     with:
       ecr_tag: ${{ needs.image_tag.outputs.image_tag }}
