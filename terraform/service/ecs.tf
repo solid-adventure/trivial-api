@@ -5,29 +5,81 @@ locals {
     cpu       = lookup(local.ecs_cpu, var.env, -1)
     memory    = lookup(local.ecs_mem, var.env, -1)
     essential = true
+    logConfiguration = {
+      logDriver = "awslogs",
+      options: {
+        awslogs-group: "${local.name_prefix}-ecs-logs",
+        awslogs-region: "us-east-1",
+        awslogs-stream-prefix: "ecs/${var.service_name}"
+      }
+    }
     portMappings = [
       {
-        containerPort = 80
-        hostPort      = 80
+        containerPort = 3000
+        hostPort      = 3000
       }
     ]
     environment = [
       # TODO : remove once things are more stable, this env var should never go to prod
       {
-        name : "ENABLE_REGISTRATION",
-        value : "TRUE"
+        name : "SECRET_KEY_BASE",
+        value : "whatdowesetthistoo"
       },
       {
-        name : "COOKIE_SIGNATURE",
-        value : md5(var.env)
+        name : "RAILS_ENV",
+        value : "production"
       },
       {
-        name : "API_ENV",
-        value : var.env
+        name : "RAILS_LOG_TO_STDOUT",
+        value : "true"
       },
       {
-        name : "TRIVIAL_URL",
+        name : "POSTGRES_HOST",
+        value : local.trivial_postgres.host
+      },
+      {
+        name : "POSTGRES_DATABASE",
+        value : local.trivial_postgres.db
+      },
+      {
+        name : "POSTGRES_USER",
+        value : local.trivial_postgres.user
+      },
+      {
+        name : "POSTGRES_PASSWORD",
+        value : local.trivial_postgres.password
+      },
+      {
+        name : "EXTERNAL_HOST",
+        value : local.trivial_api_service_domain
+      },
+      {
+        name : "MAILGUN_DOMAIN",
+        value : "whiplash.com"
+      },
+      {
+        name : "MAILGUN_SMTP_LOGIN",
+        value : "billingapp@mg.whiplash.com"
+      },
+      {
+        name : "MAILGUN_SMTP_PASSWORD",
+        value : var.mailgun_password
+      },
+      {
+        name : "MAILGUN_SMTP_PORT",
+        value : "587"
+      },
+      {
+        name : "MAILGUN_SMTP_SERVER",
+        value : "smtp.mailgun.org"
+      },
+      {
+        name : "DEFAULT_URL_HOST",
         value : "https://${local.trivial_api_service_domain}"
+      },
+      {
+        name : "DEFAULT_URL_PORT",
+        value : "443"
       },
       {
         name : "WHIPLASH_CLIENT_ID",
@@ -37,11 +89,22 @@ locals {
         name : "WHIPLASH_CLIENT_SECRET",
         value : var.core_oauth_client_secret
       },
-
       {
         name : "WHIPLASH_BASE_URL",
         value : "https://${local.core_service_domain}"
       },
+      {
+        name : "CLIENT_SECRET",
+        value : var.jwt_private_key
+      },
+      {
+        name : "CLIENT_KEYS",
+        value : var.client_keys
+      },
+      {
+        name: "TRIVIAL_UI_URL",
+        value: local.trivial_ui_service_domain
+      }
     ]
   }
 }
@@ -53,10 +116,11 @@ resource "aws_ecs_service" "trivial_api_task-service" {
   desired_count          = lookup(local.desired_count, var.env, -1)
   launch_type            = "FARGATE"
   enable_execute_command = true
+  health_check_grace_period_seconds = 60
 
   load_balancer {
     target_group_arn = local.alb_target_group_arn
-    container_port   = 80
+    container_port   = 3000
     container_name   = local.container_name
   }
 
