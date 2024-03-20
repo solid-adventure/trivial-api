@@ -6,6 +6,7 @@ on:
       - $default-branch
       - bb/adds_tf
 
+
 jobs:
   build:
     name: "Build & Push Docker Image"
@@ -27,7 +28,7 @@ jobs:
     needs: build
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
     with:
-      ecr_tag:
+      ecr_tag: "canary-$(git rev-parse --short HEAD)"
       tf_target: "stable"
       repo_target: "infra/terraform"
       tf_action: "apply"
