@@ -9,9 +9,12 @@ jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.generate_image_tag.outputs.image_tag }}
     steps:
       - uses: actions/checkout@v4
-      - run: echo "image_tag=canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - id: generate_image_tag
+        run: echo "image_tag=canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   build:
     name: "Build & Push Docker Image"
