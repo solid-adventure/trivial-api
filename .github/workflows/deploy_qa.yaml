@@ -19,25 +19,9 @@ jobs:
     secrets:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
 
-  tag:
-    needs:
-      - classify
-      - build
-    name: "Add RC Git Tags"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v3
-
-      - uses: rickstaa/action-create-tag@v1
-        with:
-          tag: ${{ needs.classify.outputs.human_tag }}
-          message: "RC: ${{ needs.classify.outputs.human_tag }}"
-
-
   deploy:
     name: "Deploy to Staging"
-    needs: [classify,build]
+    needs: build
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
     with:
       ecr_tag:
