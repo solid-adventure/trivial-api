@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     name: "Build & Push Docker Image"
-    needs: classify
     uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/updates_rails_image_build
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
