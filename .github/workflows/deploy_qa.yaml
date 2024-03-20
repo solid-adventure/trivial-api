@@ -5,13 +5,12 @@ on:
     branches:
       - $default-branch
       - bb/adds_tf
-
-
 jobs:
   generate_image_tag:
-    uses: whiplashmerch/workflows/.github/actions/generate-docker-image-tag/action.yml@bb/updates_rails_image_build
-    with:
-      enviroment: canary
+    name: Generate Docker Image Tag
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "image_tag=canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   build:
     name: "Build & Push Docker Image"
@@ -21,7 +20,7 @@ jobs:
       ecr_repo: ${{ vars.ECR_REPO }}
       service_key: "tapi"
       service_name: "Trivial API"
-      override_image_tags:
+      override_image_tags: ${{ needs.image_tag.outputs.image_tag }}
     secrets:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
@@ -33,7 +32,7 @@ jobs:
     needs: [classify, build]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
     with:
-      ecr_tag: ${{ needs.classify.outputs.human_tag }}
+      ecr_tag: ${{ needs.image_tag.outputs.image_tag }}
       tf_target: "stable"
       repo_target: "infra/terraform"
       tf_action: "apply"
