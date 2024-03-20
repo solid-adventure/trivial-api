@@ -8,27 +8,20 @@ on:
 
 
 jobs:
-  classify:
-    name: "Classify RC"
-    uses: whiplashmerch/workflows/.github/workflows/classify-rc.yml@main
+  generate_image_tag:
+    uses: whiplashmerch/workflows/.github/workflows/generate-docker-image-tag/action.yml@bb/updates_rails_image_build
     with:
-      ecr_registry: ${{ vars.ECR_REGISTRY }}
-      ecr_repo: ${{ vars.FRONTEND_VUE_ECR_REPO }}
-    secrets:
-      tf_user_access_key_id: ${{ secrets.GHA_TF_USER_ACCESS_KEY_ID }}
-      tf_user_secret: ${{ secrets.GHA_TF_USER_SECRET }}
-      gh_token: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      enviroment: canary
 
   build:
     name: "Build & Push Docker Image"
-    needs: classify
     uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/updates_rails_image_build
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.ECR_REPO }}
       service_key: "tapi"
       service_name: "Trivial API"
-      override_image_tags: ${{ needs.classify.outputs.rc_tags }}
+      override_image_tags:
     secrets:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
