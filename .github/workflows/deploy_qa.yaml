@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - $default-branch
-      - bb/adds_tf
 
 jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
-    uses:  whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@bb/updates_rails_image_build
+    uses:  whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
@@ -17,14 +16,14 @@ jobs:
 
   build:
     name: "Build & Push Docker Image"
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/updates_rails_image_build
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@main
     needs: [generate_image_tag]
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
       service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
       service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
-      override_image_tags: ${{ needs.generate_image_tag.outputs.image_tag }}
+      ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
     secrets:
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
@@ -33,7 +32,7 @@ jobs:
   deploy:
     name: "Deploy to Canary-QA"
     needs: [generate_image_tag, build]
-    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@fe-vue-prod
+    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
       tf_target: "canary"
