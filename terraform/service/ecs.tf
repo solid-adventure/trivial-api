@@ -1,7 +1,7 @@
 locals {
   task_definition = {
     name      = "${local.name_prefix}-trivial-api"
-    image     = "${var.ecr_repo}:${var.image_tag}"
+    image     = var.ecr_tag
     cpu       = lookup(local.ecs_cpu, var.env, -1)
     memory    = lookup(local.ecs_mem, var.env, -1)
     essential = true
@@ -22,26 +22,24 @@ locals {
     secrets = [
       {
       "name": "WHIPLASH_CLIENT_ID",
-      "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:whiplash_client_id"
+      "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:whiplash_client_id"
       },
       {
         "name": "WHIPLASH_CLIENT_SECRET",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:whiplash_client_secret"
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:whiplash_client_secret"
       },
       {
         "name": "CLIENT_SECRET",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:client_secret"
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:client_secret"
       },
       {
         "name": "CLIENT_KEY",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:client_key"
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:client_key"
       },
       {
         "name": "MAILGUN_PASSWORD",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:mailgun_password"
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:mailgun_password"
       },
-
-
     ]
     environment = [
       # TODO : remove once things are more stable, this env var should never go to prod
