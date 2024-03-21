@@ -37,7 +37,7 @@ jobs:
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
       tf_target: "canary"
-      repo_target: "infra/terraform"
+      repo_target: "terrafrorm/service"
       tf_action: "apply"
       gh_environment_name: canary
     secrets: inherit
