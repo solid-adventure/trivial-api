@@ -3,7 +3,7 @@ name: QA Deploy
 on:
   push:
     branches:
-      - $default-branch
+      - develop
 
 jobs:
   generate_image_tag:
