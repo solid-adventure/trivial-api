@@ -19,6 +19,30 @@ locals {
         hostPort      = 3000
       }
     ]
+    secrets = [
+      {
+      "name": "WHIPLASH_CLIENT_ID",
+      "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:whiplash_client_id"
+      },
+      {
+        "name": "WHIPLASH_CLIENT_SECRET",
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:whiplash_client_secret"
+      },
+      {
+        "name": "CLIENT_SECRET",
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:client_secret"
+      },
+      {
+        "name": "CLIENT_KEY",
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:client_key"
+      },
+      {
+        "name": "MAILGUN_PASSWORD",
+        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account}:secret:${var.service_name}:mailgun_password"
+      },
+
+
+    ]
     environment = [
       # TODO : remove once things are more stable, this env var should never go to prod
       {
@@ -62,10 +86,6 @@ locals {
         value : "billingapp@mg.whiplash.com"
       },
       {
-        name : "MAILGUN_SMTP_PASSWORD",
-        value : var.mailgun_password
-      },
-      {
         name : "MAILGUN_SMTP_PORT",
         value : "587"
       },
@@ -82,24 +102,8 @@ locals {
         value : "443"
       },
       {
-        name : "WHIPLASH_CLIENT_ID",
-        value : var.core_oauth_client_id
-      },
-      {
-        name : "WHIPLASH_CLIENT_SECRET",
-        value : var.core_oauth_client_secret
-      },
-      {
         name : "WHIPLASH_BASE_URL",
         value : "https://${local.core_service_domain}"
-      },
-      {
-        name : "CLIENT_SECRET",
-        value : var.jwt_private_key
-      },
-      {
-        name : "CLIENT_KEYS",
-        value : var.client_keys
       },
       {
         name: "TRIVIAL_UI_URL",

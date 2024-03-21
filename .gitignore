@@ -36,5 +36,6 @@
 .env.*
 .idea
 remote-state.tf
+main.tf
 .terraform
 .terraform.lock.hcl
