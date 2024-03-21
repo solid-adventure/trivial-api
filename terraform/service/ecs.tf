@@ -33,7 +33,7 @@ locals {
         "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_secret::"
       },
       {
-        "name": "CLIENT_KEY",
+        "name": "CLIENT_KEYS",
         "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_keys::"
       },
       {
