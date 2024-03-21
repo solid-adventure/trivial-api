@@ -19,28 +19,28 @@ locals {
         hostPort      = 3000
       }
     ]
-#    secrets = [
-#      {
-#      "name": "WHIPLASH_CLIENT_ID",
-#      "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:whiplash_client_id::"
-#      },
-#      {
-#        "name": "WHIPLASH_CLIENT_SECRET",
-#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:whiplash_client_secret::"
-#      },
-#      {
-#        "name": "CLIENT_SECRET",
-#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:client_secret::"
-#      },
-#      {
-#        "name": "CLIENT_KEY",
-#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:client_key::"
-#      },
-#      {
-#        "name": "MAILGUN_PASSWORD",
-#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:mailgun_password::"
-#      },
-#    ]
+    secrets = [
+      {
+      "name": "WHIPLASH_CLIENT_ID",
+      "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_id::"
+      },
+      {
+        "name": "WHIPLASH_CLIENT_SECRET",
+        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_secret::"
+      },
+      {
+        "name": "CLIENT_SECRET",
+        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_secret::"
+      },
+      {
+        "name": "CLIENT_KEY",
+        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_keys::"
+      },
+      {
+        "name": "MAILGUN_PASSWORD",
+        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:mailgun_password::"
+      },
+    ]
     environment = [
       # TODO : remove once things are more stable, this env var should never go to prod
       {

@@ -34,7 +34,6 @@ locals {
   ecs_security_group_ids = data.terraform_remote_state.whiplash-regional.outputs.ecs_security_group_ids
   ecs_subnet_ids         = data.terraform_remote_state.whiplash-regional.outputs.private_subnet_ids
   ecs_task_role_arn      = data.terraform_remote_state.whiplash-regional.outputs.ecs_task_role_arn
-#  ecs_execution_role_arn = data.terraform_remote_state.whiplash-regional.outputs.ecs_execution_role_arn
 
   alb_target_group_arn = data.terraform_remote_state.trivial-infra.outputs.trivial_api_alb_target_group_arn
 

@@ -26,12 +26,13 @@ resource "aws_iam_policy" "ecs_task_iam_policy" {
     Statement = [
       {
         Action = [
-          "secretsmanager:GetSecretValue"
+          "secretsmanager:GetSecretValue",
+          "kms:Decrypt"
         ]
         Effect   = "Allow"
         Resource = [
-          data.aws_secretsmanager_secret.secrets.arn,
-          "${data.aws_secretsmanager_secret.secrets.arn}*"
+          data.aws_secretsmanager_secret.trivial_api_secrets.arn,
+          "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}*"
         ]
       },
       {
@@ -56,3 +57,4 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_task_policy_to_role" {
   role =  aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.ecs_task_iam_policy.arn
 }
+
