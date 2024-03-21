@@ -19,28 +19,28 @@ locals {
         hostPort      = 3000
       }
     ]
-    secrets = [
-      {
-      "name": "WHIPLASH_CLIENT_ID",
-      "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:whiplash_client_id"
-      },
-      {
-        "name": "WHIPLASH_CLIENT_SECRET",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:whiplash_client_secret"
-      },
-      {
-        "name": "CLIENT_SECRET",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:client_secret"
-      },
-      {
-        "name": "CLIENT_KEY",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:client_key"
-      },
-      {
-        "name": "MAILGUN_PASSWORD",
-        "valueFrom": "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.service_name}:mailgun_password"
-      },
-    ]
+#    secrets = [
+#      {
+#      "name": "WHIPLASH_CLIENT_ID",
+#      "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:whiplash_client_id::"
+#      },
+#      {
+#        "name": "WHIPLASH_CLIENT_SECRET",
+#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:whiplash_client_secret::"
+#      },
+#      {
+#        "name": "CLIENT_SECRET",
+#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:client_secret::"
+#      },
+#      {
+#        "name": "CLIENT_KEY",
+#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:client_key::"
+#      },
+#      {
+#        "name": "MAILGUN_PASSWORD",
+#        "valueFrom": "${data.aws_secretsmanager_secret.secrets.arn}:mailgun_password::"
+#      },
+#    ]
     environment = [
       # TODO : remove once things are more stable, this env var should never go to prod
       {
@@ -145,5 +145,5 @@ resource "aws_ecs_task_definition" "trivial_api_task_definition" {
 
   cpu                = lookup(local.ecs_cpu, var.env, -1)
   memory             = lookup(local.ecs_mem, var.env, -1)
-  execution_role_arn = local.ecs_execution_role_arn
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
 }

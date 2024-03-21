@@ -1,4 +1,4 @@
-resource "aws_iam_role " "ecs_task_execution_role" {
+resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.service_name}-ecs-task-execution-role"
 
   assume_role_policy = jsonencode({
@@ -31,7 +31,7 @@ resource "aws_iam_policy" "ecs_task_iam_policy" {
         Effect   = "Allow"
         Resource = [
           data.aws_secretsmanager_secret.secrets.arn,
-          "${data.aws_secretsmanager_secret.secrets.arn}:*"
+          "${data.aws_secretsmanager_secret.secrets.arn}*"
         ]
       },
       {
@@ -46,10 +46,7 @@ resource "aws_iam_policy" "ecs_task_iam_policy" {
           "ecr:BatchCheckLayerAvailability"
         ]
         Effect   = "Allow"
-        Resource = [
-          data.aws_secretsmanager_secret.secrets.arn,
-          "${data.aws_secretsmanager_secret.secrets.arn}:*"
-        ]
+        Resource = "*"
       }
     ]
   })
