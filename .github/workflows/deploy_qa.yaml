@@ -8,13 +8,11 @@ on:
 jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
-    runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.generate_image_tag.outputs.image_tag }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: generate_image_tag
-        run: echo "image_tag=${{ vars.ECR_REGISTRY }}/${{ vars.TRIVIAL_API_ECR_REPO }}:canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    uses:  whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@bb/updates_rails_image_build
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      env: "canary"
 
   build:
     name: "Build & Push Docker Image"
