@@ -34,4 +34,8 @@
 # Ignore .env file
 .env
 .env.*
-/.idea/
+.idea
+remote-state.tf
+main.tf
+.terraform
+.terraform.lock.hcl
