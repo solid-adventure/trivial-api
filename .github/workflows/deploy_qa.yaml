@@ -16,7 +16,6 @@ jobs:
       - id: generate_image_tag
         run: echo "image_tag=${{ vars.ECR_REGISTRY }}/${{ vars.TRIVIAL_API_ECR_REPO }}:canary-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-
   build:
     name: "Build & Push Docker Image"
     uses: whiplashmerch/workflows/.github/workflows/build-rails-image.yml@bb/updates_rails_image_build
