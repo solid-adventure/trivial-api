@@ -6,6 +6,7 @@ on:
       - $default-branch
       - bb/adds_tf
 
+
 jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
