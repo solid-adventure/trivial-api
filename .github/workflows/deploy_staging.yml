@@ -40,8 +40,7 @@ jobs:
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
   tag:
-    needs:
-      - build
+    needs: [classify, build]
     name: "Add RC Git Tags"
     runs-on: ubuntu-latest
     steps:
