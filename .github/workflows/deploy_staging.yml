@@ -1,0 +1,65 @@
+name: Release Branch Deploy
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  classify:
+    name: "Classify RC"
+    uses: whiplashmerch/workflows/.github/workflows/classify-rc.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+    secrets:
+      gh_token: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+
+  generate_image_tag:
+    name: Generate Docker Image Tag
+    uses: whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      env: "stable"
+
+  build:
+    name: "Build & Push Docker Image"
+    needs: [classify, generate_image_tag]
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
+      ecr_tags: ${{ needs.generate_image_tag.outputs.image_tag }}
+    secrets:
+      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
+      BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
+
+  tag:
+    needs: [classify, build]
+    name: "Add RC Git Tags"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ needs.classify.outputs.human_tag }}
+          message: "RC: ${{ needs.classify.outputs.human_tag }}"
+
+
+  deploy:
+    name: "Deploy to Staging"
+    needs: [generate_image_tag, build]
+    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
+    with:
+      ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
+      tf_target: "stable"
+      repo_target: "terraform/service"
+      tf_action: "apply"
+      gh_environment_name: stable
+    secrets: inherit

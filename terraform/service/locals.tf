@@ -1,10 +1,10 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  aws_account_id = data.aws_caller_identity.current.account_id
+  aws_account_id             = data.aws_caller_identity.current.account_id
   container_name             = "${local.name_prefix}-trivial-api"
   trivial_api_service_domain = data.terraform_remote_state.trivial-infra.outputs.trivial_api_service_domain
-  trivial_ui_service_domain = data.terraform_remote_state.trivial-infra.outputs.trivial_ui_service_domain
+  trivial_ui_service_domain  = data.terraform_remote_state.trivial-infra.outputs.trivial_ui_service_domain
   core_service_domain        = data.terraform_remote_state.whiplash-regional.outputs.domain_names.core
 
   desired_count = {
