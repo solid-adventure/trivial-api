@@ -112,17 +112,9 @@ locals {
     {
       name      = "${local.name_prefix}-trivial-api"
       image     = var.ecr_tag
-      cpu       = lookup(local.ecs_cpu, var.env, -1)
-      memory    = lookup(local.ecs_mem, var.env, -1)
+      cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
+      memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
       essential = true
-      logConfiguration = {
-        logDriver = "awslogs",
-        options : {
-          awslogs-group : "${local.name_prefix}-ecs-logs",
-          awslogs-region : "us-east-1",
-          awslogs-stream-prefix : "ecs/${var.service_name}"
-        }
-      }
       portMappings = [
         {
           containerPort = 3000
