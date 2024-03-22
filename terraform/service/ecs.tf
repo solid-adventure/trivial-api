@@ -259,8 +259,6 @@ resource "aws_ecs_service" "trivial_api_task-service" {
 resource "aws_ecs_task_definition" "trivial_api_task_definition" {
   container_definitions = jsonencode(concat([
     local.task_definition,
-    local.agent_definition,
-    local.log_router_definition
   ]))
   family        = "${local.name_prefix}-trivial-api-task"
   network_mode  = "awsvpc"
