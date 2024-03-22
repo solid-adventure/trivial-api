@@ -86,9 +86,12 @@ locals {
     "name" : "${local.container_name}-datadog-agent"
   }
 
-  firelens_definition = merge(
-    local.docker_labels,
-    {
+  task_definition = {
+      name      = "${local.name_prefix}-trivial-api"
+      image     = var.ecr_tag
+      cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
+      memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
+      essential = true
       firelensConfiguration : null,
       logConfiguration : {
         logDriver : "awsfirelens",
@@ -104,16 +107,6 @@ locals {
           "Name" : "datadog"
         }
       },
-    }
-  )
-
-  task_definition =
-    {
-      name      = "${local.name_prefix}-trivial-api"
-      image     = var.ecr_tag
-      cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
-      memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
-      essential = true
       portMappings = [
         {
           containerPort = 3000
