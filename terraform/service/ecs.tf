@@ -29,7 +29,7 @@ locals {
     "logConfiguration" : {
       "logDriver" : "awslogs",
       "options" : {
-        awslogs-group : "${local.name_prefix}-ecs-log",
+        awslogs-group : "${local.name_prefix}-ecs-logs",
         "awslogs-region" : var.aws_region,
         # Do we need this line?
         "awslogs-stream-prefix" : "ecs/${var.service_name}"
