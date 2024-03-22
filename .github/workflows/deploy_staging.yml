@@ -59,7 +59,7 @@ jobs:
     needs: [build]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
     with:
-      ecr_tag: ${{ needs.classify.outputs.human_tag }}
+      ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
       tf_target: "stable"
       repo_target: "terraform/service"
       tf_action: "apply"
