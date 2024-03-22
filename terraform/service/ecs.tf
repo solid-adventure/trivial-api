@@ -1,5 +1,109 @@
 locals {
-  task_definition = {
+  datadog_version = "${var.service_name}:${var.ecr_tag}"
+  docker_labels   = {
+    "com.datadoghq.tags.env" : var.env,
+    "com.datadoghq.tags.service" : var.service_name,
+    "com.datadoghq.tags.version" : local.datadog_version
+  }
+  log_router_definition = merge(
+    local.docker_labels,
+    {
+      # For some reason explicitly adding user: "0" prevents accidental changes on apply. I have no idea why it works or what it does. Don't remove it.
+      user : "0",
+      "name" : "${local.container_name}-datadog-log-router"
+      "image" : "amazon/aws-for-fluent-bit",
+      "logConfiguration" : null,
+      "firelensConfiguration" : {
+        "type" : "fluentbit",
+        "options" : {
+          "enable-ecs-log-metadata" : "true"
+        }
+      }
+    }
+  )
+  agent_definition = {
+    "image" : "public.ecr.aws/datadog/agent:latest",
+    "logConfiguration" : {
+      "logDriver" : "awslogs",
+      "options" : {
+        awslogs-group : "${local.name_prefix}-ecs-log",
+        "awslogs-region" : var.aws_region,
+        # Do we need this line?
+        "awslogs-stream-prefix" : "ecs/${var.service_name}"
+      }
+    },
+    "cpu" : var.datadog_agent_cpu,
+    "memory" : var.datadog_agent_memory,
+    "mountPoints" : [],
+    "portMappings" : [
+      {
+        "hostPort" : 8126,
+        "protocol" : "tcp",
+        "containerPort" : 8126
+      }
+    ],
+    "environment" : [
+      {
+        "name" : "ECS_FARGATE",
+        "value" : "true"
+      },
+      {
+        "name" : "DD_PROCESS_AGENT_ENABLED",
+        "value" : "true"
+      },
+      {
+        "name" : "DD_DOGSTATSD_NON_LOCAL_TRAFFIC",
+        "value" : "true"
+      },
+      {
+        "name" : "DD_APM_NON_LOCAL_TRAFFIC",
+        "value" : "true"
+      },
+      {
+        "name" : "DD_APM_ENABLED",
+        "value" : "true"
+      },
+      {
+        "name" : "DD_ENV",
+        "value" : var.env
+      },
+      {
+        "name" : "DD_SERVICE",
+        "value" : var.service_name
+      },
+      {
+        "name" : "DD_VERSION",
+        "value" : local.datadog_version
+      },
+      {
+        "name" : "DD_API_KEY",
+        "value" : var.datadog_api_key
+      }
+    ],
+    "name" : "${local.container_name}-datadog-agent"
+  }
+  firelens_definition = merge(
+    local.docker_labels,
+    {
+      firelensConfiguration : null,
+      logConfiguration : {
+        logDriver : "awsfirelens",
+        options : {
+          "dd_message_key" : "log",
+          "apikey" : var.datadog_api_key,
+          "provider" : "ecs",
+          "dd_source" : "aws",
+          "dd_service" : var.service_name,
+          "Host" : "http-intake.logs.datadoghq.com",
+          "dd_tags" : "env:${var.env},version:${local.datadog_version},ecs_service_name:${aws_ecs_service.trivial_api_task-service.name}",
+          "TLS" : "on",
+          "Name" : "datadog"
+        }
+      },
+    }
+  )
+  task_definition = merge(local.firelens_definition,
+{
     name      = "${local.name_prefix}-trivial-api"
     image     = var.ecr_tag
     cpu       = lookup(local.ecs_cpu, var.env, -1)
@@ -106,10 +210,22 @@ locals {
       {
         name: "TRIVIAL_UI_URL",
         value: local.trivial_ui_service_domain
+      },
+      {
+        name : "DD_ENV",
+        value : var.env
+      },
+      {
+        name : "DD_SERVICE",
+        value : var.service_name
+      },
+      {
+        name : "DD_VERSION",
+        value : local.datadog_version
       }
     ]
   }
-}
+)}
 
 resource "aws_ecs_service" "trivial_api_task-service" {
   name                   = "${local.name_prefix}-trivial-api"
@@ -134,7 +250,11 @@ resource "aws_ecs_service" "trivial_api_task-service" {
 }
 
 resource "aws_ecs_task_definition" "trivial_api_task_definition" {
-  container_definitions = jsonencode([local.task_definition])
+  container_definitions = jsonencode(concat([
+    local.task_definition,
+    local.agent_definition,
+    local.log_router_definition
+  ]))
   family                = "${local.name_prefix}-trivial-api-task"
   network_mode          = "awsvpc"
   task_role_arn         = local.ecs_task_role_arn
