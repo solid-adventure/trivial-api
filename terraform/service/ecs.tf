@@ -107,8 +107,7 @@ locals {
     }
   )
 
-  task_definition = merge(
-    local.firelens_definition,
+  task_definition =
     {
       name      = "${local.name_prefix}-trivial-api"
       image     = var.ecr_tag
@@ -223,7 +222,6 @@ locals {
         }
       ]
     }
-  )
 }
 
 resource "aws_ecs_service" "trivial_api_task-service" {
