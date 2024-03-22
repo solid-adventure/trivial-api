@@ -37,7 +37,7 @@ locals {
         "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_keys::"
       },
       {
-        "name": "MAILGUN_PASSWORD",
+        "name": "MAILGUN_SMTP_PASSWORD",
         "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:mailgun_password::"
       },
     ]
