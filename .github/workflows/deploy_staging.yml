@@ -56,7 +56,7 @@ jobs:
 
   deploy:
     name: "Deploy to Staging"
-    needs: [build]
+    needs: [generate_image_tag, build]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
