@@ -3,9 +3,10 @@ data "aws_caller_identity" "current" {}
 locals {
   aws_account_id             = data.aws_caller_identity.current.account_id
   container_name             = "${local.name_prefix}-trivial-api"
+  enable_alt_dns             = data.terraform_remote_state.whiplash-regional.outputs.enable_alt_dns
   trivial_api_service_domain = data.terraform_remote_state.trivial-infra.outputs.trivial_api_service_domain
   trivial_ui_service_domain  = data.terraform_remote_state.trivial-infra.outputs.trivial_ui_service_domain
-  core_service_domain        = data.terraform_remote_state.whiplash-regional.outputs.domain_names.core
+  core_service_domain        = local.enable_alt_dns == false ? data.terraform_remote_state.whiplash-regional.outputs.domain_names.core : data.terraform_remote_state.whiplash-regional.outputs.alt_domain_names.core
 
   desired_count = {
     canary : 2,
