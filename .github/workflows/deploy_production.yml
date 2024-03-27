@@ -6,6 +6,7 @@ on:
       - main
       - release/bb
 
+
 jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
