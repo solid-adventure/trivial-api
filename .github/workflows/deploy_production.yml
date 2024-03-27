@@ -1,4 +1,4 @@
-name: Release Branch Deploy
+name: Production/Sandbox Deploy
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
 
   build:
     name: "Build & Push Docker Image"
-    needs: [classify, generate_image_tag]
+    needs: [generate_image_tag]
     uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
@@ -31,7 +31,7 @@ jobs:
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
   tag:
-    needs: [classify, build]
+    needs: [build]
     name: "Add RC Git Tags"
     runs-on: ubuntu-latest
     steps:
