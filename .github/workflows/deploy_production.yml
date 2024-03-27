@@ -58,7 +58,7 @@ jobs:
 
   deploy_production:
     name: "Deploy to Production"
-    needs: [generate_image_tag, build]
+    needs: [generate_image_tag, build, deploy_sandbox]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
