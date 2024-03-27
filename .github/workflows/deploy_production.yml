@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - release/bb
 
 jobs:
   generate_image_tag:
