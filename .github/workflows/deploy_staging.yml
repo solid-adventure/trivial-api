@@ -1,4 +1,4 @@
-name: Release Branch Deploy
+name: Staging/Stable Deploy
 
 on:
   pull_request:
@@ -6,15 +6,6 @@ on:
       - main
 
 jobs:
-  classify:
-    name: "Classify RC"
-    uses: whiplashmerch/workflows/.github/workflows/classify-rc.yml@main
-    with:
-      ecr_registry: ${{ vars.ECR_REGISTRY }}
-      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
-    secrets:
-      gh_token: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
-
   generate_image_tag:
     name: Generate Docker Image Tag
     uses: whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@main
@@ -25,7 +16,7 @@ jobs:
 
   build:
     name: "Build & Push Docker Image"
-    needs: [classify, generate_image_tag]
+    needs: [generate_image_tag]
     uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
@@ -38,20 +29,6 @@ jobs:
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
-  tag:
-    needs: [classify, build]
-    name: "Add RC Git Tags"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v3
-
-      - uses: rickstaa/action-create-tag@v1
-        with:
-          tag: ${{ needs.classify.outputs.human_tag }}
-          message: "RC: ${{ needs.classify.outputs.human_tag }}"
-
-
   deploy:
     name: "Deploy to Staging"
     needs: [generate_image_tag, build]
@@ -63,3 +40,15 @@ jobs:
       tf_action: "apply"
       gh_environment_name: stable
     secrets: inherit
+
+  tag:
+    needs: [ build, deploy ]
+    name: "Add Git Tags"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ needs.generate_image_tag.outputs.git_tag }}

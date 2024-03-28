@@ -1,24 +1,24 @@
-name: QA/Canary Deploy
+name: Production/Sandbox Deploy
 
 on:
   push:
     branches:
-      - develop
-
+      - main
+      - release/bb
 
 jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
-    uses:  whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/generate_docker_image_tag.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
-      env: "canary"
+      env: "production"
 
   build:
     name: "Build & Push Docker Image"
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
     needs: [generate_image_tag]
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
@@ -30,21 +30,33 @@ jobs:
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
-  deploy:
-    name: "Deploy to Canary-QA"
+  deploy_sandbox:
+    name: "Deploy to Sandbox"
     needs: [generate_image_tag, build]
     uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
-      tf_target: "canary"
+      tf_target: "sandbox"
       repo_target: "terraform/service"
       tf_action: "apply"
-      gh_environment_name: canary
+      gh_environment_name: sandbox
+    secrets: inherit
+
+  deploy_production:
+    name: "Deploy to Production"
+    needs: [generate_image_tag, build, deploy_sandbox]
+    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
+    with:
+      ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
+      tf_target: "production"
+      repo_target: "terraform/service"
+      tf_action: "apply"
+      gh_environment_name: production
     secrets: inherit
 
   tag:
-    needs: [ build, deploy ]
-    name: "Add Git Tags"
+    needs: [deploy_production]
+    name: "Add RC Git Tags"
     runs-on: ubuntu-latest
     steps:
       - name: Git clone the repository
