@@ -5,6 +5,7 @@ on:
     branches:
       - develop
 
+
 jobs:
   generate_image_tag:
     name: Generate Docker Image Tag
@@ -29,18 +30,6 @@ jobs:
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
-  tag:
-    needs: [ build ]
-    name: "Add Git Tags"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v3
-
-      - uses: rickstaa/action-create-tag@v1
-        with:
-          tag: ${{ needs.generate_image_tag.outputs.git_tag }}
-
   deploy:
     name: "Deploy to Canary-QA"
     needs: [generate_image_tag, build]
@@ -52,3 +41,15 @@ jobs:
       tf_action: "apply"
       gh_environment_name: canary
     secrets: inherit
+
+  tag:
+    needs: [ build, deploy ]
+    name: "Add Git Tags"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ needs.generate_image_tag.outputs.git_tag }}
