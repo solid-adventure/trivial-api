@@ -115,24 +115,24 @@ locals {
     ]
     secrets = [
       {
-        "name": "WHIPLASH_CLIENT_ID",
-        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_id::"
+        "name" : "WHIPLASH_CLIENT_ID",
+        "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_id::"
       },
       {
-        "name": "WHIPLASH_CLIENT_SECRET",
-        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_secret::"
+        "name" : "WHIPLASH_CLIENT_SECRET",
+        "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_secret::"
       },
       {
-        "name": "CLIENT_SECRET",
-        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_secret::"
+        "name" : "CLIENT_SECRET",
+        "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_secret::"
       },
       {
-        "name": "CLIENT_KEYS",
-        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_keys::"
+        "name" : "CLIENT_KEYS",
+        "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:client_keys::"
       },
       {
-        "name": "MAILGUN_SMTP_PASSWORD",
-        "valueFrom": "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:mailgun_password::"
+        "name" : "MAILGUN_SMTP_PASSWORD",
+        "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:mailgun_password::"
       },
     ]
     environment = [
@@ -198,8 +198,8 @@ locals {
         value : "https://${local.core_service_domain}"
       },
       {
-        name: "TRIVIAL_UI_URL",
-        value: local.trivial_ui_service_domain
+        name : "TRIVIAL_UI_URL",
+        value : local.trivial_ui_service_domain
       }
     ]
   }
@@ -222,12 +222,17 @@ resource "aws_ecs_service" "trivial_api_task-service" {
 
   load_balancer {
     target_group_arn = local.internal_alb_target_group_arn
-    container_port = 3000
-    container_name = local.container_name
+    container_port   = 3000
+    container_name   = local.container_name
   }
 
   network_configuration {
-    security_groups  = local.ecs_security_group_ids
+    security_groups = concat(
+      local.ecs_security_group_ids,
+      [
+        local.allow_internal_vpc_traffic_security_group,
+      ]
+    )
     subnets          = local.ecs_subnet_ids
     assign_public_ip = false
   }
