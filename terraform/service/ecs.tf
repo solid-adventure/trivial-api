@@ -220,6 +220,12 @@ resource "aws_ecs_service" "trivial_api_task-service" {
     container_name   = local.container_name
   }
 
+  load_balancer {
+    target_group_arn = local.internal_alb_target_group_arn
+    container_port = 3000
+    container_name = local.container_name
+  }
+
   network_configuration {
     security_groups  = local.ecs_security_group_ids
     subnets          = local.ecs_subnet_ids

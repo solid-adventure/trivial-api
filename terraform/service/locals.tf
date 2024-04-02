@@ -37,6 +37,7 @@ locals {
   ecs_task_role_arn      = data.terraform_remote_state.whiplash-regional.outputs.ecs_task_role_arn
 
   alb_target_group_arn = data.terraform_remote_state.trivial-infra.outputs.trivial_api_alb_target_group_arn
+  internal_alb_target_group_arn = data.terraform_remote_state.trivial-infra.outputs.internal_trivial_api_alb_target_group_arn
 
   trivial_postgres = {
     host     = data.terraform_remote_state.trivial-infra.outputs.trivial_database_host
