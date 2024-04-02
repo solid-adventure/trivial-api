@@ -38,7 +38,7 @@ locals {
 
   alb_target_group_arn                      = data.terraform_remote_state.trivial-infra.outputs.trivial_api_alb_target_group_arn
   internal_alb_target_group_arn             = data.terraform_remote_state.trivial-infra.outputs.internal_trivial_api_alb_target_group_arn
-  allow_internal_vpc_traffic_security_group = data.terraform_remote_state.whiplash-regional.outputs.allow_internal_vpc_traffic_security_group_arn
+  allow_internal_vpc_traffic_security_group = data.terraform_remote_state.whiplash-regional.outputs.allow_internal_vpc_traffic_security_group_id
 
   trivial_postgres = {
     host     = data.terraform_remote_state.trivial-infra.outputs.trivial_database_host
