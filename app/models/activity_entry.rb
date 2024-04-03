@@ -1,7 +1,10 @@
 require 'uri'
 require 'net/http'
+require 'search'
 
 class ActivityEntry < ApplicationRecord
+  include Search
+
   validates :source, presence: true, if: :is_request?
 
   belongs_to :app
@@ -127,6 +130,14 @@ class ActivityEntry < ApplicationRecord
   def normalize_json
     self.payload = JSON.parse(payload) rescue payload if payload.instance_of?(String)
     self.diagnostics = JSON.parse(diagnostics) rescue diagnostics if diagnostics.instance_of?(String)
+  end
+
+  def self.search(entries, search)
+    search.entries.each do |column, arguments|
+      query = create_query(column, arguments[:operator], arguments[:predicate])
+      entries = entries.where(query)
+    end
+    return entries
   end
 
   def self.send_new_webhook(app, payload)
