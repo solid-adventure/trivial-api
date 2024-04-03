@@ -6,7 +6,18 @@ class ActivityEntriesController < ApplicationController
 
   def index
     authorize! :index, ActivityEntry
-    render json: activity_for_index.map(&:activity_attributes_for_index).to_json
+
+    if params[:search]
+      search = JSON.parse(params[:search])
+      begin
+        entries = ActivityEntry.search(app_activity, search)
+        render json: entries.map(&:activity_attributes_for_index).to_json
+      rescue StandardError => exception
+        render_errors(exception, status: :unprocessable_entity)
+      end
+    else
+      render json: activity_for_index.map(&:activity_attributes_for_index).to_json
+    end
   end
 
   def show
@@ -91,10 +102,10 @@ class ActivityEntriesController < ApplicationController
   end
 
   def activity_entry_params
-      @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
-      @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
-      @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
-      @activity_params
+    @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
+    @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
+    @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
+    @activity_params
   end
 
   # Do not permit :payload or :activity_type on update, as it would re-write history
