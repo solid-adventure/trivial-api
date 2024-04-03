@@ -15,6 +15,21 @@ class ActivityEntry < ApplicationRecord
     .where.not(update_id: nil)
   }
 
+  # Long-lived session shared by all requests
+  @kafka = Services::Kafka.new
+
+  def self.kafka
+    @kafka
+  end
+
+  def app_runner_service
+    self.class.app_runner_service
+  end
+
+  def self.app_runner_service
+    ENV['DEFAULT_APP_RUNNER_SERVICE'] || 'webhook'
+  end
+
   def is_request?
     activity_type == 'request'
   end
@@ -31,10 +46,26 @@ class ActivityEntry < ApplicationRecord
     manifest.try(:[], 'listen_at').try(:[], 'path') || '/webhooks/receive'
   end
 
-  def resend
+  def resend_webhook
     res = ActivityEntry.post app_uri, payload.to_json,
       'Content-Type' => 'application/json',
       'X-Trivial-Original-Id' => id.to_s
+  end
+
+  def resend_kafka
+    self.class.kafka.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: payload["key"])
+    return OpenStruct.new(code: 200, message: 'OK')
+  end
+
+  def resend
+    case app_runner_service
+    when 'webhook'
+      resend_webhook
+    when 'kafka'
+      resend_kafka
+    else
+      raise "Invalid service: #{app_runner_service}"
+    end
   end
 
   def publish_receipt!
@@ -98,10 +129,26 @@ class ActivityEntry < ApplicationRecord
     self.diagnostics = JSON.parse(diagnostics) rescue diagnostics if diagnostics.instance_of?(String)
   end
 
-  def self.send_new(app, payload)
+  def self.send_new_webhook(app, payload)
     entry = ActivityEntry.new app: app
     res = post entry.app_uri, payload,
       'Content-Type' => 'application/json'
+  end
+
+  def self.send_new_kafka(app, payload)
+    @kafka.produce_sync(topic: Services::Kafka.topic, payload: payload, key: JSON.parse(payload)["key"])
+    return OpenStruct.new(code: 200, message: 'OK')
+  end
+
+  def self.send_new(app, payload)
+    case app_runner_service
+    when 'webhook'
+      send_new_webhook(app, payload)
+    when 'kafka'
+      send_new_kafka(app, payload)
+    else
+      raise "Invalid service: #{app_runner_service}"
+    end
   end
 
   def self.publish_enabled?
