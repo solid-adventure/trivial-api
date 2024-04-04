@@ -4,7 +4,7 @@ module Search
   end
 
   JSONB_OPERATORS = %w[? ?& ?| @> @? @@]
-  COMPERATORS = %w[< > <= >= = <>]
+  COMPERATORS = %w[< > <= >= = <> !=]
   PREDICATES = ['IS NULL','IS NOT NULL','IS TRUE','IS NOT TRUE','IS FALSE','IS NOT FALSE']
 
   class InvalidColumnError < StandardError
