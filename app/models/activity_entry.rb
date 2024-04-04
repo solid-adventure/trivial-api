@@ -140,6 +140,23 @@ class ActivityEntry < ApplicationRecord
     return entries
   end
 
+  def self.get_keys(app_id, col, path)
+    raise 'Invalid Column' unless valid_jsonb_col?(col)
+    relation = self.where(app_id: app_id)
+
+    if path
+      query = sanitize_sql_array(["jsonb_object_keys(#{col}#>?)", path])
+    else
+      query = "jsonb_object_keys(#{col})"
+    end
+
+    return relation.distinct.pluck(Arel.sql(query))
+  end
+
+  def self.valid_jsonb_col?(col)
+    return column_names.include?(col) && columns_hash[col].type == :jsonb
+  end
+
   def self.send_new_webhook(app, payload)
     entry = ActivityEntry.new app: app
     res = post entry.app_uri, payload,

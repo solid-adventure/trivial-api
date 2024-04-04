@@ -77,9 +77,25 @@ class ActivityEntriesController < ApplicationController
     end
   end
 
+  # /activity_entries/keys?app_id=123&col=col_name&path=path_value
+  def keys
+    begin
+      raise 'app_id query string required for keys query' unless app_name = params[:app_id]
+      raise CanCan::AccessDenied unless current_app_id = current_user.associated_apps.where(name: app_name).pluck(:id).first
+      raise 'col query string required for keys query' unless params[:col]
+     
+      keys = ActivityEntry.get_keys(current_app_id, params[:col], params[:path])
+      if keys.any?
+        render json: keys.to_json, status: :ok
+      else 
+        render json: keys.to_json, status: :not_found
+      end
+    rescue StandardError => exception
+      render_errors(exception, status: :unprocessable_entity)
+    end
+  end
 
   private
-
   def activity_for_index
     attrs = [:id, :owner_id, :owner_type, :app_id, :activity_type, :status, :duration_ms, :payload, :created_at]
     @activity ||= app_activity.select(attrs).limit(limit).order(created_at: :desc)
