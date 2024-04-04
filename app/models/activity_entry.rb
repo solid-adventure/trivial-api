@@ -133,8 +133,8 @@ class ActivityEntry < ApplicationRecord
   end
 
   def self.search(entries, search)
-    search.entries.each do |column, arguments|
-      query = create_query(column, arguments["operator"], arguments["predicate"])
+    search.each do |hash|
+      query = create_query(hash["c"], hash["o"], hash["p"])
       entries = entries.where(query)
     end
     return entries
