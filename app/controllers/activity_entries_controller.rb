@@ -14,7 +14,7 @@ class ActivityEntriesController < ApplicationController
         if entries.any?
           render json: entries.map(&:activity_attributes_for_index).to_json
         else
-          render json: entries.to_json, status: :no_content
+          render json: entries.to_json, status: :ok
         end
       rescue StandardError => exception
         render_errors(exception, status: :unprocessable_entity)
@@ -89,11 +89,7 @@ class ActivityEntriesController < ApplicationController
       raise 'col query string required for keys query' unless params[:col]
      
       keys = ActivityEntry.get_keys(current_app_id, params[:col], params[:path])
-      if keys.empty?
-        render json: keys.to_json, status: :no_content
-      else 
-        render json: keys.to_json, status: :ok
-      end
+      render json: keys.to_json, status: :ok
     rescue StandardError => exception
       render_errors(exception, status: :unprocessable_entity)
     end

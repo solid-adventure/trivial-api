@@ -146,13 +146,13 @@ class ActivityEntry < ApplicationRecord
 
     if path
       type_query = sanitize_sql_array(["jsonb_typeof(#{col} #> ?)", path])
-      type = relation.pluck(Arel.sql(type_query)).first
+      type = relation.distinct.pluck(Arel.sql(type_query)).compact.first
 
       if type == 'object'
         query = "jsonb_object_keys(#{col} #> ?)"
         query = sanitize_sql_array([query, path])
       else 
-        return type
+        return []
       end
     else
       query = "jsonb_object_keys(#{col})"
