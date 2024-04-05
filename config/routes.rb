@@ -64,6 +64,7 @@ Rails.application.routes.draw do
   resources :activity_entries, only: [:index, :create, :show, :create_from_request, :update] do
     collection do
       get 'stats'
+      get 'keys'
     end
 
     member do
