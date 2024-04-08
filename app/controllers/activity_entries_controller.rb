@@ -11,7 +11,11 @@ class ActivityEntriesController < ApplicationController
       search = JSON.parse(params[:search])
       begin
         entries = ActivityEntry.search(app_activity, search)
-        render json: entries.map(&:activity_attributes_for_index).to_json
+        if entries.any?
+          render json: entries.map(&:activity_attributes_for_index).to_json
+        else
+          render json: entries.to_json, status: :ok
+        end
       rescue StandardError => exception
         render_errors(exception, status: :unprocessable_entity)
       end
@@ -85,11 +89,7 @@ class ActivityEntriesController < ApplicationController
       raise 'col query string required for keys query' unless params[:col]
      
       keys = ActivityEntry.get_keys(current_app_id, params[:col], params[:path])
-      if keys.any?
-        render json: keys.to_json, status: :ok
-      else 
-        render json: keys.to_json, status: :not_found
-      end
+      render json: keys.to_json, status: :ok
     rescue StandardError => exception
       render_errors(exception, status: :unprocessable_entity)
     end
