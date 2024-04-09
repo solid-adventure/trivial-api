@@ -7,20 +7,14 @@ class ActivityEntriesController < ApplicationController
   def index
     authorize! :index, ActivityEntry
 
-    if params[:search]
-      search = JSON.parse(params[:search])
-      begin
-        entries = ActivityEntry.search(app_activity, search)
-        if entries.any?
-          render json: entries.map(&:activity_attributes_for_index).to_json
-        else
-          render json: entries.to_json, status: :ok
-        end
-      rescue StandardError => exception
-        render_errors(exception, status: :unprocessable_entity)
+    begin
+      search = params[:search] ? JSON.parse(params[:search]) : []
+      if search.any?
+        @activity = ActivityEntry.search(app_activity, search)
       end
-    else
       render json: activity_for_index.map(&:activity_attributes_for_index).to_json
+    rescue StandardError => exception
+      render_errors(exception, status: :unprocessable_entity)
     end
   end
 
@@ -98,7 +92,8 @@ class ActivityEntriesController < ApplicationController
   private
   def activity_for_index
     attrs = [:id, :owner_id, :owner_type, :app_id, :activity_type, :status, :duration_ms, :payload, :created_at]
-    @activity ||= app_activity.select(attrs).limit(limit).order(created_at: :desc)
+    @activity ||= app_activity
+    @activity.select(attrs).limit(limit).order(created_at: :desc)
   end
 
   def activity
