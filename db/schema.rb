@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_02_20_174251) do
+ActiveRecord::Schema[7.0].define(version: 2024_04_01_150728) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -58,6 +58,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_20_174251) do
     t.bigint "owner_id"
     t.index ["app_id"], name: "index_activity_entries_on_app_id"
     t.index ["owner_type", "owner_id"], name: "index_activity_entries_on_owner"
+    t.index ["payload"], name: "index_activity_entries_on_payload", using: :gin
     t.index ["update_id"], name: "index_activity_entries_on_update_id"
   end
 

@@ -6,7 +6,22 @@ class ActivityEntriesController < ApplicationController
 
   def index
     authorize! :index, ActivityEntry
-    render json: activity_for_index.map(&:activity_attributes_for_index).to_json
+
+    if params[:search]
+      search = JSON.parse(params[:search])
+      begin
+        entries = ActivityEntry.search(app_activity, search)
+        if entries.any?
+          render json: entries.map(&:activity_attributes_for_index).to_json
+        else
+          render json: entries.to_json, status: :ok
+        end
+      rescue StandardError => exception
+        render_errors(exception, status: :unprocessable_entity)
+      end
+    else
+      render json: activity_for_index.map(&:activity_attributes_for_index).to_json
+    end
   end
 
   def show
@@ -66,9 +81,21 @@ class ActivityEntriesController < ApplicationController
     end
   end
 
+  # /activity_entries/keys?app_id=123&col=col_name&path=path_value
+  def keys
+    begin
+      raise 'app_id query string required for keys query' unless app_name = params[:app_id]
+      raise CanCan::AccessDenied unless current_app_id = current_user.associated_apps.where(name: app_name).pluck(:id).first
+      raise 'col query string required for keys query' unless params[:col]
+     
+      keys = ActivityEntry.get_keys(current_app_id, params[:col], params[:path])
+      render json: keys.to_json, status: :ok
+    rescue StandardError => exception
+      render_errors(exception, status: :unprocessable_entity)
+    end
+  end
 
   private
-
   def activity_for_index
     attrs = [:id, :owner_id, :owner_type, :app_id, :activity_type, :status, :duration_ms, :payload, :created_at]
     @activity ||= app_activity.select(attrs).limit(limit).order(created_at: :desc)
@@ -91,10 +118,10 @@ class ActivityEntriesController < ApplicationController
   end
 
   def activity_entry_params
-      @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
-      @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
-      @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
-      @activity_params
+    @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
+    @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
+    @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
+    @activity_params
   end
 
   # Do not permit :payload or :activity_type on update, as it would re-write history
