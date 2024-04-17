@@ -4,6 +4,7 @@ require 'search'
 
 class ActivityEntry < ApplicationRecord
   include Search
+  SEARCHABLE_COLUMNS = %w[payload diagnostics status].freeze
 
   validates :source, presence: true, if: :is_request?
 
@@ -134,35 +135,11 @@ class ActivityEntry < ApplicationRecord
 
   def self.search(entries, search)
     search.each do |hash|
-      query = create_query(hash["c"], hash["o"], hash["p"])
+      next unless SEARCHABLE_COLUMNS.include?(hash['c'])
+      query = create_query(hash['c'], hash['o'], hash['p'])
       entries = entries.where(query)
     end
     return entries
-  end
-
-  def self.get_keys(app_id, col, path)
-    raise 'Invalid Column' unless valid_jsonb_col?(col)
-    relation = self.where(app_id: app_id)
-
-    if path
-      type_query = sanitize_sql_array(["jsonb_typeof(#{col} #> ?)", path])
-      type = relation.distinct.pluck(Arel.sql(type_query)).compact.first
-
-      if type == 'object'
-        query = "jsonb_object_keys(#{col} #> ?)"
-        query = sanitize_sql_array([query, path])
-      else 
-        return []
-      end
-    else
-      query = "jsonb_object_keys(#{col})"
-    end
-
-    return relation.distinct.pluck(Arel.sql(query))
-  end
-
-  def self.valid_jsonb_col?(col)
-    return column_names.include?(col) && columns_hash[col].type == :jsonb
   end
 
   def self.send_new_webhook(app, payload)

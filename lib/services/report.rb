@@ -40,7 +40,7 @@ module Services
       if args[:group_by] && sample
       # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
         args[:group_by].map { |i| raise "Invalid group by, not a meta key for register" unless i.in? whitelisted_groups(results) }
-        meta_groups = args[:group_by].map { |i| RegisterItem.meta_column(i, sample.register.meta) }
+        meta_groups = args[:group_by].map { |i| RegisterItem.resolved_column(i, sample.register.meta) }
         results = results.group(meta_groups).__send__(stat ,:amount)
         results = collate_register_names(results) if meta_groups.include? "register_id"
         return {title: "Count by Register", count: results }
