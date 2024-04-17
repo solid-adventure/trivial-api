@@ -4,8 +4,18 @@ class RegisterItemsController < ApplicationController
 
   # GET /register_items
   def index
-    @register_items = current_user.associated_register_items
-    render json: @register_items, adapter: :attributes
+    begin
+      @register_items = current_user.associated_register_items
+      search = params[:search] ? JSON.parse(params[:search]) : []
+      if search.any?
+        raise 'register_id required for search' unless @register
+        @register_items = @register_items.where(register_id: @register.id)
+        @register_items = RegisterItem.search(@register_items, @register.meta, search)
+      end
+      render json: @register_items, adapter: :attributes
+    rescue StandardError => exception
+      render_errors(exception, status: :unprocessable_entity)
+    end
   end
 
   # GET /register_items/1
@@ -26,9 +36,17 @@ class RegisterItemsController < ApplicationController
     end
   end
 
+  def columns
+    authorize! :index, RegisterItem
+    raise 'register_id required for columns query' unless @register
+    
+    searchable_columns = RegisterItem.get_columns(RegisterItem::SEARCHABLE_COLUMNS) + @register.meta.values
+    render json: searchable_columns.to_json, status: :ok
+  end
+
   private
   def set_register
-    @register = Register.find(params[:register_id])
+    @register = Register.find_by_id(params[:register_id])
   end
 
   def set_register_item

@@ -1,7 +1,14 @@
+require 'search'
+
 class RegisterItem < ApplicationRecord
 
   include Ownable
   include Permissible
+  include Search
+
+  # includes only non-meta searchable columns
+  # meta columns are handled by self.search
+  SEARCHABLE_COLUMNS = %w[amount units unique_key].freeze
 
   belongs_to :register
 
@@ -54,6 +61,16 @@ class RegisterItem < ApplicationRecord
 
   def self.sanitize(str)
     str.gsub(' ', '_').underscore.gsub(/[^a-zA-Z0-9_]/, '')
+  end
+
+  def self.search(items, column_labels, search)
+    search.each do |hash|
+      col = resolved_column(hash['c'], column_labels)
+      next unless SEARCHABLE_COLUMNS.include?(col) || col.match(/\Ameta\d\z/)
+      query = create_query(col, hash['o'], hash['p'])
+      items = items.where(query)
+    end
+    return items
   end
 
   private
