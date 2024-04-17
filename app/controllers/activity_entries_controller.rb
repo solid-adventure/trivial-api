@@ -79,14 +79,20 @@ class ActivityEntriesController < ApplicationController
   def keys
     begin
       raise 'app_id query string required for keys query' unless app_name = params[:app_id]
-      raise CanCan::AccessDenied unless current_app_id = current_user.associated_apps.where(name: app_name).pluck(:id).first
+      raise CanCan::AccessDenied unless current_app = current_user.associated_apps.find_by(name: app_name)
       raise 'col query string required for keys query' unless params[:col]
      
-      keys = ActivityEntry.get_keys(current_app_id, params[:col], params[:path])
+      relation = current_app.activity_entries
+      keys = ActivityEntry.get_keys(relation, params[:col], params[:path])
       render json: keys.to_json, status: :ok
     rescue StandardError => exception
       render_errors(exception, status: :unprocessable_entity)
     end
+  end
+
+  def columns
+    authorize! :index, ActivityEntry
+    render json: ActivityEntry.get_columns(ActivityEntry::SEARCHABLE_COLUMNS).to_json, status: :ok
   end
 
   private
