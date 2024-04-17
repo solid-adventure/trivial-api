@@ -1,9 +1,19 @@
+require 'search'
+
 class RegisterItem < ApplicationRecord
 
   include Ownable
   include Permissible
+  include Search
+
+  # includes only non-meta searchable columns
+  # meta columns are handled by self.search
+  SEARCHABLE_COLUMNS = %w[amount units unique_key].freeze
 
   belongs_to :register
+
+  @@initialized_registers = {}
+  @@initialization_lock = Mutex.new
 
   # Item identiy basics
   validates :description, presence: true
@@ -21,7 +31,7 @@ class RegisterItem < ApplicationRecord
 
   # Denormalized from register
   before_create :set_register_attrs
-  after_initialize :register_meta_attributes
+  after_initialize :initialize_by_register
 
   def set_register_attrs
     self.units ||= register.units
@@ -31,13 +41,49 @@ class RegisterItem < ApplicationRecord
     super(args)
   rescue ActiveRecord::UnknownAttributeError
     register = Register.find(args[:register_id])
-    register_meta_attributes(register.meta)
+    @@initialization_lock.synchronize do
+      register_meta_attributes(register.meta)
+      @@initialized_registers[register.id] = true
+    end
     super(args)
   end
 
-  def register_meta_attributes
+  def resolved_column(label, column_labels)
+    RegisterItem.resolved_column(label, column_labels)
+  end
+
+  def self.resolved_column(label, column_labels)
+    return label if label.in? column_names
+    out = column_labels.find{ |k,v|  v==label }.first
+    raise "No meta column found for #{label}" unless out
+    return out
+  end
+
+  def self.sanitize(str)
+    str.gsub(' ', '_').underscore.gsub(/[^a-zA-Z0-9_]/, '')
+  end
+
+  def self.search(items, column_labels, search)
+    search.each do |hash|
+      col = resolved_column(hash['c'], column_labels)
+      next unless SEARCHABLE_COLUMNS.include?(col) || col.match(/\Ameta\d\z/)
+      query = create_query(col, hash['o'], hash['p'])
+      items = items.where(query)
+    end
+    return items
+  end
+
+  private
+
+  def initialize_by_register
     raise "You must provide a register_id to create register items" unless register_id
-    RegisterItem.register_meta_attributes(register.meta)
+
+    @@initialization_lock.synchronize do
+      unless @@initialized_registers[register_id]
+        RegisterItem.register_meta_attributes(register.meta)
+        @@initialized_registers[register_id] = true
+      end
+    end
   end
 
   def self.register_meta_attributes(column_labels)
@@ -46,28 +92,13 @@ class RegisterItem < ApplicationRecord
 
       label = sanitize(column_labels[attr_name])
       define_method label do
-        self[meta_column(label, column_labels)]
+        self[resolved_column(label, column_labels)]
       end
 
       define_method "#{label}=" do |val|
-        self[meta_column(label, column_labels)] = val
+        self[resolved_column(label, column_labels)] = val
       end
     end
-  end
-
-  def meta_column(label, column_labels)
-    RegisterItem.meta_column(label, column_labels)
-  end
-
-  def self.meta_column(label, column_labels)
-    return label if label.in? %w( register_id owner_id owner_type created_at updated_at)
-    out = column_labels.find{ |k,v|  v==label }.first
-    raise "No meta column found for #{label}" unless out
-    return out
-  end
-
-  def self.sanitize(str)
-    str.gsub(' ', '_').underscore.gsub(/[^a-zA-Z0-9_]/, '')
   end
 
 end

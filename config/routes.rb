@@ -65,6 +65,7 @@ Rails.application.routes.draw do
     collection do
       get 'stats'
       get 'keys'
+      get 'columns'
     end
 
     member do
@@ -86,7 +87,11 @@ Rails.application.routes.draw do
   resource :profile, only: [:show, :update]
 
   resources :registers, only: [:index, :show, :create, :update]
-  resources :register_items, only: [:index, :show, :create]
+  resources :register_items, only: [:index, :show, :create] do
+    collection do
+      get 'columns'
+    end
+  end
 
   post 'reports/:report_name', to: 'reports#show'
 
