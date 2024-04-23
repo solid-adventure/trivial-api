@@ -87,7 +87,7 @@ Rails.application.routes.draw do
   resource :profile, only: [:show, :update]
 
   resources :registers, only: [:index, :show, :create, :update]
-  resources :register_items, only: [:index, :show, :create] do
+  resources :register_items, only: [:index, :show, :create, :update] do
     collection do
       get 'columns'
     end
