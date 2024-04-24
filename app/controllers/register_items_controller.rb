@@ -1,6 +1,6 @@
 class RegisterItemsController < ApplicationController
   before_action :set_register
-  before_action :set_register_item, only: %i[ show ]
+  before_action :set_register_item, only: %i[ show update ]
 
   # GET /register_items
   def index
@@ -36,6 +36,16 @@ class RegisterItemsController < ApplicationController
     end
   end
 
+  # PUT /register_items/1
+  def update
+    authorize! :update, @register_item
+    if @register_item.update(updateable_params)
+      render json: @register_item, adapter: :attributes
+    else
+      render json: @register_item.errors, status: :unprocessable_entity
+    end
+  end
+
   def columns
     authorize! :index, RegisterItem
     raise 'register_id required for columns query' unless @register
@@ -50,15 +60,15 @@ class RegisterItemsController < ApplicationController
   end
 
   def set_register_item
-    @register_item = RegisterItem.find(param[:id])
+    @register_item = RegisterItem.find(params[:id])
   end
 
   def register_item_params
-    if @register.meta.present?
+    if @register && @register.meta.present?
       params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at, @register.meta.values)
     else
       params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
     end
-   end
+  end
 
 end
