@@ -39,7 +39,7 @@ class RegisterItemsController < ApplicationController
   # PUT /register_items/1
   def update
     authorize! :update, @register_item
-    if @register_item.update(updateable_params)
+    if @register_item.update(register_item_params)
       render json: @register_item, adapter: :attributes
     else
       render json: @register_item.errors, status: :unprocessable_entity
