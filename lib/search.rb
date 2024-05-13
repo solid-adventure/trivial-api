@@ -6,6 +6,7 @@ module Search
   JSONB_OPERATORS = %w[? ?& ?| @> @? @@]
   COMPERATORS = %w[< > <= >= = <> !=]
   PREDICATES = ['IS NULL','IS NOT NULL','IS TRUE','IS NOT TRUE','IS FALSE','IS NOT FALSE']
+  ORDERINGS = ['ASC', 'DESC', 'ASC NULLS FIRST', 'DESC NULLS FIRST', 'ASC NULLS LAST', 'DESC NULLS LAST']
 
   class InvalidColumnError < StandardError
     def initialize(msg = 'Invalid or Empty column')
@@ -25,7 +26,18 @@ module Search
     end
   end
 
+  class InvalidOrderingError < StandardError
+    def initialize(msg = 'Invalid or Empty ordering')
+      super(msg)
+    end
+
   module ClassMethods
+    def create_ordering(column, order)
+      raise InvalidColumnError unless column_names.include?(column)
+      raise InvalidOrderingError unless ORDERINGS.include?(order)
+      return sanitize_sql_array([":column :ordering", column: column, order: order])
+    end
+
     def create_query(column, operator, predicate)
       raise InvalidPredicateError unless predicate
       raise InvalidColumnError unless column_names.include?(column)

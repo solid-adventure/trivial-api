@@ -73,6 +73,11 @@ class RegisterItem < ApplicationRecord
     return items
   end
 
+  def self.resolved_ordering(order_by, ordering_direction, column_labels)
+    column = resolved_column(order_by, column_labels)
+    return create_ordering(column, ordering_direction)
+  end
+
   private
 
   def initialize_by_register
