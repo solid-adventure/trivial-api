@@ -1,18 +1,30 @@
 class RegisterItemsController < ApplicationController
   before_action :set_register
   before_action :set_register_item, only: %i[ show update ]
+  before_action :set_pagination, only: %i[index]
+  before_action :set_ordering, only: %i[index]
 
   # GET /register_items
   def index
     begin
       @register_items = current_user.associated_register_items
+      @register_items = @register_items.where(register_id: @register.id) if @register
+      
       search = params[:search] ? JSON.parse(params[:search]) : []
       if search.any?
         raise 'register_id required for search' unless @register
-        @register_items = @register_items.where(register_id: @register.id)
         @register_items = RegisterItem.search(@register_items, @register.meta, search)
       end
-      render json: @register_items, adapter: :attributes
+     
+      order_register_items
+      paginate_register_items
+      response = {
+        current_page: @page,
+        total_pages: @total_pages,
+        register_items: ActiveModel::Serializer::CollectionSerializer.new(@register_items, adapter: :attributes)
+      }
+
+      render json: response
     rescue StandardError => exception
       render_errors(exception, status: :unprocessable_entity)
     end
@@ -55,6 +67,37 @@ class RegisterItemsController < ApplicationController
   end
 
   private
+  MAX_PER_PAGE = 100
+
+  def order_register_items
+    if @register
+      order = RegisterItem.resolved_ordering(@order_by, @ordering_direction, @register.meta)
+    else
+      order = RegisterItem.create_ordering(@order_by, @ordering_direction)
+    end
+    @register_items = @register_items.order(Arel.sql(order))
+  end
+
+  def paginate_register_items
+    raise 'invalid per_page param' unless @per_page.positive?
+    raise 'invalid page param' unless @page.positive?
+    
+    @total_pages = (@register_items.count.to_f / @per_page).ceil
+    offset = (@page - 1) * @per_page
+    @register_items = @register_items.limit(@per_page).offset(offset)
+  end
+
+  def set_pagination
+    @per_page = params[:per_page] ? params[:per_page].to_i : MAX_PER_PAGE
+    @per_page = [@per_page, MAX_PER_PAGE].min
+    @page = params[:page] ? params[:page].to_i : 1
+  end
+
+  def set_ordering
+    @order_by = params[:order_by] || "originated_at"
+    @ordering_direction = params[:ordering_direction] || "DESC"
+  end
+
   def set_register
     @register = Register.find_by_id(params[:register_id])
   end
