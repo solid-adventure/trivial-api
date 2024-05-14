@@ -6,6 +6,8 @@ class RegisterItem < ApplicationRecord
   include Permissible
   include Search
 
+  audited
+
   # includes only non-meta searchable columns
   # meta columns are handled by self.search
   SEARCHABLE_COLUMNS = %w[amount units unique_key].freeze
