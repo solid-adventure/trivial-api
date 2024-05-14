@@ -30,12 +30,13 @@ module Search
     def initialize(msg = 'Invalid or Empty ordering')
       super(msg)
     end
+  end
 
   module ClassMethods
-    def create_ordering(column, order)
+    def create_ordering(column, ordering)
       raise InvalidColumnError unless column_names.include?(column)
-      raise InvalidOrderingError unless ORDERINGS.include?(order)
-      return sanitize_sql_array([":column :ordering", column: column, order: order])
+      raise InvalidOrderingError unless ORDERINGS.include?(ordering)
+      return "#{column} #{ordering}"
     end
 
     def create_query(column, operator, predicate)
