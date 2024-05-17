@@ -56,9 +56,9 @@ class RegisterItem < ApplicationRecord
 
   def self.resolved_column(label, column_labels)
     return label if label.in? column_names
-    out = column_labels.find{ |k,v|  v==label }.first
-    raise "No meta column found for #{label}" unless out
-    return out
+    meta_column = column_labels.invert[label]
+    raise "No meta column found for #{label}" unless meta_column
+    return meta_column
   end
 
   def self.sanitize(str)
