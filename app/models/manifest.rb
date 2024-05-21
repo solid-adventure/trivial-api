@@ -14,6 +14,8 @@ class Manifest < ApplicationRecord
 
     has_one_attached :bundle
 
+    after_save :create_activity_entry
+
     def copy_to_app!(new_app)
         new_manifest = self.dup
         new_manifest.app_id = new_app.name
@@ -51,5 +53,24 @@ class Manifest < ApplicationRecord
                 false
             end
         end
+    end
+
+    private
+
+    def create_activity_entry
+        current_audit = audits.last
+        entry = ActivityEntry.new
+        entry.owner = owner
+        entry.app = app
+        entry.activity_type = 'build'
+        entry.status = '200'
+        entry.diagnostics = {
+            build_info: {
+                audit_id: current_audit.id,
+                action: current_audit.action,
+                user: current_audit.user_id
+            }
+        }
+        entry.save!
     end
 end
