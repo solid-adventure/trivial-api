@@ -1,6 +1,6 @@
 class RegisterItemsController < ApplicationController
-  before_action :set_register
   before_action :set_register_item, only: %i[ show update ]
+  before_action :set_register
   before_action :set_pagination, only: %i[index]
   before_action :set_ordering, only: %i[index]
 
@@ -99,7 +99,11 @@ class RegisterItemsController < ApplicationController
   end
 
   def set_register
-    @register = Register.find_by_id(params[:register_id])
+    if @register_item
+      @register = @register_item.register
+    else
+      @register = Register.find_by_id(params[:register_id])
+    end
   end
 
   def set_register_item
