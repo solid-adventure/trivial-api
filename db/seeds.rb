@@ -22,22 +22,35 @@ warehouses = %w(san_francisco los_angeles new_york paris london tokyo)
 channels = %w(retail wholesale online popup dropship)
 originated_at_range = ((DateTime.now - 2.years)..DateTime.now)
 
-register1 = Register.find_or_create_by(name: "Generated Register 1", owner: user, units: "USD", meta: {meta0: "income_account", meta1: "warehouse", meta2: "channel" })
-register2 = Register.find_or_create_by(name: "Generated Register 2", owner: user, units: "USD", meta: {meta0: "income_account", meta1: "warehouse", meta2: "channel" })
-register3 = Register.find_or_create_by(name: "Generated Register 3", owner: user, units: "USD", meta: {meta0: "income_account", meta1: "warehouse", meta2: "channel" })
-registers = [register1, register2, register3]
+registers = (1..3).map { |i|
+  org = Organization.find_or_create_by(name: "Generated Org #{i}", billing_email: user.email)
+  OrgRole.find_or_create_by(user: user, organization: org, role: "admin")
+
+  columns = (1..9).map { |i| "meta#{i}" }.sample(3)
+  meta = Hash[columns.zip(%w[income_account warehouse channel])]
+
+  Register.find_or_create_by(
+    name: "Sales",
+    owner: org,
+    units: "USD",
+    meta: meta
+  )
+}
 
 2000.times do |i|
-  RegisterItem.create(
-    register_id: registers.sample.id,
-    owner: user,
+  register = registers.sample
+  item = RegisterItem.new(
+    register_id: register.id,
+    owner: register.owner,
     description: "Generated event #{i}",
     amount: rand(0.1..20.0).round(2),
     units: "USD",
     unique_key: "#{Time.now}-#{i}",
-    income_account: income_accounts.sample,
-    warehouse: warehouses.sample,
-    channel: channels.sample, 
     originated_at: rand(originated_at_range)
   )
+  meta = register.meta.invert
+  item[meta["income_account"]] = income_accounts.sample
+  item[meta["warehouse"]] = warehouses.sample
+  item[meta["channel"]] = channels.sample
+  item.save!
 end

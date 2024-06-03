@@ -70,8 +70,10 @@ Rails.application.configure do
   ActionMailer::Base.delivery_method = :smtp
 
   # Set log level
-  # config.log_level = :INFO
-  # config.logger = Logger.new(STDOUT)
+  if ENV["RAILS_SHOW_LOGS"].present?
+    config.log_level = :info
+    config.logger = Logger.new(STDOUT)
+  end
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
