@@ -4,19 +4,26 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {
-  id: 1,
-  name: "register 1 name",
-  units: "USD",
+one:
+  id: 1
+  name: Register 1
+  units: USD
   meta: {
     "meta0": "income_account",
     "meta2": "warehouse",
     "meta5": "channel"
   }
-}
+  owner_type: Organization
+  owner_id: 1
 
-two: {
-  id: 2,
-  name: "register 2 name"
-
-}
+two:
+  id: 2
+  name: Register 2
+  units: USD
+  meta: {
+    "meta1": "income_account",
+    "meta2": "channel",
+    "meta3": "warehouse",
+  }
+  owner_type: Organization
+  owner_id: 1

@@ -9,13 +9,13 @@ class RegisterItemsController < ApplicationController
     begin
       @register_items = current_user.associated_register_items
       @register_items = @register_items.where(register_id: @register.id) if @register
-      
+
       search = params[:search] ? JSON.parse(params[:search]) : []
       if search.any?
         raise 'register_id required for search' unless @register
         @register_items = RegisterItem.search(@register_items, @register.meta, search)
       end
-     
+
       order_register_items
       paginate_register_items
       response = {
@@ -61,7 +61,7 @@ class RegisterItemsController < ApplicationController
   def columns
     authorize! :index, RegisterItem
     raise 'register_id required for columns query' unless @register
-    
+
     searchable_columns = RegisterItem.get_columns(RegisterItem::SEARCHABLE_COLUMNS) + @register.meta.values
     render json: searchable_columns.to_json, status: :ok
   end
@@ -81,7 +81,7 @@ class RegisterItemsController < ApplicationController
   def paginate_register_items
     raise 'invalid per_page param' unless @per_page.positive?
     raise 'invalid page param' unless @page.positive?
-    
+
     @total_pages = (@register_items.count.to_f / @per_page).ceil
     offset = (@page - 1) * @per_page
     @register_items = @register_items.limit(@per_page).offset(offset)
@@ -111,11 +111,13 @@ class RegisterItemsController < ApplicationController
   end
 
   def register_item_params
-    if @register && @register.meta.present?
-      params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at, @register.meta.values)
-    else
-      params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
+    permitted_params = params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
+    if @register
+      @register.meta.each do |column, label|
+        permitted_params[column] = params[label] if params[label]
+      end
     end
+    permitted_params
   end
 
 end
