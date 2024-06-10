@@ -13,6 +13,7 @@ class RegisterItem < ApplicationRecord
   SEARCHABLE_COLUMNS = %w[originated_at description amount units unique_key].freeze
 
   belongs_to :register
+  has_many :activity_entries
 
   @@initialized_registers = {}
   @@initialization_lock = Mutex.new
