@@ -97,7 +97,7 @@ class ActivityEntriesController < ApplicationController
 
   private
   def activity_for_index
-    attrs = [:id, :owner_id, :owner_type, :app_id, :activity_type, :status, :duration_ms, :payload, :created_at]
+    attrs = [:id, :owner_id, :owner_type, :app_id, :register_item_id, :activity_type, :status, :duration_ms, :payload, :created_at]
     @activity ||= app_activity
     @activity.select(attrs).limit(limit).order(created_at: :desc)
   end
@@ -119,7 +119,7 @@ class ActivityEntriesController < ApplicationController
   end
 
   def activity_entry_params
-    @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms))
+    @activity_params = {}.merge(params.permit(:activity_type, :source, :status, :duration_ms, :register_item_id))
     @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
     @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
     @activity_params
@@ -127,7 +127,7 @@ class ActivityEntriesController < ApplicationController
 
   # Do not permit :payload or :activity_type on update, as it would re-write history
   def activity_entry_update_params
-    @activity_params = {}.merge(params.permit(:status, :duration_ms))
+    @activity_params = {}.merge(params.permit(:status, :duration_ms, :register_item_id))
     @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
     @activity_params
   end
