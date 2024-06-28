@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_10_215817) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_01_191304) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -286,4 +286,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_10_215817) do
   add_foreign_key "org_roles", "users"
   add_foreign_key "permissions", "users"
   add_foreign_key "register_items", "registers"
+
+  create_view "activity_entry_payload_keys", materialized: true, sql_definition: <<-SQL
+      SELECT DISTINCT activity_entries.app_id,
+      jsonb_object_keys(activity_entries.payload) AS keys
+     FROM activity_entries
+    ORDER BY (jsonb_object_keys(activity_entries.payload));
+  SQL
+  add_index "activity_entry_payload_keys", ["app_id"], name: "index_activity_entry_payload_keys_on_app_id"
+
 end
