@@ -75,19 +75,32 @@ class ActivityEntriesController < ApplicationController
     end
   end
 
-  # /activity_entries/keys?app_id=123&col=col_name&path=path_value
+  # POST /activity_entries/keys?col=col_name
+  def refresh_keys
+    raise 'col required to refresh a key_view' unless params[:col]
+    raise "no view to refresh for #{col}" unless view = materialized_key_view_for(params[:col])
+
+    view.refresh
+    render status: :created
+  end
+
+  # GET /activity_entries/keys?app_id=123&col=col_name&path=path_value
   def keys
-    begin
-      raise 'app_id query string required for keys query' unless app_name = params[:app_id]
-      raise CanCan::AccessDenied unless current_app = current_user.associated_apps.find_by(name: app_name)
-      raise 'col query string required for keys query' unless params[:col]
-     
-      relation = current_app.activity_entries
-      keys = ActivityEntry.get_keys(relation, params[:col], params[:path])
-      render json: keys.to_json, status: :ok
-    rescue StandardError => exception
-      render_errors(exception, status: :unprocessable_entity)
-    end
+    raise 'app_id query string required for keys query' unless app_name = params[:app_id]
+    raise CanCan::AccessDenied unless current_app = current_user.associated_apps.find_by(name: app_name)
+    raise 'col query string required for keys query' unless params[:col]
+
+    keys = if params[:path]
+             ActivityEntry.get_keys_from_path(params[:col], params[:path], current_app.activity_entries)
+           else
+             materialized_key_view_for(params[:col])
+               .where(app_id: current_app.id)
+               .pluck(:keys)
+           end
+
+    render json: keys.to_json, status: :ok
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
   end
 
   def columns
@@ -136,4 +149,11 @@ class ActivityEntriesController < ApplicationController
     @updatable_entry ||= ActivityEntry.updatable.find_by_update_id!(params[:id])
   end
 
+  MATERIALIZED_KEY_VIEWS = {
+    'payload' => ActivityEntryPayloadKey
+  }.freeze
+
+  def materialized_key_view_for(col)
+    MATERIALIZED_KEY_VIEWS[col]
+  end
 end
