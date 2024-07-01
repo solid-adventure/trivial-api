@@ -14,12 +14,24 @@ module Search
     end
   end
 
+  class InvalidPathError < StandardError
+    def initialize(msg = 'Invalid or Empty scope')
+      super(msg)
+    end
+  end
+
+  class InvalidScopeError < StandardError
+    def initialize(msg = 'Invalid or Empty scope')
+      super(msg)
+    end
+  end
+
   class InvalidOperatorError < StandardError
     def initialize(msg = 'Invalid or Empty operator')
       super(msg)
     end
   end
-  
+
   class InvalidPredicateError < StandardError
     def initialize(msg = 'Invalid or Empty predicate')
       super(msg)
@@ -43,7 +55,7 @@ module Search
       raise InvalidPredicateError unless predicate
       raise InvalidColumnError unless column_names.include?(column)
       query = "#{column} "
-      
+
       data_type = columns_hash[column].type
       if data_type == :jsonb
         raise InvalidOperatorError unless JSONB_OPERATORS.include?(operator)
@@ -59,25 +71,25 @@ module Search
       return sanitize_sql_array(["#{query} ?", predicate])
     end
 
-    def get_keys(relation, col, path)
-      return [] unless relation
-      raise InvalidColumnError unless valid_jsonb_col?(col)
+    def get_keys_from_path(col, path, scope)
+      raise InvalidColumnError unless valid_jsonb_col? col
+      raise InvalidPathError unless valid_jsonb_path? path
+      raise InvalidScopeError unless scope.is_a? ActiveRecord::Relation
 
-      if path
-        type_query = sanitize_sql_array(["jsonb_typeof(#{col} #> ?)", path])
-        type = relation.distinct.pluck(Arel.sql(type_query)).compact.first
+      path_query = sanitize_sql_array(["#{col} #> ?", path])
 
-        if type == 'object'
-          query = "jsonb_object_keys(#{col} #> ?)"
-          query = sanitize_sql_array([query, path])
-        else 
-          return []
-        end
-      else
-        query = "jsonb_object_keys(#{col})"
-      end
+      type_query = "jsonb_typeof(#{path_query})"
+      type = self.where(Arel.sql("#{path_query} IS NOT NULL"))
+        .merge(scope)
+        .distinct
+        .pick(Arel.sql(type_query))
+      return [] unless type == 'object'
 
-      return relation.distinct.pluck(Arel.sql(query))
+      keys_query = "jsonb_object_keys(#{path_query})"
+      return self.where(Arel.sql("#{path_query} IS NOT NULL"))
+        .merge(scope)
+        .distinct
+        .pluck(Arel.sql(keys_query))
     end
 
     def get_columns(whitelist)
@@ -86,6 +98,13 @@ module Search
 
     def valid_jsonb_col?(col)
       return column_names.include?(col) && columns_hash[col].type == :jsonb
+    end
+
+    # path must be a string with form '{key, sub-array index, ..., sub-key}'
+    def valid_jsonb_path?(path)
+      return false unless path.is_a? String
+      path_regex = /^\{(?:\s*\w+\s*(?:,\s*\w+\s*)*)\}$/
+      path.match? path_regex
     end
   end
 end
