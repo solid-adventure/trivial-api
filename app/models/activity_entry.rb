@@ -20,13 +20,6 @@ class ActivityEntry < ApplicationRecord
     .where.not(update_id: nil)
   }
 
-  # Long-lived session shared by all requests
-  @kafka = Services::Kafka.new
-
-  def self.kafka
-    @kafka
-  end
-
   def app_runner_service
     self.class.app_runner_service
   end
@@ -153,7 +146,7 @@ class ActivityEntry < ApplicationRecord
   end
 
   def self.send_new_kafka(app, payload)
-    @kafka.produce_sync(topic: Services::Kafka.topic, payload: payload, key: JSON.parse(payload)["key"])
+    KAFKA.produce_sync(topic: Services::Kafka.topic, payload: payload, key: JSON.parse(payload)["key"])
     return OpenStruct.new(code: 200, message: 'OK')
   end
 
