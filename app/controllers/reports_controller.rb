@@ -13,7 +13,8 @@ class ReportsController < ApplicationController
       if e.message.in? [
         "Unable to compare registers with different meta keys",
         "Cannot report on multiple units in the same report",
-        "Invalid group by, not a meta key for register"
+        "Invalid group by, not a meta key for register",
+        "Multiple groups and period groups not yet supported"
       ]
         render json: {error: e.message}, status: 500
       else
@@ -23,7 +24,7 @@ class ReportsController < ApplicationController
   end
 
   def report_params
-    params.permit(:start_at, :end_at, :register_ids, group_by: [])
+    params.permit(:start_at, :end_at, :register_ids, :group_by_period, :timezone, group_by: [])
   end
 
 

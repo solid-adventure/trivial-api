@@ -139,6 +139,8 @@ GEM
     ffi (1.15.5)
     globalid (1.1.0)
       activesupport (>= 5.0)
+    groupdate (6.4.0)
+      activesupport (>= 6.1)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
     jmespath (1.6.2)
@@ -314,6 +316,7 @@ DEPENDENCIES
   discard (~> 1.2)
   dotenv-rails
   factory_bot_rails
+  groupdate
   jwt (~> 2.3)
   listen (~> 3.2)
   net-imap
