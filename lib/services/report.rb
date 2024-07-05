@@ -31,22 +31,23 @@ module Services
 
       results = args[:user].associated_register_items
       results = results.where(register_id: args[:register_ids]) if args[:register_ids]
-
-      sample = results.first
-      validate_single_unit_of_measure(results) or raise "Cannot report on multiple units in the same report"
-
-      if args[:group_by] && sample
-      # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
-        args[:group_by].map { |i| raise "Invalid group by, not a meta key for register" unless i.in? whitelisted_groups(results) }
-        meta_groups = args[:group_by].map { |i| RegisterItem.resolved_column(i, sample.register.meta) }
+      if args[:timezone] && args[:group_by_period]
         results = group_by_period(results, *formattated_group_by_period_args(args))
+      else
+        results = results.between(args[:start_at], args[:end_at])
+      end
+
+      if args[:group_by]
+      # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
+        meta_groups = args[:group_by].map do |column|
+          RegisterItem.resolved_column(column, Register.find(args[:register_ids]).meta)
+        end
         results = results.group(meta_groups).__send__(stat ,:amount)
         results = collate_register_names(results) if meta_groups.include? "register_id"
         results = format(results)
-        return {title: "Count by Register", count: results }
+        return { title: "Count by Register", count: results }
       end
 
-      results = group_by_period(results, *formattated_group_by_period_args(args))
       results = results.__send__(stat ,:amount)
       return {title: stat.titleize, count: format(results) }
     end
@@ -91,7 +92,7 @@ module Services
     # Given a string in the form "2024-02-14T04:59:59.999Z" and a timezone like "America/Detroit", returns a Time object
     # of Tue, 13 Feb 2024 23:59:59.999000000 EST -05:00
     def time_from_string(time_string, timezone)
-      Time.find_zone(timezone).parse(time_string)
+      timezone ? Time.find_zone(timezone).parse(time_string) : time_string
     end
 
     def formattated_group_by_period_args(args)
@@ -105,27 +106,12 @@ module Services
 
     def group_by_period(results, period, start_at, end_at, timezone)
       period&.downcase!
-      return results.group_by_day(:created_at, time_zone: timezone, format: "%b %d %Y", range: start_at..end_at) if period == "day"
-      return results.group_by_week(:created_at, time_zone: timezone, format: "%b %d %Y", range: start_at..end_at) if period == "week"
-      return results.group_by_month(:created_at, time_zone: timezone, format: "%b %Y", range: start_at..end_at) if period == "month"
-      return results.group_by_quarter(:created_at, time_zone: timezone, format: "Q%b %Y", range: start_at..end_at) if period == "quarter"
-      return results.group_by_year(:created_at, time_zone: timezone, format: "%Y", range: start_at..end_at) if period == "year"
-      return results.between(start_at, end_at) # Pass through unchanged if no period or invalid period is specified. "total" would commonly trigger this edge case.
-    end
-
-    def whitelisted_groups(results)
-      register_ids = results.group(:register_id).size.keys
-      registers = Register.select(:meta).where(id: register_ids)
-      registers.each do |r|
-        r.meta.each do |key, val|
-          raise "Unable to compare registers with different meta keys" unless val == registers.first.meta[key]
-        end
-      end
-      return registers.first.meta.values + ["register_id"]
-    end
-
-    def validate_single_unit_of_measure(results)
-      results.group(:units).size.keys.length <= 1
+      return results.group_by_day(:originated_at, time_zone: timezone, format: "%b %d %Y", range: start_at..end_at) if period == "day"
+      return results.group_by_week(:originated_at, time_zone: timezone, format: "%b %d %Y", range: start_at..end_at) if period == "week"
+      return results.group_by_month(:originated_at, time_zone: timezone, format: "%b %Y", range: start_at..end_at) if period == "month"
+      return results.group_by_quarter(:originated_at, time_zone: timezone, format: "Q%b %Y", range: start_at..end_at) if period == "quarter"
+      return results.group_by_year(:originated_at, time_zone: timezone, format: "%Y", range: start_at..end_at) if period == "year"
+      raise "invalid group by period: #{period}"
     end
 
     # Given {1=>404, 3=>1, 2=>1} with keys being register_ids, replace the ids with register.name
