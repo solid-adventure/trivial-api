@@ -19,6 +19,11 @@ module Services
       @producer
     end
 
+    def produce_async(topic:, payload:, key:)
+      validate_payload(payload)
+      producer.produce_async(topic: topic, payload: payload, key: key)
+    end
+
     def produce_sync(topic:, payload:, key:)
       validate_payload(payload)
       producer.produce_sync(topic: topic, payload: payload, key: key)

@@ -3,11 +3,11 @@ require 'test_helper'
 class KafkaTest < ActiveSupport::TestCase
 
   def setup
-    @kafka = Services::Kafka.new
+    #
   end
 
   test 'initializes' do
-    assert_instance_of WaterDrop::Producer, @kafka.producer
+    assert_instance_of WaterDrop::Producer, KAFKA.producer
   end
 
   test 'throws when topic is not set' do
@@ -38,13 +38,13 @@ class KafkaTest < ActiveSupport::TestCase
 
   test 'throws when payload is nil' do
     assert_raises TypeError do
-      @kafka.produce_sync(topic: "events", payload: nil, key: "key")
+      KAFKA.produce_sync(topic: "events", payload: nil, key: "key")
     end
   end
 
   test 'does not throw when payload is valid' do
     assert_nothing_raised do
-      @kafka.validate_payload({key: "value"}.to_json)
+      KAFKA.validate_payload({key: "value"}.to_json)
     end
   end
 
