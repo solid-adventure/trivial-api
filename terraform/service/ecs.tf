@@ -150,6 +150,18 @@ locals {
         value : "true"
       },
       {
+        "name" : "DD_ENV",
+        "value" : var.env
+      },
+      {
+        "name" : "DD_SERVICE",
+        "value" : var.service_name
+      },
+      {
+        "name" : "DD_VERSION",
+        "value" : local.datadog_version
+      },
+      {
         name : "POSTGRES_HOST",
         value : local.trivial_postgres.host
       },
