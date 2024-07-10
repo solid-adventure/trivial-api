@@ -90,12 +90,18 @@ class ActivityEntriesController < ApplicationController
     raise CanCan::AccessDenied unless current_app = current_user.associated_apps.find_by(name: app_name)
     raise 'col query string required for keys query' unless params[:col]
 
-    keys = if params[:path]
-             ActivityEntry.get_keys_from_path(params[:col], params[:path], current_app.activity_entries)
+    primary_key = params[:path] ? params[:path].gsub(/[{}]/, '') : nil
+    keys = if primary_key
+             materialized_key_view_for(params[:col])
+               .where(app_id: current_app.id)
+               .where(primary_key: primary_key)
+               .where('secondary_key IS NOT NULL')
+               .pluck(:secondary_key)
            else
              materialized_key_view_for(params[:col])
                .where(app_id: current_app.id)
-               .pluck(:keys)
+               .distinct
+               .pluck(:primary_key)
            end
 
     render json: keys.to_json, status: :ok

@@ -14,18 +14,6 @@ module Search
     end
   end
 
-  class InvalidPathError < StandardError
-    def initialize(msg = 'Invalid or Empty scope')
-      super(msg)
-    end
-  end
-
-  class InvalidScopeError < StandardError
-    def initialize(msg = 'Invalid or Empty scope')
-      super(msg)
-    end
-  end
-
   class InvalidOperatorError < StandardError
     def initialize(msg = 'Invalid or Empty operator')
       super(msg)
@@ -71,40 +59,8 @@ module Search
       return sanitize_sql_array(["#{query} ?", predicate])
     end
 
-    def get_keys_from_path(col, path, scope)
-      raise InvalidColumnError unless valid_jsonb_col? col
-      raise InvalidPathError unless valid_jsonb_path? path
-      raise InvalidScopeError unless scope.is_a? ActiveRecord::Relation
-
-      path_query = sanitize_sql_array(["#{col} #> ?", path])
-
-      type_query = "jsonb_typeof(#{path_query})"
-      type = self.where(Arel.sql("#{path_query} IS NOT NULL"))
-        .merge(scope)
-        .distinct
-        .pick(Arel.sql(type_query))
-      return [] unless type == 'object'
-
-      keys_query = "jsonb_object_keys(#{path_query})"
-      return self.where(Arel.sql("#{path_query} IS NOT NULL"))
-        .merge(scope)
-        .distinct
-        .pluck(Arel.sql(keys_query))
-    end
-
     def get_columns(whitelist)
       return whitelist & column_names
-    end
-
-    def valid_jsonb_col?(col)
-      return column_names.include?(col) && columns_hash[col].type == :jsonb
-    end
-
-    # path must be a string with form '{key, sub-array index, ..., sub-key}'
-    def valid_jsonb_path?(path)
-      return false unless path.is_a? String
-      path_regex = /^\{(?:\s*\w+\s*(?:,\s*\w+\s*)*)\}$/
-      path.match? path_regex
     end
   end
 end
