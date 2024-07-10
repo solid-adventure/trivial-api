@@ -1,5 +1,5 @@
 class ActivityEntriesController < ApplicationController
-  MAX_RESULTS = 100
+  MAX_RESULTS = 20
 
   skip_before_action :authenticate_user!, only: [:update, :create_from_request]
 
