@@ -91,6 +91,7 @@ RSpec.describe Services::Report do
     it 'formats grouping by column correctly' do
       args[:group_by] = ['entity_type']
       results = report.send(:simple_stat_lookup, 'count', args)
+      expect(results[:title]).to eq('Count by Entity Type')
       expect(results[:count].length).to eq(1)
       expect(results[:count][0][:period]).to eq('All')
       expect(results[:count][0][:group]).to eq('Order')
@@ -101,6 +102,7 @@ RSpec.describe Services::Report do
       args[:group_by_period] = 'quarter'
       args[:timezone] = 'Etc/GMT+4' # EDT
       results = report.send(:simple_stat_lookup, 'count', args)
+      expect(results[:title]).to eq('Count by Quarter')
       expect(results[:count].length).to eq(4)
       expect(results[:count][0][:period]).to eq('Q1 2023')
       expect(results[:count][0][:group]).to eq('All')
@@ -121,6 +123,7 @@ RSpec.describe Services::Report do
       args[:timezone] = 'Etc/GMT+4' # EDT
       args[:group_by] = ['entity_type']
       results = report.send(:simple_stat_lookup, 'count', args)
+      expect(results[:title]).to eq('Count by Quarter and Entity Type')
       expect(results[:count].length).to eq(4)
       expect(results[:count][0][:period]).to eq('Q1 2023')
       expect(results[:count][0][:group]).to eq('Order')

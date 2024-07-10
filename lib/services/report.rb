@@ -35,30 +35,39 @@ module Services
       raise ArgumentsError, 'Invalid start_at' unless args[:start_at]
       raise ArgumentsError, 'Invalid end_at' unless args[:end_at]
       raise ArgumentsError, 'Invalid register_id' unless register = Register.find_by(id: args[:register_id])
+      period_groups_present = args[:group_by_period].present? && args[:timezone].present?
+      column_groups_present = args[:group_by].present?
 
       results = args[:user].associated_register_items
         .where(register_id: register.id)
 
-      if args[:timezone] && args[:group_by_period]
+      if period_groups_present
         results = group_by_period(results, *formatted_group_by_period_args(args))
       else
         results = results.between(args[:start_at], args[:end_at])
       end
 
-      title = stat.titleize
       # WARNING: group_by is accepted as an array, but multidimensional grouping is not yet supported
-      if args[:group_by]
+      if column_groups_present
         raise ArgumentsError, 'grouping by multiple dimensions is not yet supported' if args[:group_by].length > 1
         meta = register.meta.invert
         meta_groups = args[:group_by].map do |column|
           meta.fetch(column) { |c| raise ArgumentsError, "Invalid group_by, #{c} is not a meta-column for register" }
         end
         results = results.group(meta_groups)
-        title = "Count by Register"
       end
+      title = if period_groups_present && column_groups_present
+                "#{ stat.titleize } by #{ args[:group_by_period].titleize } and #{ args[:group_by][0].titleize }"
+              elsif period_groups_present
+                "#{ stat.titleize } by #{ args[:group_by_period].titleize }"
+              elsif column_groups_present
+                "#{ stat.titleize } by #{ args[:group_by][0].titleize }"
+              else
+                stat.titleize
+              end
 
       results = results.__send__(stat ,:amount)
-      results = format(results, args[:group_by_period].present?, args[:group_by].present?)
+      results = format(results, period_groups_present, column_groups_present)
       return { title: title, count: results }
     end
 
