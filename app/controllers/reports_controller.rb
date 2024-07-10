@@ -5,27 +5,17 @@ class ReportsController < ApplicationController
   # POST reports/item_average
   # POST reports/item_list
   def show
-    begin
-      report = Services::Report.new()
-      render json: report.__send__(params["report_name"], report_params.merge(user: current_user))
-    rescue => e
-      Rails.logger.error e
-      if e.message.in? [
-        "Unable to compare registers with different meta keys",
-        "Cannot report on multiple units in the same report",
-        "Invalid group by, not a meta key for register",
-        "Multiple groups and period groups not yet supported"
-      ]
-        render json: {error: e.message}, status: 500
-      else
-        render json: {error: "Unable to render report"}, status: 500
-      end
-    end
+    report = Services::Report.new()
+    render json: report.__send__(params["report_name"], report_params.merge(user: current_user))
+  rescue Services::Report::ArgumentsError => e
+    Rails.logger.error e
+    render json: {error: e.message}, status: :unprocessable_content
+  rescue => e
+    Rails.logger.error e
+    render json: {error: "Unable to render report"}, status: :internal_server_error
   end
 
   def report_params
-    params.permit(:start_at, :end_at, :register_ids, :group_by_period, :timezone, group_by: [])
+    params.permit(:start_at, :end_at, :register_id, :group_by_period, :timezone, group_by: [])
   end
-
-
 end

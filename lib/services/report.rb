@@ -1,5 +1,7 @@
 module Services
   class Report
+    class ArgumentsError < StandardError; end
+
     def item_count(args)
       simple_stat_lookup("count", args)
     end
@@ -13,12 +15,14 @@ module Services
     end
 
     def item_list(args)
+      raise ArgumentsError, 'Invalid start_at' unless args[:start_at]
+      raise ArgumentsError, 'Invalid end_at' unless args[:end_at]
+      raise ArgumentsError, 'Invalid register_id' unless args[:register_id]
       limit = args[:limit] || 50
 
       results = args[:user].associated_register_items
+        .where(register_id: args[:register_id])
         .between(args[:start_at], args[:end_at])
-
-      results = results.where(register_id: args[:register_ids]) if args[:register_ids]
 
       # TODO: output formatted fot TableView
       {title: "All Items", count: results.limit(limit) }
@@ -28,54 +32,61 @@ module Services
 
     def simple_stat_lookup(stat, args)
       return unless stat.in? %w(count sum average)
+      raise ArgumentsError, 'Invalid start_at' unless args[:start_at]
+      raise ArgumentsError, 'Invalid end_at' unless args[:end_at]
+      raise ArgumentsError, 'Invalid register_id' unless register = Register.find_by(id: args[:register_id])
 
       results = args[:user].associated_register_items
-      results = results.where(register_id: args[:register_ids]) if args[:register_ids]
+        .where(register_id: register.id)
+
       if args[:timezone] && args[:group_by_period]
-        results = group_by_period(results, *formattated_group_by_period_args(args))
+        results = group_by_period(results, *formatted_group_by_period_args(args))
       else
         results = results.between(args[:start_at], args[:end_at])
       end
 
+      title = stat.titleize
+      # WARNING: group_by is accepted as an array, but multidimensional grouping is not yet supported
       if args[:group_by]
-      # NOTE: We accept group_by as an array to support grouping by multiple dimensions later, but for now we only support one dimension
+        raise ArgumentsError, 'grouping by multiple dimensions is not yet supported' if args[:group_by].length > 1
+        meta = register.meta.invert
         meta_groups = args[:group_by].map do |column|
-          RegisterItem.resolved_column(column, Register.find(args[:register_ids]).meta)
+          meta.fetch(column) { |c| raise ArgumentsError, "Invalid group_by, #{c} is not a meta-column for register" }
         end
-        results = results.group(meta_groups).__send__(stat ,:amount)
-        results = collate_register_names(results) if meta_groups.include? "register_id"
-        results = format(results)
-        return { title: "Count by Register", count: results }
+        results = results.group(meta_groups)
+        title = "Count by Register"
       end
 
       results = results.__send__(stat ,:amount)
-      return {title: stat.titleize, count: format(results) }
+      results = format(results, args[:group_by_period].present?, args[:group_by].present?)
+      return { title: title, count: results }
     end
 
-    # Given an object with an array for a key like: {["Jan 2024", "b2b shipping"]=>0},
-    # OR  {"b2b shipping"=>0}
+    # Given an object with an array for a key like: {["Jan 2024", "b2b shipping"]=>0} OR {"b2b shipping"=>0}
     # returns an array of objects with string for keys: [{:period=>"Jan 2024", :group=>"b2b shipping", :value=>0}]
-    def format(results)
-      out = []
-      if ((results.is_a? String) || (results.is_a? Numeric))
-        return [{:period=>"All", :group=>"", :value=>results}]
-      end
+    def format(results, period_groups_present, column_groups_present)
+      return [{ period: "All", group: "All", value: results }] if results.is_a? Numeric
+      raise "Malformed results for report: #{results}" unless results.is_a? Hash
 
-      if results&.keys&.first&.is_a? String
-        results.each do |r|
-          out.push({
-            period: "All",
-            group: r[0],
-            value: r[1]
-          })
-        end
-        return quarterize(out)
-      end
+      # NOTE: .group() always orders the the key array for multidimensional groups by the order they were called in
+      # therefor this map implementation relies on calling group by period then group by column on results
+      # this ensures period = key[0] and column_group = key[1] in the case that results were grouped by both
+      out = results.map do |key, value|
+        period, group = if period_groups_present && column_groups_present
+                          [key[0], key[1]]
+                        elsif period_groups_present
+                          [key, 'All']
+                        elsif column_groups_present
+                          ['All', key]
+                        else
+                          ['All', 'All'] # this shouldn't be possible
+                        end
 
-      raise "Multiple groups and period groups not yet supported" if results&.keys&.first&.is_a? Array and results.keys.first.length > 2
-      results.each do |k| out.push(
-          {:period => k[0][0], :group => k[0][1], :value => k[1]}
-        )
+        {
+          period: period,
+          group: group,
+          value: value
+        }
       end
       return quarterize(out)
     end
@@ -95,7 +106,7 @@ module Services
       timezone ? Time.find_zone(timezone).parse(time_string) : time_string
     end
 
-    def formattated_group_by_period_args(args)
+    def formatted_group_by_period_args(args)
       [
         args[:group_by_period],
         time_from_string(args[:start_at], args[:timezone]),
@@ -111,17 +122,7 @@ module Services
       return results.group_by_month(:originated_at, time_zone: timezone, format: "%b %Y", range: start_at..end_at) if period == "month"
       return results.group_by_quarter(:originated_at, time_zone: timezone, format: "Q%b %Y", range: start_at..end_at) if period == "quarter"
       return results.group_by_year(:originated_at, time_zone: timezone, format: "%Y", range: start_at..end_at) if period == "year"
-      raise "invalid group by period: #{period}"
-    end
-
-    # Given {1=>404, 3=>1, 2=>1} with keys being register_ids, replace the ids with register.name
-    def collate_register_names(results)
-      out = {}
-      registers = Register.where(id: results.keys).pluck(:id, :name)
-      results.each do |k,v|
-        out[registers.find{|r| r[0] == k}[1]] = v
-      end
-      return out
+      raise ArgumentsError, "Invalid group by period: #{period}"
     end
   end
 end
