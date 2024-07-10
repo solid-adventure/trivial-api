@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_01_191304) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_10_205557) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -288,10 +288,24 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_01_191304) do
   add_foreign_key "register_items", "registers"
 
   create_view "activity_entry_payload_keys", materialized: true, sql_definition: <<-SQL
-      SELECT DISTINCT activity_entries.app_id,
-      jsonb_object_keys(activity_entries.payload) AS keys
-     FROM activity_entries
-    ORDER BY (jsonb_object_keys(activity_entries.payload));
+      WITH entry_data AS (
+           SELECT activity_entries.app_id,
+              jsonb_object_keys(activity_entries.payload) AS primary_key,
+              activity_entries.payload
+             FROM activity_entries
+          ), extracted_key_data AS (
+           SELECT entry_data.app_id,
+              entry_data.primary_key,
+              secondary_key_data.secondary_key
+             FROM (entry_data
+               LEFT JOIN LATERAL ( SELECT jsonb_object_keys((entry_data.payload -> entry_data.primary_key)) AS secondary_key
+                    WHERE (jsonb_typeof((entry_data.payload -> entry_data.primary_key)) = 'object'::text)) secondary_key_data ON (true))
+          )
+   SELECT DISTINCT extracted_key_data.app_id,
+      extracted_key_data.primary_key,
+      extracted_key_data.secondary_key
+     FROM extracted_key_data
+    ORDER BY extracted_key_data.primary_key, extracted_key_data.secondary_key;
   SQL
   add_index "activity_entry_payload_keys", ["app_id"], name: "index_activity_entry_payload_keys_on_app_id"
 
