@@ -90,13 +90,30 @@ class ActivityEntriesController < ApplicationController
     raise CanCan::AccessDenied unless current_app = current_user.associated_apps.find_by(name: app_name)
     raise 'col query string required for keys query' unless params[:col]
 
-    keys = if params[:path]
-             ActivityEntry.get_keys_from_path(params[:col], params[:path], current_app.activity_entries)
-           else
-             materialized_key_view_for(params[:col])
-               .where(app_id: current_app.id)
-               .pluck(:keys)
-           end
+    if view_version(params[:col]) == 1
+      keys = if params[:path]
+               ActivityEntry.get_keys_from_path(params[:col], params[:path], current_app.activity_entries)
+             else
+               materialized_key_view_for(params[:col])
+                 .where(app_id: current_app.id)
+                 .pluck(:keys)
+             end
+    else
+      primary_key = params[:path] ? params[:path].gsub(/[{}]/, '') : nil
+      keys = if primary_key
+               materialized_key_view_for(params[:col])
+                 .where(app_id: current_app.id)
+                 .where(primary_key: primary_key)
+                 .where('secondary_key IS NOT NULL')
+                 .pluck(:secondary_key)
+             else
+               materialized_key_view_for(params[:col])
+                 .where(app_id: current_app.id)
+                 .distinct
+                 .pluck(:primary_key)
+             end
+    end
+
 
     render json: keys.to_json, status: :ok
   rescue StandardError => exception
@@ -155,5 +172,14 @@ class ActivityEntriesController < ApplicationController
 
   def materialized_key_view_for(col)
     MATERIALIZED_KEY_VIEWS[col]
+  end
+
+  def view_version(col)
+    view = materialized_key_view_for(col)
+    if view.column_names.include?('keys')
+      return 1
+    else
+      return 2
+    end
   end
 end
