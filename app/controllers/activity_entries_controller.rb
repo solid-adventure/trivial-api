@@ -90,6 +90,7 @@ class ActivityEntriesController < ApplicationController
     raise CanCan::AccessDenied unless current_app = current_user.associated_apps.find_by(name: app_name)
     raise 'col query string required for keys query' unless params[:col]
 
+    # delete the version paths after successfully migrating activity_entry_payload_keys v2 in prod
     if view_version(params[:col]) == 1
       keys = if params[:path]
                ActivityEntry.get_keys_from_path(params[:col], params[:path], current_app.activity_entries)
@@ -98,7 +99,7 @@ class ActivityEntriesController < ApplicationController
                  .where(app_id: current_app.id)
                  .pluck(:keys)
              end
-    else
+    else # this is the new version to use after successful migration
       primary_key = params[:path] ? params[:path].gsub(/[{}]/, '') : nil
       keys = if primary_key
                materialized_key_view_for(params[:col])
@@ -113,7 +114,6 @@ class ActivityEntriesController < ApplicationController
                  .pluck(:primary_key)
              end
     end
-
 
     render json: keys.to_json, status: :ok
   rescue StandardError => exception
@@ -174,8 +174,10 @@ class ActivityEntriesController < ApplicationController
     MATERIALIZED_KEY_VIEWS[col]
   end
 
+  # this will be deleted when the activity_entry_payload_key v2 is rolled out successfully in prod
   def view_version(col)
     view = materialized_key_view_for(col)
+    view.reset_column_information # this ensures fresh column info after a migration
     if view.column_names.include?('keys')
       return 1
     else
