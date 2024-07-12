@@ -7,7 +7,7 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-
+=begin
 admin = User.new
 admin.name = 'admin'
 admin.email = 'admin@email.com'
@@ -15,7 +15,6 @@ admin.role = 'admin'
 admin.password = '@Password123'
 admin.approval = 'approved'
 admin.save!
-user = User.last
 
 income_accounts = %w(carrier_fees storage receiving shipping VAS)
 warehouses = %w(san_francisco los_angeles new_york paris london tokyo)
@@ -53,4 +52,50 @@ registers = (1..3).map { |i|
   item[meta["warehouse"]] = warehouses.sample
   item[meta["channel"]] = channels.sample
   item.save!
+end
+=end
+
+app = App.last
+owner = app.owner
+
+size = 50
+alphabet = ('a'...'z').to_a
+k = Array.new(size) { 8.times.map { alphabet.sample }.join }
+v = Array.new(size) { SecureRandom.hex(4) }
+
+event_types = %i[
+                  item invoice project shipnotice order shipnotice_item consumer_return
+                  void_item void_invoice void_shipnotice void_order
+                  void_project void_shipnotice_item void_consumer_return random
+                ]
+statuses = Array.new(99, "200") + [ "500" ]
+
+10.times do |i|
+  entry_array = []
+  300000.times do |j|
+    random_hash = 16.times
+      .map { k.sample }
+      .zip( 16.times.map { v.sample } )
+      .to_h
+
+    payload = {
+                event_name: "generated_event #{ (j + 1) * (i + 1) }",
+                key: "generated_key #{ (j + 1) * (i + 1) }",
+                event_types.sample => random_hash
+              }
+
+    entry_array.push(
+      {
+        activity_type: "generated_activity",
+        app_id: app.id,
+        owner_id: owner.id,
+        owner_type: "Organization",
+        payload: payload,
+        diagnostics: {},
+        status: statuses.sample,
+        duration_ms: rand(2000...60000)
+      }
+    )
+  end
+  ActivityEntry.insert_all(entry_array)
 end
