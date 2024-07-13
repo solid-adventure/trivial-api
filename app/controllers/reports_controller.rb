@@ -7,7 +7,7 @@ class ReportsController < ApplicationController
   def show
     report = Services::Report.new()
     render json: report.__send__(params["report_name"], report_params.merge(user: current_user))
-  rescue Services::Report::ArgumentsError => e
+  rescue ArgumentError => e
     Rails.logger.error e
     render json: {error: e.message}, status: :unprocessable_content
   rescue => e
