@@ -4,15 +4,17 @@ namespace :tasks do
   # rake tasks:send_new_period_started_events
   desc "Create Kafka events when new billing period is started"
   task :send_new_period_started_events => :environment do
-    puts "Starting new period task"
+    puts "Producing new period events into kafka topic: #{Services::Kafka.topic}"
   # key = object_verb.customerId
     customer_ids = Tag.where(taggable_type: "App", context: "customer_id").pluck(:name).uniq
     customer_ids.each do |customer_id|
       key = "new-period-started.#{customer_id}"
+      period_start = "#{Date.today.beginning_of_day.utc.iso8601 }" # Midnight UTC
+      puts "Sending new period started event. period_start: #{period_start}, customer_id: #{customer_id}"
       payload = {
         "key": key,
         "name": "New Period Started",
-        "period_start": "#{Date.today.beginning_of_day.utc.iso8601 }" # Midnight UTC
+        "period_start": period_start,
       }
       KAFKA.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: key)
     end
