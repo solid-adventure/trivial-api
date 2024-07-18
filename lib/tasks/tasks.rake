@@ -14,7 +14,9 @@ namespace :tasks do
       payload = {
         "key": key,
         "name": "period.started",
-        "period_start": period_start,
+        "period": {
+          started_at: period_start
+        },
       }
       KAFKA.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: key)
     end

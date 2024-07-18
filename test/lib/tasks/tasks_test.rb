@@ -24,12 +24,12 @@ class RakeTaskTest < ActiveSupport::TestCase
       assert_equal Tag.where(taggable_type: "App", context: "customer_id").pluck(:name), ["1","2"]
 
       # Run the rake task and ensure the producer now has the two messages the task should have created
-      mock_enviroment(partial_env_hash:{"KAFKA_TOPIC"=>"events"}) do
+      mock_enviroment(partial_env_hash:{"KAFKA_TOPIC"=>"billing_events"}) do
         Rake::Task["tasks:send_new_period_started_events"].invoke
         assert_equal @producer.client.messages.count, 2
 
         payloads = @producer.client.messages.map {|m| JSON.parse m[:payload] }
-        assert_equal  payloads.map { |p| p["name"] }.uniq, ["New Period Started"]
+        assert_equal  payloads.map { |p| p["name"] }.uniq, ["period.started"]
       end
   end
 
