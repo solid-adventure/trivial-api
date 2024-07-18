@@ -8,12 +8,12 @@ namespace :tasks do
   # key = object_verb.customerId
     customer_ids = Tag.where(taggable_type: "App", context: "customer_id").pluck(:name).uniq
     customer_ids.each do |customer_id|
-      key = "new-period-started.#{customer_id}"
+      key = "period.started.#{customer_id}"
       period_start = "#{Date.today.beginning_of_day.utc.iso8601 }" # Midnight UTC
       puts "Sending new period started event. period_start: #{period_start}, customer_id: #{customer_id}"
       payload = {
         "key": key,
-        "name": "New Period Started",
+        "name": "period.started",
         "period_start": period_start,
       }
       KAFKA.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: key)
