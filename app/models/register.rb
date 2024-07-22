@@ -19,12 +19,36 @@ class Register < ApplicationRecord
   has_many :permitted_users, through: :permissions, source: :user
 
   has_many :register_items, dependent: :destroy
+  has_many :charts, dependent: :destroy, inverse_of: :register
 
-  before_create :set_defaults
+  before_validation :set_defaults
+  after_create :create_gross_revenue_chart
 
-  def set_defaults
-    self.sample_type ||= 'increment'
-    self.units ||= 'units'
-  end
+  private
+    def set_defaults
+      self.sample_type ||= 'increment'
+      self.units ||= 'units'
+    end
 
+    def create_gross_revenue_chart
+      return unless owner_type == 'Organization'
+      Chart.create!(
+        {
+          dashboard_id: owner.owned_dashboards.first.id,
+          register_id: id,
+          name: "Gross Revenue",
+          report_period: 'month',
+          meta0: meta.key?('meta0') ? false : nil,
+          meta1: meta.key?('meta1') ? false : nil,
+          meta2: meta.key?('meta2') ? false : nil,
+          meta3: meta.key?('meta3') ? false : nil,
+          meta4: meta.key?('meta4') ? false : nil,
+          meta5: meta.key?('meta5') ? false : nil,
+          meta6: meta.key?('meta6') ? false : nil,
+          meta7: meta.key?('meta7') ? false : nil,
+          meta8: meta.key?('meta8') ? false : nil,
+          meta9: meta.key?('meta9') ? false : nil,
+        }
+      )
+    end
 end
