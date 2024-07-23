@@ -19,15 +19,17 @@ jobs:
   build:
     needs:
       - classify
-    uses: whiplashmerch/workflows/.github/workflows/build-vue-image-v2.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_SERVICE_KEY }}
       service_name: ${{ vars.TRIVIAL_SERVICE_NAME }}
       ecr_tags: ${{ needs.classify.outputs.all_tags }}
-      version: ${{ needs.classify.outputs.primary_tag }}
     secrets:
-      npm_token: ${{ secrets.NPM_TOKEN }}
       gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
+      BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
   infra:
     if: contains(github.event.pull_request.labels.*.name, 'pr-env')
