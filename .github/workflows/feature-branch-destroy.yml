@@ -1,0 +1,18 @@
+name: Destroy Environment
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+    types: [ closed ]
+
+jobs:
+  infra:
+    uses: whiplashmerch/workflows/.github/workflows/pr-env-destroy.yml@main
+    with:
+      ecr_registry: ${{ vars.ECR_REGISTRY }}
+      ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
+      service_key: ${{ vars.TRIVIAL_API_SERVICE_KEY }}
+      service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
+    secrets: inherit
