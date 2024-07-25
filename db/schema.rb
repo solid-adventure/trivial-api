@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_10_205557) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_16_212314) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -107,6 +107,30 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_10_205557) do
     t.index ["user_id", "user_type"], name: "user_index"
   end
 
+  create_table "charts", force: :cascade do |t|
+    t.bigint "dashboard_id", null: false
+    t.bigint "register_id", null: false
+    t.string "name", null: false
+    t.string "chart_type", default: "gross_revenue", null: false
+    t.string "color_scheme", default: "default", null: false
+    t.string "report_period", null: false
+    t.boolean "meta0"
+    t.boolean "meta1"
+    t.boolean "meta2"
+    t.boolean "meta3"
+    t.boolean "meta4"
+    t.boolean "meta5"
+    t.boolean "meta6"
+    t.boolean "meta7"
+    t.boolean "meta8"
+    t.boolean "meta9"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chart_type"], name: "index_charts_on_chart_type"
+    t.index ["dashboard_id"], name: "index_charts_on_dashboard_id"
+    t.index ["register_id"], name: "index_charts_on_register_id"
+  end
+
   create_table "credential_sets", force: :cascade do |t|
     t.uuid "external_id", null: false
     t.string "name", null: false
@@ -132,6 +156,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_10_205557) do
     t.bigint "user_id", null: false
     t.index ["customer_id"], name: "index_customers_users_on_customer_id"
     t.index ["user_id"], name: "index_customers_users_on_user_id"
+  end
+
+  create_table "dashboards", force: :cascade do |t|
+    t.string "owner_type", null: false
+    t.bigint "owner_id", null: false
+    t.string "name", null: false
+    t.string "dashboard_type", default: "default", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id"], name: "index_dashboards_on_owner"
   end
 
   create_table "manifest_drafts", force: :cascade do |t|
@@ -279,6 +313,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_10_205557) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_entries", "apps"
   add_foreign_key "activity_entries", "register_items"
+  add_foreign_key "charts", "dashboards"
+  add_foreign_key "charts", "registers"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifests", "apps", column: "internal_app_id"

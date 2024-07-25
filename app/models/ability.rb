@@ -115,7 +115,7 @@ class Ability
     can :revoke, Manifest do |manifest|
       Permission.find_by(permissible: manifest, user: user, permit: REVOKE_BIT)
     end
-    
+
     # ManifestDraft Permission Blocks
     can [:manage, :grant, :revoke, :transfer], ManifestDraft do |draft|
       draft.admin?(user)
@@ -183,6 +183,46 @@ class Ability
     end
     can :revoke, RegisterItem do |item|
       Permission.find_by(permissible: item, user: user, permit: REVOKE_BIT)
+    end
+
+    # Dashboard Permission Blocks
+    can [:read], Dashboard do |dashboard|
+      dashboard.member?(user)
+    end
+    can :read, Dashboard do |dashboard|
+      Permission.find_by(permissible: dashboard, user: user, permit: READ_BIT)
+    end
+    can :update, Dashboard do |dashboard|
+      Permission.find_by(permissible: dashboard, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, Dashboard do |dashboard|
+      Permission.find_by(permissible: dashboard, user: user, permit: DELETE_BIT)
+    end
+    can :grant, Dashboard do |dashboard|
+      Permission.find_by(permissible: dashboard, user: user, permit: GRANT_BIT)
+    end
+    can :revoke, Dashboard do |dashboard|
+      Permission.find_by(permissible: dashboard, user: user, permit: REVOKE_BIT)
+    end
+    can [:manage, :grant, :revoke, :transfer], Dashboard do |dashboard|
+      dashboard.admin?(user)
+    end
+
+    # Chart Permission Blocks
+    can [:read], Chart do |chart|
+      chart.dashboard.admin?(user)
+    end
+    can :read, Chart do |chart|
+      Permission.find_by(permissible: chart.dashboard, user: user, permit: READ_BIT)
+    end
+    can :update, Chart do |chart|
+      Permission.find_by(permissible: chart.dashboard, user: user, permit: UPDATE_BIT)
+    end
+    can :destroy, Chart do |chart|
+      Permission.find_by(permissible: chart.dashboard, user: user, permit: DELETE_BIT)
+    end
+    can [:manage, :grant, :revoke, :transfer], Chart do |chart|
+      chart.dashboard.admin?(user)
     end
   end
 end

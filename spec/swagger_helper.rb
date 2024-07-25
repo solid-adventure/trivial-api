@@ -59,6 +59,25 @@ RSpec.configure do |config|
             scheme: :bearer,
             bearerFormat: 'JWT'
           }
+        },
+        schemas: {
+          chart_schema: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              dashboard_id: { type: :integer },
+              register_id: { type: :integer },
+              name: { type: :string },
+              chart_type: { type: :string },
+              color_scheme: { type: :string },
+              report_period: { type: :string },
+              report_groups: {
+                type: :object,
+                additionalProperties: { type: :boolean }
+              }
+            },
+            required: %i[id dashboard_id register_id name chart_type color_scheme report_period report_groups]
+          }
         }
       }
     }
