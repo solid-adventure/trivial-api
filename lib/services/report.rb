@@ -12,20 +12,6 @@ module Services
       simple_stat_lookup("average", args)
     end
 
-    def item_list(args)
-      raise ArgumentError, 'Invalid start_at' unless args[:start_at]
-      raise ArgumentError, 'Invalid end_at' unless args[:end_at]
-      raise ArgumentError, 'Invalid register_id' unless args[:register_id]
-      limit = args[:limit] || 50
-
-      results = args[:user].associated_register_items
-        .where(register_id: args[:register_id])
-        .between(args[:start_at], args[:end_at])
-
-      # TODO: output formatted fot TableView
-      {title: "All Items", count: results.limit(limit) }
-    end
-
     private
 
     def simple_stat_lookup(stat, args)
