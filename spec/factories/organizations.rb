@@ -9,7 +9,8 @@ FactoryBot.define do
     # Organizations should always have at least 1 user with 'admin'
     transient do
       members_count { 0 } # Adjust the number of additional members as needed
-      admin { User.first }
+      admin {}
+      delete_callback_objects {}
     end
 
     after(:create) do |organization, evaluator|
@@ -25,6 +26,11 @@ FactoryBot.define do
       evaluator.members_count.times do
         user = create(:user)
         create(:org_role, user: user, organization: organization, role: 'member')
+      end
+
+      if evaluator.delete_callback_objects
+        organization.owned_registers.first.destroy
+        organization.owned_dashboards.first.destroy
       end
     end 
   end

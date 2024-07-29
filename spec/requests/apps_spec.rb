@@ -30,7 +30,7 @@ describe 'Apps API' do
   path '/apps' do
     get 'List the current user\'s applications' do
       tags 'Apps'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      security [ { access_token: [], client: [], uid: [] } ]
       produces 'application/json'
 
       response '200', 'App listing' do
@@ -53,7 +53,7 @@ describe 'Apps API' do
 
     post 'Create a new application' do
       tags 'Apps'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      security [ { access_token: [], client: [], uid: [] } ]
       consumes 'application/json'
       produces 'application/json'
 
@@ -91,7 +91,7 @@ describe 'Apps API' do
   path '/apps/{appId}' do
     get 'Retrieve details for the app with the given id (name field)' do
       tags 'Apps'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      security [ { access_token: [], client: [], uid: [] } ]
       produces 'application/json'
       parameter name: "appId", in: :path, type: :string
 
@@ -121,7 +121,7 @@ describe 'Apps API' do
 
     put 'Update the app' do
       tags 'Apps'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      security [ { access_token: [], client: [], uid: [] } ]
       consumes 'application/json'
       produces 'application/json'
       parameter name: "appId", in: :path, type: :string
@@ -163,7 +163,7 @@ describe 'Apps API' do
 
     delete 'Delete the app' do
       tags 'Apps'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      security [ { access_token: [], client: [], uid: [] } ]
       parameter name: "appId", in: :path, type: :string
 
       let(:appId) { user_app.name }
@@ -187,7 +187,7 @@ describe 'Apps API' do
   path '/apps/name_suggestion' do
     get 'Retrieve a suggested descriptive name for a new app' do
       tags 'Apps'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      security [ { access_token: [], client: [], uid: [] } ]
       produces 'application/json'
 
       response '200', 'New name suggestion' do

@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :customers
   has_many :org_roles, :dependent => :destroy
   has_many :organizations, through: :org_roles
-  
+
   has_many :owned_apps, class_name: 'App', as: :owner
   has_many :owned_manifests, class_name: 'Manifest', as: :owner
   has_many :owned_manifest_drafts, class_name: 'ManifestDraft', as: :owner
@@ -22,7 +22,8 @@ class User < ActiveRecord::Base
   has_many :owned_credential_sets, class_name: 'CredentialSet', as: :owner
   has_many :owned_registers, class_name: 'Register', as: :owner
   has_many :owned_register_items, class_name: 'RegisterItem', as: :owner
-  
+  has_many :owned_dashboards, class_name: 'Dashboard', as: :owner
+
   has_many :permissions
   has_many :permitted_apps, -> { distinct }, through: :permissions, source: :permissible, source_type: 'App'
   has_many :permitted_manifests, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Manifest'
@@ -30,6 +31,7 @@ class User < ActiveRecord::Base
   has_many :permitted_credential_sets, -> { distinct }, through: :permissions, source: :permissible, source_type: 'CredentialSet'
   has_many :permitted_registers, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Register'
   has_many :permitted_register_items, -> { distinct }, through: :permissions, source: :permissible, source_type: 'RegisterItem'
+  has_many :permitted_dashboards, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Dashboard'
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]
@@ -111,6 +113,10 @@ class User < ActiveRecord::Base
     associated_resources('register_items')
   end
 
+  def associated_dashboards
+    associated_resources('dashboards')
+  end
+
   private
 
   def associated_resources(resource_type, org_roles=['admin', 'member'])
@@ -127,7 +133,7 @@ class User < ActiveRecord::Base
 
   def associated_resources_via_app(resource_type, org_roles=['admin', 'member'])
     model_class = resource_type.classify.constantize
-    
+
     return model_class.all if self.role == 'client'
 
     orgs = self.organizations.where(org_roles: { role: org_roles })

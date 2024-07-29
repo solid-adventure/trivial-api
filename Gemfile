@@ -27,6 +27,7 @@ gem 'bootsnap', require: false
 gem 'cancancan'
 gem 'faraday' # networking library
 
+gem 'groupdate'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 gem 'rack-cors'
 

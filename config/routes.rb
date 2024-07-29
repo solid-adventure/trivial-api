@@ -94,6 +94,10 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :dashboards do
+    resources :charts
+  end
+
   post 'reports/:report_name', to: 'reports#show'
 
   get 'credential_sets', to: 'credential_sets#index'
