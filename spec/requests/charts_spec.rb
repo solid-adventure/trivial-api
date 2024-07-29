@@ -95,9 +95,9 @@ describe "Charts API", type: :request do
         {
           register_id: register.id,
           name: "Test Chart",
-          chart_type: chart_type,
+          chart_type: "test",
           color_scheme: "default",
-          report_period: "year",
+          report_period: report_period,
           report_groups: {
             customer_id: false,
             income_account: true,
@@ -106,7 +106,7 @@ describe "Charts API", type: :request do
           }
         }
       }
-      let(:chart_type) { 'test' }
+      let(:report_period) { 'year' }
 
       response '201', 'Create Dashboard Chart' do
         schema type: { '$ref' => '#/components/schemas/chart_schema' }
@@ -121,7 +121,7 @@ describe "Charts API", type: :request do
       end
 
       response '422', 'Invalid Chart Params' do
-        let(:chart_type) { 'gross_revenue' }
+        let(:report_period) { 'millisecond' }
         run_test!
       end
 

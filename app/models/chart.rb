@@ -8,15 +8,11 @@ class Chart < ApplicationRecord
   validates :name,
     presence: true,
     uniqueness: {
-      scope: %i[dashboard],
-      message: "%{value} already exists as a chart name for this dashboard"
+      scope: %i[dashboard register],
+      message: "%{value} already exists as a chart name for this dashboard and register"
     }
   validates :chart_type,
-    presence: true,
-    uniqueness: {
-      scope: %i[dashboard register],
-      message: "%{value} already exists as a chart type for this dashboard and register"
-    }
+    presence: true
   validates :color_scheme,
     presence: true
   validates :report_period,
