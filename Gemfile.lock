@@ -161,12 +161,19 @@ GEM
       addressable (>= 2.8)
     jsonapi-renderer (0.2.2)
     jwt (2.7.1)
+    karafka (2.3.4)
+      karafka-core (>= 2.3.0, < 2.4.0)
+      waterdrop (>= 2.6.12, < 3.0.0)
+      zeitwerk (~> 2.3)
     karafka-core (2.3.0)
       karafka-rdkafka (>= 0.14.8, < 0.15.0)
     karafka-rdkafka (0.14.10)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
+    karafka-testing (2.3.3)
+      karafka (>= 2.3.0, < 2.4.0)
+      waterdrop (>= 2.6.12)
     libdatadog (7.0.0.1.0)
     libdatadog (7.0.0.1.0-x86_64-linux)
     libddwaf (1.14.0.0.0)
@@ -344,6 +351,7 @@ DEPENDENCIES
   faraday
   groupdate
   jwt (~> 2.3)
+  karafka-testing
   listen (~> 3.2)
   net-imap
   net-pop
