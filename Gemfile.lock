@@ -148,12 +148,19 @@ GEM
       addressable (>= 2.8)
     jsonapi-renderer (0.2.2)
     jwt (2.7.1)
+    karafka (2.3.4)
+      karafka-core (>= 2.3.0, < 2.4.0)
+      waterdrop (>= 2.6.12, < 3.0.0)
+      zeitwerk (~> 2.3)
     karafka-core (2.3.0)
       karafka-rdkafka (>= 0.14.8, < 0.15.0)
     karafka-rdkafka (0.14.10)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
+    karafka-testing (2.3.3)
+      karafka (>= 2.3.0, < 2.4.0)
+      waterdrop (>= 2.6.12)
     listen (3.8.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -318,6 +325,7 @@ DEPENDENCIES
   factory_bot_rails
   groupdate
   jwt (~> 2.3)
+  karafka-testing
   listen (~> 3.2)
   net-imap
   net-pop
