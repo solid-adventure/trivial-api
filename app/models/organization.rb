@@ -10,7 +10,7 @@ class Organization < ApplicationRecord
   has_many :owned_register_items, class_name: 'RegisterItem', as: :owner
   has_many :owned_dashboards, class_name: 'Dashboard', as: :owner, inverse_of: :owner
 
-  has_many :org_roles, dependent: :delete_all
+  has_many :org_roles, dependent: :destroy
   has_many :users, through: :org_roles
 
   validates :billing_email, presence: true
@@ -18,6 +18,8 @@ class Organization < ApplicationRecord
 
   after_create :create_default_dashboard
   after_create :create_default_register
+
+  default_scope { order(created_at: :asc) }
 
   private
     def create_default_register
