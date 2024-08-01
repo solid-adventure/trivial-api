@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_16_212314) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_01_001645) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -111,7 +111,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_16_212314) do
     t.bigint "dashboard_id", null: false
     t.bigint "register_id", null: false
     t.string "name", null: false
-    t.string "chart_type", default: "gross_revenue", null: false
+    t.string "chart_type", default: "table", null: false
     t.string "color_scheme", default: "default", null: false
     t.string "report_period", null: false
     t.boolean "meta0"
