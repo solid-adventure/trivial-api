@@ -1,5 +1,5 @@
 class OrganizationsController < ApplicationController
-  before_action :set_organization, only: %i[ show update destroy ]
+  before_action :set_organization, only: %i[ show update destroy delete_org_role ]
 
   # GET /organizations
   def index
@@ -42,6 +42,19 @@ class OrganizationsController < ApplicationController
       render status: :no_content
     else
       render json: @organization.errors, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /organizations/1/delete_org_role
+  def delete_org_role
+    user = User.find(params[:user_id])
+    @org_role = OrgRole.find_by!(organization: @organization, user: user)
+
+    if can?(:revoke, @organization) || can?(:revoke, @org_role)
+      @org_role.destroy
+      render json: { message: 'Delete OK' }, status: :no_content
+    else
+      render json: { error: "Unauthorized" }, status: :unauthorized
     end
   end
 
