@@ -15,11 +15,15 @@ describe 'Organizations API' do
         id: { type: :integer },
         name: { type: :string },
         billing_email: { type: :string },
-        org_role: {
-          type: :object,
-          properties: {
-            user_id: { type: :string },
-            role: { type: :string }
+        dashboards: {
+          type: :array,
+          items: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              name: { type: :string }
+            },
+            required: %w[ id name ]
           }
         },
         users: {
@@ -29,12 +33,14 @@ describe 'Organizations API' do
             properties: {
               id: { type: :integer },
               name: { type: :string },
-              email: { type: :string }
-            }
+              email: { type: :string },
+              roles: { type: :string }
+            },
+            required: %w[ id name email roles ]
           }
         }
       },
-      required: %w(id name billing_email)
+      required: %w[ id name billing_email dashboards ]
     }
   end
 
@@ -64,7 +70,8 @@ describe 'Organizations API' do
         end
       end
 
-      response '204', 'User has no associated Organizations' do
+      response '200', 'User has no associated Organizations' do
+        schema type: :array, items: organization_schema
         before do
           OrgRole.where(user: @admin).delete_all
         end
@@ -95,7 +102,7 @@ describe 'Organizations API' do
       let(:name) { 'New Organization' }
       let(:billing_email) { 'org@example.com' }
       let(:organization) { { name: name, billing_email: billing_email } }
-      
+
       response '201', 'Create Organization' do
         schema type: :organization_schema
 
@@ -173,7 +180,7 @@ describe 'Organizations API' do
       security [ { access_token: [], client: [], uid: [], token_type: [] } ]
       consumes 'application/json'
       produces 'organization/json'
-      
+
       parameter name: :organization, in: :body, schema: {
         type: :object,
         properties: { 
@@ -184,7 +191,7 @@ describe 'Organizations API' do
 
       let(:name) { 'Updated Organization Name' }
       let(:organization) { { name: name } }
-      
+
       response '200', 'Update Organization' do
         schema type: :organization_schema
 
@@ -250,208 +257,6 @@ describe 'Organizations API' do
 
       response '401', 'Invalid credentials' do
         let('access-token') { 'invalid-token' }
-        run_test!
-      end
-    end
-  end
-
-  path '/organizations/{id}/create_org_role' do
-    parameter name: 'id', in: :path, type: :integer
-    let(:id) { @orgs.first.id }
-
-    post 'Create Organization Role' do
-      tags 'Organizations'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
-      consumes 'application/json'
-      produces 'organization/json'
-
-      parameter name: :organization, in: :body, schema: {
-        type: :object,
-        properties: { 
-          user_id: { type: :integer },
-          role: { type: :string }
-        }
-      }
-
-      let(:user_id) { @member.id }
-      let(:role) { 'member' }
-      let(:organization) { { user_id: user_id, role: role } }
-
-      response '201', 'Organization Role created' do
-        schema type: :organization_schema
-        run_test! do
-          data = JSON.parse(response.body)
-          org_role = @member.org_roles.find_by(organization: @orgs.first)
-          expect(org_role.role).to eq(role)
-        end
-      end
-
-      response '404', 'No Organization Found' do
-        let(:id) { Organization.last.id + 999 }
-        run_test!
-      end
-
-      response '404', 'No User Found' do
-        let(:user_id) { User.last.id + 999 }
-        run_test!
-      end
-
-      response '401', 'User missing permissions, no role' do
-        let(:id) { @test_org.id }
-        run_test!
-      end
-
-      response '401', 'User missing permissions, not admin' do
-        before do
-          OrgRole
-            .find_by(user: @admin, organization: @orgs.first)
-            .update_column(:role, 'member')
-        end
-        run_test!
-      end
-
-      response '422', 'Unprocessable Entity' do
-        let(:role) { 'wizard' }
-        run_test!
-      end
-    end
-  end
-
-  path '/organizations/{id}/update_org_role' do
-    parameter name: 'id', in: :path, type: :integer
-    let(:id) { @orgs.first.id }
-
-    put 'Update Organization Role' do
-      tags 'Organizations'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
-      consumes 'application/json'
-      produces 'organization/json'
-
-      parameter name: :organization, in: :body, schema: {
-        type: :object,
-        properties: { 
-          user_id: { type: :integer },
-          role: { type: :string }
-        }
-      }
-
-      before do 
-        OrgRole.create(user: @member, organization: @orgs.first, role: 'member')
-      end
-
-      let(:user_id) { @member.id }
-      let(:role) { 'admin' }
-      let(:organization) { { user_id: user_id, role: role } }
-
-      response '200', 'Organization Role updated' do
-        schema type: :organization_schema
-        
-        run_test! do
-          data = JSON.parse(response.body)
-          org_role = @member.org_roles.find_by(organization: @orgs.first)
-          expect(org_role.role).to eq(role)
-        end
-      end
-
-      response '404', 'No Organization Found' do
-        let(:id) { Organization.last.id + 999 }
-        run_test!
-      end
-
-      response '404', 'No User Found' do
-        let(:user_id) { User.last.id + 999 }
-        run_test!
-      end
-
-      response '404', 'No OrgRole Found' do
-        before do
-          @member.org_roles.delete_all
-        end
-        run_test!
-      end
-
-      response '401', 'User missing permissions, no role' do
-        before do
-          @admin.org_roles.delete_all
-        end
-        run_test!
-      end
-
-      response '401', 'User missing permissions, not admin' do
-        before do
-          OrgRole
-            .find_by(user: @admin, organization: @orgs.first)
-            .update_column(:role, 'member')
-        end
-        run_test!
-      end
-
-      response '422', 'Unprocessable Entity' do
-        let(:role) { 'wizard' }
-        run_test!
-      end
-    end
-  end
-
-  path '/organizations/{id}/delete_org_role' do
-    parameter name: 'id', in: :path, type: :integer
-    let(:id) { @orgs.first.id }
-
-    delete 'Delete Organization Role' do
-      tags 'Organizations'
-      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
-      consumes 'application/json'
-      produces 'organization/json'
-
-      parameter name: :organization, in: :body, schema: {
-        type: :object,
-        properties: { 
-          user_id: { type: :integer },
-        }
-      }
-      before do 
-        OrgRole.create(user: @member, organization: @orgs.first, role: 'member')
-      end
-
-      let(:user_id) { @member.id }
-      let(:organization) { { user_id: user_id } }
-
-      response '204', 'Organization Role deleted' do
-        run_test! do 
-          expect(@orgs.first.reload.org_roles.count).to eq(1)
-        end
-      end
-      
-      response '404', 'No Organization Found' do
-        let(:id) { Organization.last.id + 999 }
-        run_test!
-      end
-
-      response '404', 'No User Found' do
-        let(:user_id) { User.last.id + 999 }
-        run_test!
-      end
-
-      response '404', 'No OrgRole Found' do
-        before do
-          @member.org_roles.delete_all
-        end
-        run_test!
-      end
-
-      response '401', 'User missing permissions, no role' do
-        before do
-          @admin.org_roles.delete_all
-        end
-        run_test!
-      end
-
-      response '401', 'User missing permissions, not admin' do
-        before do
-          OrgRole
-            .find_by(user: @admin, organization: @orgs.first)
-            .update_column(:role, 'member')
-        end
         run_test!
       end
     end
