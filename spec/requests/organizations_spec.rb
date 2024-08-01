@@ -261,4 +261,68 @@ describe 'Organizations API' do
       end
     end
   end
+
+  path '/organizations/{id}/delete_org_role' do
+    parameter name: 'id', in: :path, type: :integer
+    let(:id) { @orgs.first.id }
+
+    delete 'Delete Organization Role' do
+      tags 'Organizations'
+      security [ { access_token: [], client: [], uid: [], token_type: [] } ]
+      consumes 'application/json'
+      produces 'organization/json'
+
+      parameter name: :organization, in: :body, schema: {
+        type: :object,
+        properties: {
+          user_id: { type: :integer },
+        }
+      }
+      before do
+        OrgRole.create(user: @member, organization: @orgs.first, role: 'member')
+      end
+
+      let(:user_id) { @member.id }
+      let(:organization) { { user_id: user_id } }
+
+      response '204', 'Organization Role deleted' do
+        run_test! do
+          expect(@orgs.first.reload.org_roles.count).to eq(1)
+        end
+      end
+
+      response '404', 'No Organization Found' do
+        let(:id) { Organization.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No User Found' do
+        let(:user_id) { User.last.id + 999 }
+        run_test!
+      end
+
+      response '404', 'No OrgRole Found' do
+        before do
+          @member.org_roles.delete_all
+        end
+        run_test!
+      end
+
+      response '401', 'User missing permissions, no role' do
+        before do
+          @admin.org_roles.delete_all
+        end
+        run_test!
+      end
+
+      response '401', 'User missing permissions, not admin' do
+        before do
+          OrgRole
+            .find_by(user: @admin, organization: @orgs.first)
+            .update_column(:role, 'member')
+        end
+        run_test!
+      end
+    end
+  end
 end

@@ -19,7 +19,11 @@ Rails.application.routes.draw do
   end
 
   resources :users
-  resources :organizations
+  resources :organizations do
+    member do
+      delete 'delete_org_role'
+    end
+  end
 
   resources :apps, only: [:index, :create, :update, :show, :destroy] do
 
