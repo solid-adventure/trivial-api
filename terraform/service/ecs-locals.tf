@@ -9,26 +9,6 @@ locals {
 
   agent_definition_secrets = [
     {
-      name : "KAFKA_USERNAME",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_USERNAME::"
-    },
-    {
-      name : "KAFKA_PASSWORD",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_PASSWORD::"
-    },
-    {
-      name : "KAFKA_BOOTSTRAP_SERVERS",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_BOOTSTRAP_SERVERS::"
-    },
-    {
-      name : "KAFKA_TOPIC",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_TOPIC::"
-    },
-    {
-      name : "KAFKA_NAMESPACE",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_NAMESPACE::"
-    },
-    {
       "name" : "WHIPLASH_CLIENT_ID",
       "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_id::"
     },
