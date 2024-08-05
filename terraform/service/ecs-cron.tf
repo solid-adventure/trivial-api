@@ -83,7 +83,7 @@ resource "aws_scheduler_schedule" "trivial_api_new_period_cron" {
     mode = "OFF"
   }
 
-  schedule_expression = "cron(0 5 * * *)" # run everyday at 5am UTC
+  schedule_expression = "cron(0 5 ? * * *)" # run everyday at 5am UTC
 
   target {
     arn = local.ecs_cluster_id
