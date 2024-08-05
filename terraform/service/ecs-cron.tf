@@ -48,7 +48,7 @@ locals {
         hostPort      = 3000
       }
     ]
-    secrets     = concat(
+    secrets = concat(
       local.agent_definition_secrets,
       local.kafka_secrets
     )
@@ -76,8 +76,8 @@ resource "aws_ecs_task_definition" "trivial_api_new_period_cron_task_definition"
 }
 
 resource "aws_scheduler_schedule" "trivial_api_new_period_cron" {
-  name        = "${local.name_prefix}-${var.service_name}-${local.new_period_cron_name}"
-  group_name  = "default"
+  name       = "${local.name_prefix}-${var.service_name}-${local.new_period_cron_name}"
+  group_name = "default"
 
   flexible_time_window {
     mode = "OFF"
@@ -86,7 +86,7 @@ resource "aws_scheduler_schedule" "trivial_api_new_period_cron" {
   schedule_expression = "cron(0 5 * * *)" # run every 30 minutes
 
   target {
-    arn      = local.ecs_cluster_id
+    arn = local.ecs_cluster_id
     # role that allows scheduler to start the task (explained later)
     role_arn = aws_iam_role.new_period_cron_role.arn
 
