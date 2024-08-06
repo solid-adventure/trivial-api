@@ -26,8 +26,8 @@ locals {
         hostPort      = 3000
       }
     ]
-    secrets     = local.agent_definition_secrets
-    environment = local.agent_definition_env_vars
+    secrets     = local.task_definition_secrets
+    environment = local.task_definition_env_vars
   }
 }
 

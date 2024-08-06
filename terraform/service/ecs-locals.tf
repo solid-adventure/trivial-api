@@ -7,7 +7,7 @@ locals {
     "com.datadoghq.tags.version" : local.datadog_version
   }
 
-  agent_definition_secrets = [
+  task_definition_secrets = [
     {
       "name" : "WHIPLASH_CLIENT_ID",
       "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:whiplash_client_id::"
@@ -28,13 +28,13 @@ locals {
       "name" : "MAILGUN_SMTP_PASSWORD",
       "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:mailgun_password::"
     },
+    {
+      "name" : "SECRET_KEY_BASE",
+      "valueFrom" : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:SECRET_KEY_BASE::"
+    },
   ]
 
-  agent_definition_env_vars = [
-    {
-      name : "SECRET_KEY_BASE",
-      value : "whatdowesetthistoo"
-    },
+  task_definition_env_vars = [
     {
       name : "RAILS_ENV",
       value : "production"
