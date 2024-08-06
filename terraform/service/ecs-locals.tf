@@ -32,6 +32,10 @@ locals {
 
   agent_definition_env_vars = [
     {
+      name : "SECRET_KEY_BASE",
+      value : "whatdowesetthistoo"
+    },
+    {
       name : "RAILS_ENV",
       value : "production"
     },
