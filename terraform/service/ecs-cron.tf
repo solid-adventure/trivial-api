@@ -62,7 +62,7 @@ resource "aws_ecs_task_definition" "trivial_api_new_period_cron_task_definition"
     local.agent_definition,
     local.log_router_definition,
   ]))
-  family        = "${local.name_prefix}-trivial-api-task"
+  family        = "${local.name_prefix}-${var.service_name}-${local.new_period_cron_name}"
   network_mode  = "awsvpc"
   task_role_arn = local.ecs_task_role_arn
 
