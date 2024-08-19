@@ -1,4 +1,7 @@
 class RegisterItemsController < ApplicationController
+
+  include ActionController::MimeResponds
+
   before_action :set_register_item, only: %i[ show update ]
   before_action :set_register
   before_action :set_pagination, only: %i[index]
@@ -17,14 +20,19 @@ class RegisterItemsController < ApplicationController
       end
 
       order_register_items
-      paginate_register_items
-      response = {
-        current_page: @page,
-        total_pages: @total_pages,
-        register_items: ActiveModel::Serializer::CollectionSerializer.new(@register_items, adapter: :attributes)
-      }
 
-      render json: response
+      if params[:format] == 'csv'
+        render_csv
+      else
+        paginate_register_items
+        response = {
+          current_page: @page,
+          total_pages: @total_pages,
+          register_items: ActiveModel::Serializer::CollectionSerializer.new(@register_items, adapter: :attributes)
+        }
+        render json: response
+      end
+
     rescue StandardError => exception
       render_errors(exception, status: :unprocessable_entity)
     end
@@ -67,7 +75,7 @@ class RegisterItemsController < ApplicationController
   end
 
   private
-  MAX_PER_PAGE = 100
+  MAX_PER_PAGE = 1000000 # TEMP
 
   def order_register_items
     if @register
@@ -118,6 +126,48 @@ class RegisterItemsController < ApplicationController
       end
     end
     permitted_params
+  end
+
+  def render_csv
+    Rails.logger.info "Starting CSV processing..."
+    @start_time = Time.now
+
+    set_file_headers
+    set_streaming_headers
+
+    response.status = 200
+
+    #setting the body to an enumerator, rails will iterate this enumerator
+    self.response_body = csv_lines
+
+  end
+
+  def set_file_headers
+    file_name = "register_items.csv"
+    headers["Content-Type"] = "text/csv"
+    headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
+  end
+
+  def set_streaming_headers
+    #nginx doc: Setting this to "no" will allow unbuffered responses suitable for Comet and HTTP streaming applications
+    headers['X-Accel-Buffering'] = 'no'
+
+    headers["Cache-Control"] ||= "no-cache"
+    headers.delete("Content-Length")
+  end
+
+  def csv_lines
+    meta_labels = @register.meta.values || []
+    meta_symbols = meta_labels.map { |v| v.to_sym }
+    meta_db_column_names = @register.meta.keys
+     out = Enumerator.new do |y|
+      y << RegisterItem.csv_header(meta_symbols).to_s
+      @register_items.find_each(batch_size: 5000) do |register_item|
+        y << register_item.to_csv_row(meta_symbols, meta_db_column_names).to_s
+     end
+     Rails.logger.info "Finished processing CSV, duration: #{Time.now - @start_time} seconds"
+    end
+    return out
   end
 
 end
