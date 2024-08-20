@@ -49,6 +49,29 @@ RSpec.describe Services::Report do
       expect(results[:count].first[:value]).to eq(1)
     end
 
+    it "does not invert amount's sign by default" do
+      results = report.send(:simple_stat_lookup, 'sum', args)
+      expect(results[:count].first[:value]).to eq(5.0)
+    end
+
+    it "inverts amount's sign when invert_sign is true" do
+      args[:invert_sign] = true
+      results = report.send(:simple_stat_lookup, 'sum', args)
+      expect(results[:count].first[:value]).to eq(-5.0)
+    end
+
+    it "correctly inverts amount's sign when grouping" do
+      args[:group_by] = ['income_account']
+      results = report.send(:simple_stat_lookup, 'sum', args)
+      expect(results[:count][0][:value]).to eq(2.5)
+      expect(results[:count][1][:value]).to eq(2.5)
+
+      args[:invert_sign] = true
+      results = report.send(:simple_stat_lookup, 'sum', args)
+      expect(results[:count][0][:value]).to eq(-2.5)
+      expect(results[:count][1][:value]).to eq(-2.5)
+    end
+
     it 'correctly groups results given a :group_by' do
       args[:group_by] = ['entity_type']
       results = report.send(:simple_stat_lookup, 'count', args)
