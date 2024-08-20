@@ -38,7 +38,7 @@ module Services
         results = results.group(meta_groups)
       end
       results = results.__send__(stat ,:amount)
-      results = format(results, args[:group_by_period].present?, args[:group_by].present?)
+      results = format(results, args[:group_by_period].present?, args[:group_by].present?, args[:invert_sign])
 
       title = generate_title(stat, args[:group_by_period], args[:group_by])
       return { title: title, count: results }
@@ -62,14 +62,16 @@ module Services
 
     # Given an object with an array for a key like: {["Jan 2024", "b2b shipping"]=>0} OR {"b2b shipping"=>0}
     # returns an array of objects with string for keys: [{:period=>"Jan 2024", :group=>"b2b shipping", :value=>0}]
-    def format(results, period_groups_present, column_groups_present)
-      return [{ period: "All", group: "All", value: results }] if results.is_a? Numeric
+    def format(results, period_groups_present, column_groups_present, invert_sign)
+      sign_multiplier = invert_sign ? -1 : 1
+      return [{ period: "All", group: "All", value: results * sign_multiplier }] if results.is_a? Numeric
       raise "Malformed results for report: #{results}" unless results.is_a? Hash
 
       # NOTE: .group() always orders the the key array for multidimensional groups by the order they were called in
       # therefor this map implementation relies on calling group by period then group by column on results
       # this ensures period = key[0] and column_groups = key[1...] in the case that results were grouped by both
       results.map do |key, value|
+        value ||= 0
         period, group = if period_groups_present && column_groups_present
                           group = key.length == 2 ? key[1] : key[1...]
                           [key[0], group]
@@ -83,7 +85,7 @@ module Services
         {
           period: period,
           group: group,
-          value: value
+          value: value * sign_multiplier
         }
       end
     end
