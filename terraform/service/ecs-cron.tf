@@ -49,10 +49,10 @@ locals {
       }
     ]
     secrets = concat(
-      local.agent_definition_secrets,
+      local.task_definition_secrets,
       local.kafka_secrets
     )
-    environment = local.agent_definition_env_vars
+    environment = local.task_definition_env_vars
   }
 }
 
