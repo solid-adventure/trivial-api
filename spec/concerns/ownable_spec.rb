@@ -6,7 +6,7 @@ describe Ownable do
   let(:user3) { FactoryBot.create(:user) }
   let(:organization1) { FactoryBot.create(:organization, admin: user1, members_count: 2) }
   let(:organization2) { FactoryBot.create(:organization, admin: user2, members_count: 2) }
-  let(:ownable) { FactoryBot.create(:app, custom_owner: old_owner) }
+  let(:ownable) { FactoryBot.create(:app, owner: old_owner) }
 
   describe '#transfer_ownership' do
     describe "previous permissions" do
@@ -78,7 +78,7 @@ describe Ownable do
     context 'resource owner is User' do
       before do
         @owner = FactoryBot.create(:user)
-        @ownable = FactoryBot.create(:app, custom_owner: @owner)
+        @ownable = FactoryBot.create(:app, owner: @owner)
       end
 
       it 'returns true if user is owner' do
@@ -92,7 +92,7 @@ describe Ownable do
     context 'resource owner is Organization' do
       before do
         @org = FactoryBot.create(:organization, members_count: 1)
-        @ownable = FactoryBot.create(:app, custom_owner: @org)
+        @ownable = FactoryBot.create(:app, owner: @org)
       end
 
       it 'returns true if user is admin of org' do
