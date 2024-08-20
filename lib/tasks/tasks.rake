@@ -1,6 +1,4 @@
 namespace :tasks do
-
-
   # rake tasks:send_new_period_started_events
   desc "Create Kafka events when new billing period is started"
   task :send_new_period_started_events => :environment do
@@ -62,25 +60,26 @@ namespace :tasks do
     puts "Done"
   end
 
-  desc "Create Sign Up events in PostHog for existing users"
-  task backfill_user_signups: :environment do
+  # rake "tasks:cleanup_activity_entries["30"]" this will run in non-destructive preview mode
+  # rake "tasks:cleanup_activity_entries["30","false"]" this will actually delete records
+  desc "Remove ActivityEntries with no RegisterItem that are older than provided days"
+  task :cleanup_activity_entries, [:days_kept, :preview] => :environment do |t, args|
+    raise 'must supply number of days to keep' unless args[:days_kept]
+    cutoff_date = Time.now - args[:days_kept].to_i.days
+    puts "Preparing to remove outdated ActivityEntries, current cutoff date is #{cutoff_date}."
 
-    posthog = PostHog::Client.new({
-      api_key: ENV['POSTHOG_API_KEY'],
-      api_host: ENV['POSTHOG_HOST'],
-      on_error: Proc.new { |status, msg| print msg }
-    })
+    preview = ActiveModel::Type::Boolean.new.cast(args[:preview])
+    preview = true if preview.nil?
 
-    User.where("created_at > ?", Time.now - 7.day).each do |user|
-      puts posthog.capture({
-        distinct_id: user.email,
-        event: 'User Signup',
-        properties: {
-            source: 'backfill_user_signups',
-        },
-        timestamp: user.created_at
-      })
+    entries_to_delete = ActivityEntry.where(register_item_id: nil)
+                                     .where('created_at < ?', cutoff_date)
+    puts "#{entries_to_delete.count} ActivityEntries to delete."
+
+    if preview
+      puts "Preview Mode, would have deleted #{entries_to_delete.count}"
+    else
+      deleted_count = entries_to_delete.destroy_all.length
+      puts "Deleted #{deleted_count} ActivityEntry records"
     end
   end
-
 end
