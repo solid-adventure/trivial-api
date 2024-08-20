@@ -22,7 +22,7 @@ RSpec.describe AppsController, :type => :controller do
 
   context "logged in user" do
 
-    let! (:app) { FactoryBot.create(:app, custom_owner: user) }
+    let! (:app) { FactoryBot.create(:app, owner: user) }
 
     before do
       login
@@ -38,7 +38,7 @@ RSpec.describe AppsController, :type => :controller do
 
   context "tagged apps" do
 
-    let!(:tagged_app) { FactoryBot.create(:app, custom_owner: user) }
+    let!(:tagged_app) { FactoryBot.create(:app, owner: user) }
     let!(:tag) { FactoryBot.create(:tag, taggable: tagged_app, context: 'color', name: 'blue') }
 
     before do
