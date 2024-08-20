@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_01_001645) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_20_161314) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -126,6 +126,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_01_001645) do
     t.boolean "meta9"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "invert_sign", default: false, null: false
     t.index ["chart_type"], name: "index_charts_on_chart_type"
     t.index ["dashboard_id"], name: "index_charts_on_dashboard_id"
     t.index ["register_id"], name: "index_charts_on_register_id"
