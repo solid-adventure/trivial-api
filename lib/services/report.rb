@@ -82,6 +82,11 @@ module Services
                         else
                           ['All', 'All'] # this shouldn't be possible
                         end
+        group = if group.is_a?(Array)
+                  group.map { |entry| entry.nil? ? '' : entry }
+                else
+                  group.nil? ? '' : group
+                end
         {
           period: period,
           group: group,
