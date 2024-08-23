@@ -1,4 +1,7 @@
 class RegisterItemsController < ApplicationController
+
+  include ActionController::MimeResponds
+
   before_action :set_register_item, only: %i[ show update ]
   before_action :set_register
   before_action :set_pagination, only: %i[index]
@@ -6,28 +9,31 @@ class RegisterItemsController < ApplicationController
 
   # GET /register_items
   def index
-    begin
-      @register_items = current_user.associated_register_items
-      @register_items = @register_items.where(register_id: @register.id) if @register
+    @register_items = current_user.associated_register_items
+    @register_items = @register_items.where(register_id: @register.id) if @register
 
-      search = params[:search] ? JSON.parse(params[:search]) : []
-      if search.any?
-        raise 'register_id required for search' unless @register
-        @register_items = RegisterItem.search(@register_items, @register.meta, search)
-      end
+    search = params[:search] ? JSON.parse(params[:search]) : []
+    if search.any?
+      raise 'register_id required for search' unless @register
+      @register_items = RegisterItem.search(@register_items, @register.meta, search)
+    end
 
-      order_register_items
+    order_register_items
+
+    if params[:format] == 'csv'
+      render_csv
+    else
       paginate_register_items
       response = {
         current_page: @page,
         total_pages: @total_pages,
         register_items: ActiveModel::Serializer::CollectionSerializer.new(@register_items, adapter: :attributes)
       }
-
       render json: response
-    rescue StandardError => exception
-      render_errors(exception, status: :unprocessable_entity)
     end
+
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
   end
 
   # GET /register_items/1
@@ -120,4 +126,43 @@ class RegisterItemsController < ApplicationController
     permitted_params
   end
 
+  def render_csv
+    Rails.logger.info "Starting CSV processing..."
+    @start_time = Time.now
+
+    set_file_headers
+    set_streaming_headers
+
+    response.status = 200
+
+    # rails will iterate the returned csv_lines enumerator
+    self.response_body = csv_lines
+  end
+
+  def set_file_headers
+    file_name = "register_items.csv"
+    headers["Content-Type"] = "text/csv"
+    headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
+  end
+
+  def set_streaming_headers
+    headers['X-Accel-Buffering'] = 'no'
+    headers["Last-Modified"] = Time.now.httpdate.to_s
+    headers["Cache-Control"] ||= "no-cache"
+    headers.delete("Content-Length")
+  end
+
+  def csv_lines
+    meta_labels = @register.meta.values || []
+    meta_symbols = meta_labels.map { |v| v.to_sym }
+    meta_db_column_names = @register.meta.keys
+    out = Enumerator.new do |y|
+      y << RegisterItem.csv_header(meta_symbols).to_s
+      @register_items.find_each(batch_size: 5000) do |register_item|
+        y << register_item.to_csv_row(meta_symbols, meta_db_column_names).to_s
+      end
+      Rails.logger.info "Finished processing CSV, duration: #{Time.now - @start_time} seconds"
+    end
+    out
+  end
 end

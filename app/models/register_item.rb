@@ -1,4 +1,5 @@
 require 'search'
+require 'csv'
 
 class RegisterItem < ApplicationRecord
 
@@ -42,6 +43,43 @@ class RegisterItem < ApplicationRecord
 
   def resolved_column(label)
     RegisterItem.resolved_column(label, register.meta)
+  end
+
+  def to_csv_row(meta_symbols=[], meta_db_column_names=[])
+    header = self.class.csv_header(meta_symbols)
+    values = [
+      "id",
+      "register_id",
+      "owner_type",
+      "owner_id",
+      "unique_key",
+      "description",
+      "amount",
+      "units",
+      "originated_at",
+      "created_at"
+    ]
+    .concat(meta_db_column_names)
+    values = values.map { |value| self[value] }
+    CSV::Row.new(header, values, false) #false - means its not a header
+  end
+
+  def self.csv_header(meta_symbols=[])
+    symbols = [
+        :id,
+        :register_id,
+        :owner_type,
+        :owner_id,
+        :unique_key,
+        :description,
+        :amount,
+        :units,
+        :originated_at,
+        :created_at
+      ]
+    symbols += meta_symbols
+    names = symbols.map { |s| s.to_s }
+    CSV::Row.new(symbols, names, true)  #true - means its a header
   end
 
   def self.resolved_column(label, column_labels)
