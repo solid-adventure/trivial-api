@@ -9,33 +9,31 @@ class RegisterItemsController < ApplicationController
 
   # GET /register_items
   def index
-    begin
-      @register_items = current_user.associated_register_items
-      @register_items = @register_items.where(register_id: @register.id) if @register
+    @register_items = current_user.associated_register_items
+    @register_items = @register_items.where(register_id: @register.id) if @register
 
-      search = params[:search] ? JSON.parse(params[:search]) : []
-      if search.any?
-        raise 'register_id required for search' unless @register
-        @register_items = RegisterItem.search(@register_items, @register.meta, search)
-      end
-
-      order_register_items
-
-      if params[:format] == 'csv'
-        render_csv
-      else
-        paginate_register_items
-        response = {
-          current_page: @page,
-          total_pages: @total_pages,
-          register_items: ActiveModel::Serializer::CollectionSerializer.new(@register_items, adapter: :attributes)
-        }
-        render json: response
-      end
-
-    rescue StandardError => exception
-      render_errors(exception, status: :unprocessable_entity)
+    search = params[:search] ? JSON.parse(params[:search]) : []
+    if search.any?
+      raise 'register_id required for search' unless @register
+      @register_items = RegisterItem.search(@register_items, @register.meta, search)
     end
+
+    order_register_items
+
+    if params[:format] == 'csv'
+      render_csv
+    else
+      paginate_register_items
+      response = {
+        current_page: @page,
+        total_pages: @total_pages,
+        register_items: ActiveModel::Serializer::CollectionSerializer.new(@register_items, adapter: :attributes)
+      }
+      render json: response
+    end
+
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
   end
 
   # GET /register_items/1
@@ -75,7 +73,7 @@ class RegisterItemsController < ApplicationController
   end
 
   private
-  MAX_PER_PAGE = 1000000 # TEMP
+  MAX_PER_PAGE = 100
 
   def order_register_items
     if @register
@@ -137,9 +135,8 @@ class RegisterItemsController < ApplicationController
 
     response.status = 200
 
-    #setting the body to an enumerator, rails will iterate this enumerator
+    # rails will iterate the returned csv_lines enumerator
     self.response_body = csv_lines
-
   end
 
   def set_file_headers
@@ -159,14 +156,13 @@ class RegisterItemsController < ApplicationController
     meta_labels = @register.meta.values || []
     meta_symbols = meta_labels.map { |v| v.to_sym }
     meta_db_column_names = @register.meta.keys
-     out = Enumerator.new do |y|
+    out = Enumerator.new do |y|
       y << RegisterItem.csv_header(meta_symbols).to_s
       @register_items.find_each(batch_size: 5000) do |register_item|
         y << register_item.to_csv_row(meta_symbols, meta_db_column_names).to_s
-     end
-     Rails.logger.info "Finished processing CSV, duration: #{Time.now - @start_time} seconds"
+      end
+      Rails.logger.info "Finished processing CSV, duration: #{Time.now - @start_time} seconds"
     end
-    return out
+    out
   end
-
 end
