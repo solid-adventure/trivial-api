@@ -4,6 +4,7 @@ class Register < ApplicationRecord
   include Permissible
 
   audited
+  has_associated_audits
 
   # Register identity basics
   validates :name, presence: true, uniqueness: { scope: :owner }
