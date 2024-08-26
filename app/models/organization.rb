@@ -1,5 +1,6 @@
 class Organization < ApplicationRecord
   audited
+  has_associated_audits
 
   has_many :owned_apps, class_name: 'App', as: :owner
   has_many :owned_manifests, class_name: 'Manifest', as: :owner

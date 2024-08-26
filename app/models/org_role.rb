@@ -1,7 +1,7 @@
 class OrgRole < ApplicationRecord
   ROLES = %w(admin member guest).freeze
 
-  audited
+  audited associated_with: :organization
 
   validates :user_id, presence: true
   validates :organization_id, presence: true
