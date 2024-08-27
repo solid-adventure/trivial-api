@@ -34,9 +34,8 @@ describe 'Webhooks API' do
         update_id: { type: :string, nullable: true },
         activity_type: { type: :string },
         status: { type: :string, nullable: true },
-        payload: { type: :object, nullable:true },
         diagnostics: { type: :object, nullable: true }
-      }, required: ['app_id', 'payload']
+      }, required: ['app_id']
     }
   end
 
