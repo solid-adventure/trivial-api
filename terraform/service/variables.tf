@@ -16,5 +16,5 @@ variable "datadog_agent_cpu" {
 
 variable "datadog_agent_memory" {
   type    = number
-  default = 256
+  default = 384
 }
