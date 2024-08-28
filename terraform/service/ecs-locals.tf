@@ -94,6 +94,14 @@ locals {
     {
       name : "TRIVIAL_UI_URL",
       value : local.trivial_ui_service_domain
+    },
+    {
+      name : "RAILS_MAX_THREADS",
+      value : 8
+    },
+    {
+      name : "WEB_CONCURRENCY",
+      value : 6
     }
   ]
 
