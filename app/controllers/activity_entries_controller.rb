@@ -129,11 +129,11 @@ class ActivityEntriesController < ApplicationController
   def activity_for_index
     attrs = [:id, :owner_id, :owner_type, :app_id, :register_item_id, :activity_type, :status, :duration_ms, :created_at]
     @activity ||= app_activity
-    @activity.select(attrs).limit(limit).order(created_at: :desc)
+    @activity.select(attrs).limit(limit).order(id: :desc)
   end
 
   def activity
-    @activity ||= app_activity.limit(limit).order(created_at: :desc)
+    @activity ||= app_activity.limit(limit).order(id: :desc)
   end
 
   def app_activity
