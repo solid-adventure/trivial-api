@@ -116,7 +116,6 @@ class ActivityEntry < ApplicationRecord
       activity_type: self.activity_type,
       status: self.status,
       duration_ms: self.duration_ms,
-      payload: self.payload,
       created_at: self.created_at,
     }
   end
