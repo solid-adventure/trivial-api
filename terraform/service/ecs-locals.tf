@@ -94,6 +94,10 @@ locals {
     {
       name : "TRIVIAL_UI_URL",
       value : local.trivial_ui_service_domain
+    },
+    {
+      name : "WEB_CONCURRENCY",
+      value : 6
     }
   ]
 
