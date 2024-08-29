@@ -29,7 +29,7 @@ resource "aws_iam_policy" "scheduler" {
         Action = [
           "ecs:RunTask"
         ]
-        Resources = [
+        Resource = [
           "${aws_ecs_task_definition.trivial_api_new_period_cron_task_definition.arn}:*"
         ]
       },
