@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  concern :auditable do
+    resources :audits, only: [:index, :show]
+  end
+
   resources :customers
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
@@ -19,13 +23,20 @@ Rails.application.routes.draw do
   end
 
   resources :users
+
   resources :organizations do
     member do
       delete 'delete_org_role'
     end
   end
 
-  resources :apps, only: [:index, :create, :update, :show, :destroy] do
+  resources :apps, concerns: :auditable, only: [:index, :create, :update, :show, :destroy] do
+    collection do
+      get 'name_suggestion'
+      get 'stats/hourly'
+      get 'stats/daily'
+      get 'stats/weekly'
+    end
 
     member do 
       post 'copy'
@@ -33,17 +44,13 @@ Rails.application.routes.draw do
       post 'tags'
       delete 'tags', to: 'apps#remove_tags'
     end
+
     resource :credentials, only: [:show] do
       put '', action: :update
       patch '', action: :patch
     end
+
     resource :api_key, only: [:create, :update]
-    collection do
-      get 'name_suggestion'
-      get 'stats/hourly'
-      get 'stats/daily'
-      get 'stats/weekly'
-    end
   end
 
 

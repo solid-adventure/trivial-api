@@ -7,7 +7,7 @@ class RegisterItem < ApplicationRecord
   include Permissible
   include Search
 
-  audited
+  audited associated_with: :register
 
   # includes only non-meta searchable columns
   # meta columns are handled by self.search
