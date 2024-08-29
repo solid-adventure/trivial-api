@@ -25,15 +25,15 @@ resource "aws_iam_policy" "scheduler" {
     Version = "2012-10-17"
     Statement = [
       {
-        # allow scheduler to execute the task
         Effect = "Allow",
         Action = [
           "ecs:RunTask"
         ]
-        # trim :<revision> from arn, to point at the whole task definition and not just one revision
-        Resource = [trimsuffix(aws_ecs_task_definition.trivial_api_new_period_cron_task_definition.arn, ":${aws_ecs_task_definition.trivial_api_new_period_cron_task_definition.revision}")]
+        Resources = [
+          "${aws_ecs_task_definition.trivial_api_new_period_cron_task_definition.arn}:*"
+        ]
       },
-      { # allow scheduler to set the IAM roles of your task
+      {
         Effect = "Allow",
         Action = [
           "iam:PassRole"
