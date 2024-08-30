@@ -152,6 +152,7 @@ module MockData::RegisterItems
       diagnostics: { events: [], errors: [] },
       owner_type: @owner.class,
       owner_id: @owner.id,
+      created_at: originated_at,
       register_item_id: register_item_id
     }
   end
