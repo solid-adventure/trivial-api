@@ -39,7 +39,7 @@ class ManifestsController < ApplicationController
     end
 
     def manifest_params
-        params.permit(:app_id, :content, :bundle)
+        params.permit(:app_id, :bundle, :content, content: {})
     end
 
     def app
