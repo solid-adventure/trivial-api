@@ -72,8 +72,13 @@ describe 'manifests', type: :request do
         run_test!
       end
 
-      response(201, 'valid with required fields') do
+      response(201, 'valid with content as string') do
         let(:manifest) { { content: '{}' } }
+        run_test!
+      end
+
+      response(201, 'valid with content as hash') do
+        let(:manifest) { { content: { app: 1234, definitions: [] } } }
         run_test!
       end
     end
