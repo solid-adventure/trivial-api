@@ -3,7 +3,7 @@ class TagExists < StandardError
 end
 
 class Tag < ApplicationRecord
-  audited
+  audited associated_with: :taggable
 
   belongs_to :taggable, polymorphic: true
   
