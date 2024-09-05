@@ -97,11 +97,11 @@ locals {
     },
     {
       name : "RAILS_MAX_THREADS",
-      value : "8"
+      value : "24"
     },
     {
       name : "WEB_CONCURRENCY",
-      value : "6"
+      value : "2"
     }
   ]
 
