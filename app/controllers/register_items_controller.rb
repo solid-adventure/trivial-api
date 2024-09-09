@@ -143,6 +143,7 @@ class RegisterItemsController < ApplicationController
     file_name = "register_items.csv"
     headers["Content-Type"] = "text/csv"
     headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
+    headers["X-Items-Count"] = @register_items.size
   end
 
   def set_streaming_headers

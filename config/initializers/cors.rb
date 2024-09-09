@@ -18,7 +18,8 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
         'access-token',
         'client',
         'expiry',
-        'uid'
+        'uid',
+        'X-Items-Count'
       ]
   end
   origins = all_resources[0].instance_variable_get(:@origins)
