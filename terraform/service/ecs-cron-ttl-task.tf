@@ -4,6 +4,8 @@ locals {
   cron_ttl_task_definition = {
     name      = "${local.name_prefix}-trivial-api-${local.cron_name}"
     image     = var.ecr_tag
+
+    # TEMP send "cleanup_activity_entries["60","false"]" to disable preview mode
     command   = ["rake", "tasks:cleanup_activity_entries["60"]"]
     cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
     memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
@@ -63,8 +65,10 @@ resource "aws_scheduler_schedule" "trivial_api_cron_ttl_task" {
     mode = "OFF"
   }
 
-  schedule_expression = "cron(0 6 ? * * *)" # run everyday at 6am UTC
+  # schedule_expression = "cron(0 6 ? * * *)" # run everyday at 6am UTC
 
+  # TEMP run every 5 minutes
+  schedule_expression = "cron(*/5 * ? * * *)"
   target {
     arn = local.ecs_cluster_id
     # role that allows scheduler to start the task (explained later)
