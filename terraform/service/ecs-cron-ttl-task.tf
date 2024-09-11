@@ -6,8 +6,7 @@ locals {
     name      = "${local.name_prefix}-trivial-api-${local.ttl_task_cron_name}"
     image     = var.ecr_tag
 
-    # TEMP send "cleanup_activity_entries["60","false"]" to disable preview mode
-    command   = ["rake", "tasks:cleanup_activity_entries[\"60\"]"]
+    command   = ["rake", "tasks:cleanup_activity_entries[60, true]"]
     cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
     memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
     essential = true
@@ -66,7 +65,8 @@ resource "aws_scheduler_schedule" "trivial_api_cron_ttl_task" {
     mode = "OFF"
   }
 
-  # schedule_expression = "cron(0 6 ? * * *)" # run everyday at 6am UTC
+  # Will run daily at 6:15 UTC = 1:15 AM EST = 2:15 AM EDT
+  # schedule_expression = "cron(15 6 ? * * *)"
 
   # TEMP run every 5 minutes
   schedule_expression = "cron(*/5 * ? * * *)"
