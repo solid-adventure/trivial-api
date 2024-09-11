@@ -69,10 +69,19 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v4
 
+      - name: Generate org token
+        id: org_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.org_app_id }}
+          private-key: ${{ secrets.org_app_key }}
+          owner: ${{ github.repository_owner }}
+
       - uses: rickstaa/action-create-tag@v1
         with:
           tag: ${{ needs.generate_image_tag.outputs.git_tag }}
-          false: tag_exists_error
+          tag_exists_error: false
+          github_token: ${{ steps.org_token.outputs.token }}
 
 
   notify:
