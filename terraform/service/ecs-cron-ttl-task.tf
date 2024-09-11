@@ -73,7 +73,7 @@ resource "aws_scheduler_schedule" "trivial_api_cron_ttl_task" {
   target {
     arn = local.ecs_cluster_id
     # role that allows scheduler to start the task (explained later)
-    role_arn = aws_iam_role.new_period_cron_role.arn # Leaving this set to the new_period_role for now, which should have the same privelage
+    role_arn = aws_iam_role.ttl_task_cron_role.arn
 
     ecs_parameters {
       # trimming the revision suffix here so that schedule always uses latest revision
