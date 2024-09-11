@@ -1,4 +1,4 @@
-resource "aws_iam_role" "new_period_cron_role" {
+resource "aws_iam_role" "ttl_task_cron_role" {
   name = "cron-scheduler-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -14,9 +14,9 @@ resource "aws_iam_role" "new_period_cron_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "new_period_cron_role_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "ttl_task_cron_role_policy_attachment" {
   policy_arn = aws_iam_policy.scheduler.arn
-  role       = aws_iam_role.new_period_cron_role.name
+  role       = aws_iam_role.ttl_task_cron_role.name
 }
 
 resource "aws_iam_policy" "scheduler" {

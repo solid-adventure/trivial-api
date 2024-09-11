@@ -1,8 +1,9 @@
 locals {
-  cron_name = "cron-ttl-task"
 
-  cron_ttl_task_definition = {
-    name      = "${local.name_prefix}-trivial-api-${local.cron_name}"
+  ttl_task_cron_name = "ttl-task-cron"
+
+  ttl_task_cron_definition = {
+    name      = "${local.name_prefix}-trivial-api-${local.ttl_task_cron_name}"
     image     = var.ecr_tag
 
     # TEMP send "cleanup_activity_entries["60","false"]" to disable preview mode
@@ -20,7 +21,7 @@ locals {
         "dd_source" : "aws"
         "dd_service" : var.service_name
         "Host" : "http-intake.logs.datadoghq.com"
-        "dd_tags" : "env:${var.env},version:${local.datadog_version},ecs_service_name:${local.name_prefix}-${var.service_name}-${local.cron_name}"
+        "dd_tags" : "env:${var.env},version:${local.datadog_version},ecs_service_name:${local.name_prefix}-${var.service_name}-${local.ttl_task_cron_name}"
         "TLS" : "on"
         "Name" : "datadog"
       }
@@ -38,13 +39,13 @@ locals {
   }
 }
 
-resource "aws_ecs_task_definition" "trivial_api_cron_ttl_task_definition" {
+resource "aws_ecs_task_definition" "trivial_api_ttl_task_cron_definition" {
   container_definitions = jsonencode(concat([
-    local.cron_ttl_task_definition,
+    local.ttl_task_cron_definition,
     local.agent_definition,
     local.log_router_definition,
   ]))
-  family        = "${local.name_prefix}-${var.service_name}-${local.cron_name}"
+  family        = "${local.name_prefix}-${var.service_name}-${local.ttl_task_cron_name}"
   network_mode  = "awsvpc"
   task_role_arn = local.ecs_task_role_arn
 
@@ -58,7 +59,7 @@ resource "aws_ecs_task_definition" "trivial_api_cron_ttl_task_definition" {
 }
 
 resource "aws_scheduler_schedule" "trivial_api_cron_ttl_task" {
-  name       = "${local.name_prefix}-${var.service_name}-${local.cron_name}"
+  name       = "${local.name_prefix}-${var.service_name}-${local.ttl_task_cron_name}"
   group_name = "default"
 
   flexible_time_window {
@@ -76,7 +77,7 @@ resource "aws_scheduler_schedule" "trivial_api_cron_ttl_task" {
 
     ecs_parameters {
       # trimming the revision suffix here so that schedule always uses latest revision
-      task_definition_arn = trimsuffix(aws_ecs_task_definition.trivial_api_cron_ttl_task_definition.arn, ":${aws_ecs_task_definition.trivial_api_cron_ttl_task_definition.revision}")
+      task_definition_arn = trimsuffix(aws_ecs_task_definition.trivial_api_ttl_task_cron_definition.arn, ":${aws_ecs_task_definition.trivial_api_ttl_task_cron_definition.revision}")
       launch_type         = "FARGATE"
       network_configuration {
         security_groups = concat(
