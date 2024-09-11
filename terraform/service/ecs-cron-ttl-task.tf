@@ -6,7 +6,8 @@ locals {
     name      = "${local.name_prefix}-trivial-api-${local.ttl_task_cron_name}"
     image     = var.ecr_tag
 
-    command   = ["rake", "tasks:cleanup_activity_entries[60, true]"]
+   # delete entries older than 45 days with no register_item_id, preview_mode: false
+    command   = ["rake", "tasks:cleanup_activity_entries[45, false]"]
     cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
     memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
     essential = true
