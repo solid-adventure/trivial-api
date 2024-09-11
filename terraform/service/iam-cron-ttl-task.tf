@@ -19,7 +19,7 @@ resource "aws_iam_role_policy_attachment" "ttl_task_cron_role_policy_attachment"
   role       = aws_iam_role.ttl_task_cron_role.name
 }
 
-resource "aws_iam_policy" "scheduler" {
+resource "aws_iam_policy" "ttl-task-scheduler" {
   name = "ttl-task-cron-scheduler-policy"
   policy = jsonencode({
     Version = "2012-10-17"
