@@ -57,8 +57,8 @@ jobs:
         id: org_token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.org_app_id }}
-          private-key: ${{ secrets.org_app_key }}
+          app-id: ${{ secrets.ORG_GITHUB_APP_ID }}
+          private-key: ${{ secrets.ORG_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
       - uses: rickstaa/action-create-tag@v1
