@@ -7,7 +7,7 @@ locals {
     image     = var.ecr_tag
 
     # TEMP send "cleanup_activity_entries["60","false"]" to disable preview mode
-    command   = ["rake", "tasks:cleanup_activity_entries["60"]"]
+    command   = ["rake", "tasks:cleanup_activity_entries[\"60\"]"]
     cpu       = lookup(local.ecs_cpu, var.env, -1) - var.datadog_agent_cpu
     memory    = lookup(local.ecs_mem, var.env, -1) - var.datadog_agent_memory
     essential = true

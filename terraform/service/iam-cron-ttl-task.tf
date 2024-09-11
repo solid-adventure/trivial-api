@@ -20,7 +20,7 @@ resource "aws_iam_role_policy_attachment" "ttl_task_cron_role_policy_attachment"
 }
 
 resource "aws_iam_policy" "scheduler" {
-  name = "cron-scheduler-policy"
+  name = "ttl-task-cron-scheduler-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
