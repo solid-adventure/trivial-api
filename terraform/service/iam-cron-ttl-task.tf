@@ -30,7 +30,7 @@ resource "aws_iam_policy" "ttl_task_scheduler" {
           "ecs:RunTask"
         ]
         Resource = [
-          aws_ecs_task_definition.trivial_api_new_period_cron_task_definition.arn
+          aws_ecs_task_definition.trivial_api_ttl_task_cron_definition.arn
         ]
       },
       {
