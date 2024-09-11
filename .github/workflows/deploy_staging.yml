@@ -17,7 +17,7 @@ jobs:
   build:
     name: "Build & Push Docker Image"
     needs: [generate_image_tag]
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v2.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v3.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
@@ -25,21 +25,25 @@ jobs:
       service_name: ${{ vars.TRIVIAL_API_SERVICE_NAME }}
       ecr_tags: ${{ needs.generate_image_tag.outputs.image_tag }}
     secrets:
-      gh_pat: ${{ secrets.PROJECT_WORKFLOWS_TOKEN }}
+      org_app_id: ${{ secrets.ORG_GITHUB_APP_ID }}
+      org_app_key: ${{ secrets.ORG_GITHUB_APP_PRIVATE_KEY }}
       BUNDLE_GITHUB__COM: ${{ secrets.BUNDLE_GITHUB__COM }}
       BUNDLE_ENTERPRISE__CONTRIBSYS__COM: ${{ secrets.BUNDLE_ENTERPRISE__CONTRIBSYS__COM }}
 
   deploy:
     name: "Deploy to Staging"
     needs: [generate_image_tag, build]
-    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v2.yml@main
+    uses: whiplashmerch/workflows/.github/workflows/run-terraform-v3.yml@main
     with:
       ecr_tag: ${{ needs.generate_image_tag.outputs.image_tag }}
       tf_target: "stable"
       repo_target: "terraform/service"
       tf_action: "apply"
       gh_environment_name: stable
-    secrets: inherit
+    secrets:
+      org_app_id: ${{ secrets.ORG_GITHUB_APP_ID }}
+      org_app_key: ${{ secrets.ORG_GITHUB_APP_PRIVATE_KEY }}
+      dd_api_key: ${{ secrets.DATADOG_API_KEY }}
 
   tag:
     needs: [ generate_image_tag, build, deploy ]
@@ -49,10 +53,19 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v4
 
+      - name: Generate org token
+        id: org_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.ORG_GITHUB_APP_ID }}
+          private-key: ${{ secrets.ORG_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
       - uses: rickstaa/action-create-tag@v1
         with:
           tag: ${{ needs.generate_image_tag.outputs.git_tag }}
           tag_exists_error: false
+          github_token: ${{ steps.org_token.outputs.token }}
 
 
   notify:
