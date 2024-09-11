@@ -43,7 +43,7 @@ jobs:
     secrets:
       org_app_id: ${{ secrets.ORG_GITHUB_APP_ID }}
       org_app_key: ${{ secrets.ORG_GITHUB_APP_PRIVATE_KEY }}
-
+      dd_api_key: ${{ secrets.DATADOG_API_KEY }}
 
   tag:
     needs: [ generate_image_tag, build, deploy ]
