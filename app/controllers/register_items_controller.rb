@@ -2,22 +2,14 @@ class RegisterItemsController < ApplicationController
 
   include ActionController::MimeResponds
 
-  before_action :set_register_item, only: %i[ show update ]
   before_action :set_register
+  before_action :set_register_item, only: %i[ show update ]
+  before_action :set_register_items, only: %i[ index sum ]
   before_action :set_pagination, only: %i[index]
   before_action :set_ordering, only: %i[index]
 
   # GET /register_items
   def index
-    @register_items = current_user.associated_register_items
-    @register_items = @register_items.where(register_id: @register.id) if @register
-
-    search = params[:search] ? JSON.parse(params[:search]) : []
-    if search.any?
-      raise 'register_id required for search' unless @register
-      @register_items = RegisterItem.search(@register_items, @register.meta, search)
-    end
-
     order_register_items
 
     if params[:format] == 'csv'
@@ -31,7 +23,6 @@ class RegisterItemsController < ApplicationController
       }
       render json: response
     end
-
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
   end
@@ -72,6 +63,13 @@ class RegisterItemsController < ApplicationController
     render json: searchable_columns.to_json, status: :ok
   end
 
+  def sum
+    sum_col = params[:col] || 'amount'
+    raise `invalid sum column: #{sum_col}` unless RegisterItem.columns_hash[sum_col]&.type == :decimal
+
+    render json: { sum: @register_items.sum(sum_col) }, status: :ok
+  end
+
   private
   MAX_PER_PAGE = 100
 
@@ -82,6 +80,14 @@ class RegisterItemsController < ApplicationController
       order = RegisterItem.create_ordering(@order_by, @ordering_direction)
     end
     @register_items = @register_items.order(Arel.sql(order))
+  end
+
+  def filter_register_items
+    search = params[:search] ? JSON.parse(params[:search]) : []
+    if search.any?
+      raise 'register_id required for search' unless @register
+      @register_items = RegisterItem.search(@register_items, @register.meta, search)
+    end
   end
 
   def paginate_register_items
@@ -114,6 +120,12 @@ class RegisterItemsController < ApplicationController
 
   def set_register_item
     @register_item = RegisterItem.find(params[:id])
+  end
+
+  def set_register_items
+    @register_items = current_user.associated_register_items
+    @register_items = @register_items.where(register_id: @register.id) if @register
+    filter_register_items
   end
 
   def register_item_params

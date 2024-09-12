@@ -96,6 +96,7 @@ Rails.application.routes.draw do
   resources :register_items, only: [:index, :show, :create, :update] do
     collection do
       get 'columns'
+      get 'sum'
     end
   end
 
