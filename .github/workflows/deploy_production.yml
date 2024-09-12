@@ -18,7 +18,7 @@ jobs:
   build:
     name: "Build & Push Docker Image"
     needs: [generate_image_tag]
-    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v3 .yml@main
+    uses: whiplashmerch/workflows/.github/workflows/build-rails-image-v3.yml@main
     with:
       ecr_registry: ${{ vars.ECR_REGISTRY }}
       ecr_repo: ${{ vars.TRIVIAL_API_ECR_REPO }}
