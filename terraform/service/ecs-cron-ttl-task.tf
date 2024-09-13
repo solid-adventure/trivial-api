@@ -67,7 +67,10 @@ resource "aws_scheduler_schedule" "trivial_api_cron_ttl_task" {
   }
 
   # Will run daily at 6:15 UTC = 1:15 AM EST = 2:15 AM EDT
-  schedule_expression = "cron(15 6 ? * * *)"
+  # schedule_expression = "cron(15 6 ? * * *)"
+
+  # TEMP run every 5 minutes
+  schedule_expression = "cron(*/5 * ? * * *)"
 
   target {
     arn = local.ecs_cluster_id
