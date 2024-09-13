@@ -93,4 +93,5 @@ namespace :tasks do
     end
     puts "cleanup_activity_entries task completed."
   end
+
 end
