@@ -64,10 +64,13 @@ class RegisterItemsController < ApplicationController
   end
 
   def sum
-    sum_col = params[:col] || 'amount'
-    raise "invalid sum column: #{sum_col}" unless RegisterItem.columns_hash[sum_col]&.type == :decimal
-
-    render json: { sum: @register_items.sum(sum_col) }, status: :ok
+    col = params[:col] || 'amount'
+    validated_column = RegisterItem.columns_hash[col]
+    if validated_column && validated_column.type == :decimal
+      render json: { sum: @register_items.sum(validated_column.name) }, status: :ok
+    else
+      render json: { error: "invalid sum column: #{col}" }, status: :bad_request
+    end
   end
 
   private
