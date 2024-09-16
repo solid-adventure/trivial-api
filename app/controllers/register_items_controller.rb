@@ -126,7 +126,16 @@ class RegisterItemsController < ApplicationController
     permitted_params
   end
 
+  MAX_CSV_ROWS = 500000
   def render_csv
+    if @register_items.size > MAX_CSV_ROWS
+      render json: {
+        error: "CSV row limit exceeded",
+        message: "Limit is #{ MAX_CSV_ROWS }, requested #{ @register_items.size } rows. "
+      }, status: :bad_request
+      return
+    end
+
     Rails.logger.info "Starting CSV processing..."
     @start_time = Time.now
 
