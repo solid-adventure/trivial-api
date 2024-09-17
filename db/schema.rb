@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_30_225353) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_17_165854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -58,9 +58,11 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_30_225353) do
     t.bigint "owner_id"
     t.bigint "register_item_id"
     t.index ["app_id"], name: "index_activity_entries_on_app_id"
+    t.index ["created_at"], name: "index_activity_entries_on_created_at"
     t.index ["owner_type", "owner_id"], name: "index_activity_entries_on_owner"
     t.index ["payload"], name: "index_activity_entries_on_payload", using: :gin
     t.index ["register_item_id"], name: "index_activity_entries_on_register_item_id"
+    t.index ["status"], name: "index_activity_entries_status_excluding_200", where: "((status)::text <> '200'::text)"
     t.index ["update_id"], name: "index_activity_entries_on_update_id"
   end
 
