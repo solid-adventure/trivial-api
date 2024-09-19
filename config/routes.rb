@@ -24,7 +24,7 @@ Rails.application.routes.draw do
 
   resources :users
 
-  resources :organizations do
+  resources :organizations, concerns: :auditable do
     member do
       delete 'delete_org_role'
     end
