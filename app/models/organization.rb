@@ -22,6 +22,10 @@ class Organization < ApplicationRecord
 
   default_scope { order(created_at: :asc) }
 
+  def admin?(user)
+    org_roles.find_by(user: user)&.role == 'admin'
+  end
+
   private
     def create_default_register
       Register.create!(
