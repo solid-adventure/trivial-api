@@ -18,25 +18,6 @@ describe 'Activity Entries API' do
         id: { type: :integer },
         owner_id: { type: :integer },
         owner_type: { type: :string },
-        app_id: { type: :integer },
-        register_item_id: { type: :integer, nullable: true },
-        activity_type: { type: :string },
-        status: { type: :string, nullable: true },
-        source: { type: :string, nullable: true },
-        duration_ms: { type: :integer, nullable: true },
-        payload: { type: :object, nullable: true },
-        diagnostics: { type: :object, nullable: true }
-      }, required: ['app_id', 'activity_type']
-    }
-  end
-
-  def self.create_activity_schema
-    {
-      type: :object,
-      properties: {
-        id: { type: :integer },
-        owner_id: { type: :integer },
-        owner_type: { type: :string },
         app_id: { type: :string },
         register_item_id: { type: :integer, nullable: true },
         activity_type: { type: :string },
@@ -103,7 +84,7 @@ describe 'Activity Entries API' do
       }
 
       response '201', 'Activity logged', save_request_example: :new_activity do
-        schema create_activity_schema
+        schema activity_schema
 
         run_test! do |response|
           data = JSON.parse(response.body)

@@ -8,6 +8,8 @@ class ActivityEntriesController < ApplicationController
     search = params[:search] ? JSON.parse(params[:search]) : []
     if search.any?
       @activity_entries = if search_on_payload?(search)
+                            # adding a limit when payload is present in the search creates an inefficient query plan
+                            # plucking ids then limiting on the id only search avoids this
                             ids = ActivityEntry.search(@activity_entries, search).pluck(:id)
                             ActivityEntry.where(id: ids)
                           else
@@ -16,7 +18,7 @@ class ActivityEntriesController < ApplicationController
     end
 
     @activity_entries = @activity_entries.order(id: :desc).limit(limit)
-    render json: @activity_entries, status: :ok, adapter: :attributes
+    render json: @activity_entries, status: :ok, adapter: :attributes, each_serializer: ActivityEntryIndexSerializer
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
   end
