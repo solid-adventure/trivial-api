@@ -1,21 +1,26 @@
 class ActivityEntriesController < ApplicationController
-  MAX_RESULTS = 20
-
   skip_before_action :authenticate_user!, only: [:update, :create_from_request]
-
+  before_action :set_activity_entries, only: %i[index]
 
   def index
     authorize! :index, ActivityEntry
 
-    begin
-      search = params[:search] ? JSON.parse(params[:search]) : []
-      if search.any?
-        @activity = ActivityEntry.search(app_activity, search)
-      end
-      render json: activity_for_index.map(&:activity_attributes_for_index).to_json
-    rescue StandardError => exception
-      render_errors(exception, status: :unprocessable_entity)
+    search = params[:search] ? JSON.parse(params[:search]) : []
+    if search.any?
+      @activity_entries = if search_on_payload?(search)
+                            # adding a limit when payload is present in the search creates an inefficient query plan
+                            # plucking ids then limiting on the id only search avoids this
+                            ids = ActivityEntry.search(@activity_entries, search).pluck(:id)
+                            ActivityEntry.where(id: ids)
+                          else
+                            ActivityEntry.search(@activity_entries, search)
+                          end
     end
+
+    @activity_entries = @activity_entries.order(id: :desc).limit(limit)
+    render json: @activity_entries, status: :ok, adapter: :attributes, each_serializer: ActivityEntryIndexSerializer
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
   end
 
   def show
@@ -126,24 +131,7 @@ class ActivityEntriesController < ApplicationController
   end
 
   private
-  def activity_for_index
-    attrs = [:id, :owner_id, :owner_type, :app_id, :register_item_id, :activity_type, :status, :duration_ms, :created_at]
-    @activity ||= app_activity
-    ids = @activity.pluck(:id)
-    ActivityEntry.select(attrs).where(id: ids).order(id: :desc).limit(limit)
-  end
-
-  def activity
-    @activity ||= app_activity.limit(limit).order(id: :desc)
-  end
-
-  def app_activity
-    if params[:app_id].present?
-      current_user.associated_apps.find_by_name(params[:app_id]).activity_entries
-    else
-      current_user.associated_activity_entries
-    end
-  end
+  MAX_RESULTS = 20
 
   def limit
     [[(params[:limit] || MAX_RESULTS).to_i, 1].max, MAX_RESULTS].min
@@ -161,6 +149,14 @@ class ActivityEntriesController < ApplicationController
     @activity_params = {}.merge(params.permit(:status, :duration_ms, :register_item_id))
     @activity_params[:diagnostics] = JSON.parse(request.body.read)["diagnostics"]
     @activity_params
+  end
+
+  def set_activity_entries
+    @activity_entries = if params[:app_id].present?
+                          current_user.associated_apps.find_by_name(params[:app_id]).activity_entries
+                        else
+                          current_user.associated_activity_entries
+                        end
   end
 
   def updatable_entry
@@ -184,5 +180,12 @@ class ActivityEntriesController < ApplicationController
     else
       return 2
     end
+  end
+
+  def search_on_payload?(search)
+    search.each do |hash|
+      return true if hash['c'] == 'payload'
+    end
+    false
   end
 end
