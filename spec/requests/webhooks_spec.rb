@@ -30,7 +30,11 @@ describe 'Webhooks API' do
     {
       type: :object,
       properties: {
+        id: { type: :integer },
+        owner_id: { type: :integer },
+        owner_type: { type: :string },
         app_id: { type: :string },
+        register_item_id: { type: :integer, nullable: true },
         update_id: { type: :string, nullable: true },
         activity_type: { type: :string },
         status: { type: :string, nullable: true },

@@ -15,7 +15,11 @@ describe 'Activity Entries API' do
     {
       type: :object,
       properties: {
+        id: { type: :integer },
+        owner_id: { type: :integer },
+        owner_type: { type: :string },
         app_id: { type: :string },
+        register_item_id: { type: :integer, nullable: true },
         activity_type: { type: :string },
         status: { type: :string, nullable: true },
         source: { type: :string, nullable: true },
@@ -70,12 +74,14 @@ describe 'Activity Entries API' do
         required: [ 'app_id', 'activity_type' ]
       }
       let(:payload) { {"test_data" => "12345"} }
-      let(:new_activity) { {
-        app_id: user_app.name,
-        activity_type: 'request',
-        source: 'localhost',
-        payload: payload
-      } }
+      let(:new_activity) {
+        {
+          app_id: user_app.name,
+          activity_type: 'request',
+          source: 'localhost',
+          payload: payload
+        }
+      }
 
       response '201', 'Activity logged', save_request_example: :new_activity do
         schema activity_schema
