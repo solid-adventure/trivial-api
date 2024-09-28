@@ -1,5 +1,6 @@
 module Services
   class Report
+
     def item_count(args)
       simple_stat_lookup("count", args)
     end
@@ -12,9 +13,46 @@ module Services
       simple_stat_lookup("average", args)
     end
 
+    def cache_cutoff(timezone)
+      (Time.now - 2.days).in_time_zone(timezone)
+    end
+
+    def cache_key(stat, args)
+      "simple_stat_lookup/#{stat}_#{args.reject { |k, _| k == :user }.to_s}"
+    end
+
     private
 
+
+    # The main entry point for all report queries. This method
+    # will check if the end_at time is after the cache cutoff
+    # and if so, will combine the cached results with the live db results
     def simple_stat_lookup(stat, args)
+      timezone = validate_timezone!(args[:timezone]).freeze
+      start_at, end_at = validate_time_range!(args[:start_at], args[:end_at], timezone)
+      cutoff = cache_cutoff(timezone)
+
+      if start_at <= cutoff && end_at <= cutoff
+        return cached_simple_stat_lookup(stat, args)
+      elsif start_at <= cutoff && end_at > cutoff
+        cached_result = cached_simple_stat_lookup(stat, args.merge(end_at: cutoff.iso8601))
+        live_result = _simple_stat_lookup(stat, args.merge(start_at: cutoff.iso8601))
+        return combine_results(cached_result, live_result)
+      elsif start_at > cutoff && end_at > cutoff
+        return _simple_stat_lookup(stat, args)
+      else
+        # This case should never happen if the input is validated correctly
+        raise ArgumentError, "Invalid time range"
+      end
+    end
+
+    def cached_simple_stat_lookup(stat, args)
+      Rails.cache.fetch(cache_key(stat, args), expires_in: 1.day) do
+        _simple_stat_lookup(stat, args)
+      end
+    end
+
+    def _simple_stat_lookup(stat, args)
       return unless stat.in? %w(count sum average)
       timezone = validate_timezone!(args[:timezone]).freeze
       start_at, end_at = validate_time_range!(args[:start_at], args[:end_at], timezone)
@@ -148,5 +186,21 @@ module Services
       raise ArgumentError, 'timezone mismatched from time range timezones' if timezone.utc_offset != time.utc_offset
       time
     end
+
+    def combine_results(cached_result, live_result)
+      combined = { title: cached_result[:title] }
+      all_groups = (cached_result[:count] + live_result[:count]).map { |item| [item[:period], item[:group]] }.uniq
+      combined[:count] = all_groups.map do |period, group|
+        cached_item = cached_result[:count].find { |item| item[:period] == period && item[:group] == group }
+        live_item = live_result[:count].find { |item| item[:period] == period && item[:group] == group }
+        {
+          period: period,
+          group: group,
+          value: (cached_item&.dig(:value) || 0) + (live_item&.dig(:value) || 0)
+        }
+      end
+      combined
+    end
+
   end
 end
