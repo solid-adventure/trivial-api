@@ -189,17 +189,27 @@ module Services
     end
 
     def combine_results(cached_result, live_result)
+      raise "Invalid cached result" unless cached_result.is_a?(Hash)
+      raise "Invalid live result" unless live_result.is_a?(Hash)
+
       combined = { title: cached_result[:title] }
-      all_groups = (cached_result[:count] + live_result[:count]).map { |item| [item[:period], item[:group]] }.uniq
+      cached_counts = cached_result[:count] || []
+      live_counts = live_result[:count] || []
+
+      all_groups = (cached_counts + live_counts).map { |item| [item[:period], item[:group]] }.uniq
+
+      # Create lookup hashes for faster access
+      cached_lookup = cached_counts.each_with_object({}) { |item, hash| hash[[item[:period], item[:group]]] = item[:value] }
+      live_lookup = live_counts.each_with_object({}) { |item, hash| hash[[item[:period], item[:group]]] = item[:value] }
+
       combined[:count] = all_groups.map do |period, group|
-        cached_item = cached_result[:count].find { |item| item[:period] == period && item[:group] == group }
-        live_item = live_result[:count].find { |item| item[:period] == period && item[:group] == group }
         {
           period: period,
           group: group,
-          value: (cached_item&.dig(:value) || 0) + (live_item&.dig(:value) || 0)
+          value: (cached_lookup[[period, group]] || 0) + (live_lookup[[period, group]] || 0)
         }
       end
+
       combined
     end
 
