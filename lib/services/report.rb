@@ -48,6 +48,7 @@ module Services
 
     def cached_simple_stat_lookup(stat, args)
       Rails.cache.fetch(cache_key(stat, args), expires_in: 1.day) do
+        Rails.logger.info "Cache miss for #{cache_key(stat, args)}"
         _simple_stat_lookup(stat, args)
       end
     end
