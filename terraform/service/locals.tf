@@ -19,7 +19,7 @@ locals {
     canary : 512,
     stable : 512,
     sandbox : 512,
-    production : 1024
+    production : 2048
   }
 
   ecs_mem = {

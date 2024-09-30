@@ -97,7 +97,7 @@ locals {
     },
     {
       name : "RAILS_MAX_THREADS",
-      value : "24"
+      value : "18"
     },
     {
       name : "WEB_CONCURRENCY",
