@@ -26,7 +26,7 @@ locals {
     canary : 1024,
     stable : 1024,
     sandbox : 1024,
-    production : 2048
+    production : 4096
   }
 
   # Cleaner Remote Imports
