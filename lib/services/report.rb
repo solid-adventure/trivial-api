@@ -183,7 +183,6 @@ module Services
     def validate_time!(time_string, timezone)
       time = Time.iso8601(time_string)
       return time unless timezone
-      raise ArgumentError, 'timezone mismatched from time range timezones' if timezone.utc_offset != time.utc_offset
       time
     end
 
