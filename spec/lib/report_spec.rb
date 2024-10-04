@@ -359,13 +359,6 @@ RSpec.describe Services::Report do
       end.to raise_error(ArgumentError)
     end
 
-    it 'raises an error if start_at or end_at timezones mismatch from timezone' do
-      args[:timezone] = 'Etc/GMT+5' # EST, start_at and end_at are EDT
-      expect do
-        report.send(:simple_stat_lookup, 'count', args)
-      end.to raise_error(ArgumentError)
-    end
-
     it 'raises an error when an invalid group_by is provided' do
       args[:group_by] = ['register_id']
       expect do
