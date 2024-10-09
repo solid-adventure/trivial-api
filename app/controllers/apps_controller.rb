@@ -125,10 +125,10 @@ class AppsController < ApplicationController
     @activity_params
   end
 
-  def get_activity_for(app_ids, date_cutoff)
+  def get_activity_for(app_ids, date_cutoff = nil)
     date_cutoff ||= Time.now.midnight - 7.days
     ActivityEntry.requests
-      .where(app_ids:, created_at: date_cutoff..)
+      .where(app_id: app_ids, created_at: date_cutoff..)
       .group(:app_id, "created_at::date", :status)
       .count
   end
