@@ -72,8 +72,9 @@ class AppsController < ApplicationController
   end
 
   def collection_activity_stats
-    app_ids = App.where(name: params[:app_names] || []).pluck(:id) || apps.pluck(:id)
-    raise CanCan::AccessDenied unless current_user.associated_apps.pluck(:id).includes? app_ids
+    app_names = params[:app_names] || []
+    app_ids = app_names.any? ? App.where(name: app_names).pluck(:id) : apps.pluck(:id)
+    raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
 
     app_activity_groups = get_activity_for(app_ids)
     app_activity_stats = format_activity(app_activity_groups)
