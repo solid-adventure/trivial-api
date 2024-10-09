@@ -70,6 +70,31 @@ class AppsController < ApplicationController
   def name_suggestion
     render json: {suggestion: App.new.name_suggestion}
   end
+
+  def collection_activity_stats
+    app_names = params[:app_names] || []
+    app_ids = app_names.any? ? App.where(name: app_names).pluck(:id) : apps.pluck(:id)
+    raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
+
+    app_activity_groups = get_activity_for(app_ids)
+    app_activity_stats = format_activity(app_activity_groups)
+
+    render json: app_activity_stats.to_json, status: :ok
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
+  end
+
+  def activity_stats
+    authorize! :read, app
+
+    app_activity_group = get_activity_for(app.id)
+    app_activity_stats = format_activity(app_activity_group).first[:stats]
+
+    render json: app_activity_stats.to_json
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
+  end
+
   private
 
   def app
@@ -98,5 +123,26 @@ class AppsController < ApplicationController
     @activity_params = {}
     @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
     @activity_params
+  end
+
+  def get_activity_for(app_ids, date_cutoff)
+    date_cutoff ||= Time.now.midnight - 7.days
+    ActivityEntry.requests
+      .where(app_ids:, created_at: date_cutoff..)
+      .group(:app_id, "created_at::date", :status)
+      .count
+  end
+
+  def format_activity(activity)
+    results = {}
+    activity.each do |(app_id, date, status), value|
+      results_hash[app_id] ||= { app_id:, stats: {} }
+      results_hash[app_id][:stats][date] ||= { date:, count: {} }
+      results_hash[app_id][:stats][date][:count][status] = value
+    end
+    results.each do |app_id, inner_hash|
+      inner_hash[:stats] = inner_hash[:stats].values
+    end
+    results.values
   end
 end
