@@ -75,11 +75,12 @@ class AppsController < ApplicationController
     app_names = params[:app_names].to_s.split(',')
     raise 'Invalid app_names provided' unless app_names.any?
 
-    app_ids = App.where(name: app_names).pluck(:id)
+    app_id_names_map = App.where(name: app_names).pluck(:id, :name).to_h
+    app_ids = app_id_names_map.keys
     raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
 
     app_activity_groups = get_activity_for(app_ids)
-    app_activity_stats = format_activity(app_activity_groups)
+    app_activity_stats = format_activity(app_activity_groups, app_id_names_map)
 
     render json: app_activity_stats.to_json, status: :ok
   rescue StandardError => exception
@@ -89,8 +90,9 @@ class AppsController < ApplicationController
   def activity_stats
     authorize! :read, app
 
+    app_id_names_map = { app.id => app.name }
     app_activity_group = get_activity_for(app.id)
-    app_activity_stats = format_activity(app_activity_group).first[:stats]
+    app_activity_stats = format_activity(app_activity_group, app_id_names_map).first[:stats]
 
     render json: app_activity_stats.to_json
   rescue StandardError => exception
@@ -135,10 +137,10 @@ class AppsController < ApplicationController
       .count
   end
 
-  def format_activity(activity)
+  def format_activity(activity, app_id_names_map)
     results = {}
     activity.each do |(app_id, date, status), value|
-      results[app_id] ||= { app_id:, stats: {} }
+      results[app_id] ||= { app_id: app_id_names_map[app_id], stats: {} }
       results[app_id][:stats][date] ||= { date:, count: {} }
       results[app_id][:stats][date][:count][status] = value
     end
