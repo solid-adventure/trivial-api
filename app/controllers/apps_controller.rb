@@ -138,9 +138,9 @@ class AppsController < ApplicationController
   def format_activity(activity)
     results = {}
     activity.each do |(app_id, date, status), value|
-      results_hash[app_id] ||= { app_id:, stats: {} }
-      results_hash[app_id][:stats][date] ||= { date:, count: {} }
-      results_hash[app_id][:stats][date][:count][status] = value
+      results[app_id] ||= { app_id:, stats: {} }
+      results[app_id][:stats][date] ||= { date:, count: {} }
+      results[app_id][:stats][date][:count][status] = value
     end
     results.each do |app_id, inner_hash|
       inner_hash[:stats] = inner_hash[:stats].values
