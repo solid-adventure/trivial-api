@@ -73,11 +73,22 @@ class ActivityEntriesController < ApplicationController
   def stats
     app = current_user.associated_apps.find_by_name!(params[:app_id])
     authorize! :read, app
-    if app
-      render json: ActivityEntry.chart_stats(app.id, 7)
-    else
-      render status: :not_found
+
+    date_cutoff = Time.now - 7.days
+    grouped_stats = app.activity_entries
+      .where(activity_type: 'request', created_at: date_cutoff..)
+      .group("created_at::date", :status)
+      .count
+
+    formatted_stats = {}
+    grouped_stats.each do |(date, status), count|
+      formatted_stats[date] ||= { date: date, count: {} }
+      formatted_stats[date][:count][status] = count
     end
+
+    render json: formatted_stats.values.to_json
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
   end
 
   # POST /activity_entries/keys?col=col_name
