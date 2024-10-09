@@ -33,12 +33,11 @@ Rails.application.routes.draw do
   resources :apps, concerns: :auditable, only: [:index, :create, :update, :show, :destroy] do
     collection do
       get 'name_suggestion'
-      get 'stats/hourly'
-      get 'stats/daily'
-      get 'stats/weekly'
+      get 'activity_stats', to: 'apps#collection_activity_stats'
     end
 
     member do 
+      get 'activity_stats'
       post 'copy'
       post 'last_request'
       post 'tags'
