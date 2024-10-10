@@ -80,9 +80,11 @@ class AppsController < ApplicationController
     raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
 
     date_cutoff ||= Time.now.midnight - 7.days
-    app_activity_groups = get_activity_for(app_ids, date_cutoff)
-    app_activity_stats = format_activity(app_activity_groups, app_id_names_map, date_cutoff)
+    cache_cutoff = Time.now.midnight
+    cached_app_activity_stats = cached_activity_for(app_ids, app_id_names_map, date_cutoff, cache_cutoff)
+    todays_app_activity_stats = uncached_activity_for(app_ids, app_id_names_map, cache_cutoff)
 
+    app_activity_stats = merge_activity_stats(cached_app_activity_stats, todays_app_activity_stats)
     render json: app_activity_stats.to_json, status: :ok
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
@@ -93,8 +95,11 @@ class AppsController < ApplicationController
 
     app_id_names_map = { app.id => app.name }
     date_cutoff ||= Time.now.midnight - 7.days
-    app_activity_group = get_activity_for(app.id, date_cutoff)
-    app_activity_stats = format_activity(app_activity_group, app_id_names_map, date_cutoff).first[:stats]
+    cache_cutoff = Time.now.midnight
+    cached_app_activity_stats = cached_activity_for([app.id], app_id_names_map, date_cutoff, cache_cutoff)
+    todays_app_activity_stats = uncached_activity_for([app.id], app_id_names_map, cache_cutoff)
+
+    app_activity_stats = merge_activity_stats(cached_app_activity_stats, todays_app_activity_stats)
 
     render json: app_activity_stats.to_json
   rescue StandardError => exception
@@ -131,6 +136,46 @@ class AppsController < ApplicationController
     @activity_params
   end
 
+  def cached_activity_for(app_ids, app_id_names_map, date_cutoff, cache_cutoff)
+    cached_activity_stats = {}
+    uncached_app_ids = []
+    app_ids.each do |app_id|
+      cache_key = "app_activity_stats/#{app_id}/#{date_cutoff}"
+      cached_data = Rails.cache.read(cache_key)
+      if cached_data
+        cached_activity_stats[app_id] = cached_data
+      else
+        uncached_app_ids << app_id
+      end
+    end
+
+    if uncached_app_ids.any?
+      past_activity_groups = get_activity_for_cache(uncached_app_ids, date_cutoff, cache_cutoff)
+      include_cutoff = (cache_cutoff - 1.day)
+      past_activity_stats = format_activity(past_activity_groups, app_id_names_map, date_cutoff, include_cutoff)
+
+      past_activity_stats.each do |app_id, formatted_stats|
+        cache_key = "app_activity_stats/#{app_id}/#{date_cutoff}"
+        Rails.cache.write(cache_key, formatted_stats, expires_in: 12.hours)
+        cached_activity_stats[app_id] = formatted_stats
+      end
+    end
+
+    cached_activity_stats
+  end
+
+  def uncached_activity_for(app_ids, app_id_names_map, cache_cutoff)
+    app_activity_groups = get_activity_for(app_ids, cache_cutoff)
+    format_activity(app_activity_groups, app_id_names_map, cache_cutoff, Time.now)
+  end
+
+  def get_activity_for_cache(app_ids, date_cutoff, cache_cutoff)
+    ActivityEntry.requests
+      .where(app_id: app_ids, created_at: date_cutoff..cache_cutoff)
+      .group(:app_id, "created_at::date", :status)
+      .count
+  end
+
   def get_activity_for(app_ids, date_cutoff)
     ActivityEntry.requests
       .where(app_id: app_ids, created_at: date_cutoff..)
@@ -138,8 +183,8 @@ class AppsController < ApplicationController
       .count
   end
 
-  def format_activity(activity, app_id_names_map, date_cutoff)
-    included_dates_hash = (date_cutoff.to_date..Date.today).map do |date|
+  def format_activity(activity, app_id_names_map, date_cutoff, include_cutoff)
+    included_dates_hash = (date_cutoff.to_date..include_cutoff.to_date).map do |date|
       [date, { date:, count: {} }]
     end.to_h
 
@@ -148,9 +193,16 @@ class AppsController < ApplicationController
       results[app_id] ||= { app_id: app_id_names_map[app_id], stats: included_dates_hash }
       results[app_id][:stats][date][:count][status] = value
     end
-    results.each do |app_id, inner_hash|
+    results.each do |_, inner_hash|
       inner_hash[:stats] = inner_hash[:stats].values
     end
-    results.values
+    results
+  end
+
+  def merge_activity_stats(cached_stats, todays_stats)
+    cached_stats.each do |app_id, formatted_stats|
+      formatted_stats[:stats] += todays_stats[app_id][:stats]
+    end
+    cached_stats.values
   end
 end
