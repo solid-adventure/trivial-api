@@ -97,7 +97,86 @@ class App < ApplicationRecord
     activity_entries.update_all(owner_id: new_owner.id, owner_type: new_owner.class.name)
   end
 
+  def self.get_activity_stats_for(app_names:, date_cutoff:)
+    return {} if app_names.empty?
+    app_ids = App.where(name: app_names).pluck(:id)
+
+    cached_stats = cached_stats(app_ids:, date_cutoff:)
+    uncached_app_ids = app_ids - cached_activity_stats.keys
+    newly_cached_stats = cache_stats!(app_ids: uncached_app_ids, date_cutoff:)
+    cached_activity.merge!(newly_cached_stats)
+
+    uncached_activity = uncached_stats_for(app_ids)
+
+    activity_stats = cached_activity.merge(uncached_activity) do |app_id, cached, uncached|
+      cached[:stats] + uncached[:stats]
+    end
+    activity_stats.values
+  end
+
   private
+  @cache_date_cutoff = Date.today
+
+  def self.cache_key_for(app_id:, date_cutoff:)
+    "app_activity_stats/#{app_id}/#{date_cutoff}"
+  end
+
+  def self.cached_stats(app_ids:, date_cutoff:)
+    cached_stats = {}
+    app_ids.each do |app_id|
+      cache_key = cache_key_for(app_id:, date_cutoff:)
+      if cached_data = Rails.cache.read(cache_key)
+        cached_activity_stats[app_id] = cached_data
+      end
+    end
+    cached_stats
+  end
+
+  def self.cache_stats_for!(app_ids:, date_cutoff:)
+    time_range = (date_cutoff.to_time..@cache_date_cutoff.to_time)
+    included_dates = (date_cutoff...@cache_date_cutoff).to_a
+    activity_stats = stats_for(app_ids:, time_range:, included_dates:)
+
+    activity_stats.each do |app_id, formatted_stats|
+      cache_key = cache_key_for(app_id:, date_cutoff:)
+      expires_in = (Time.now.end_of_day - Time.now).seconds
+      Rails.cache.write(cache_key, formatted_stats, expires_in:)
+    end
+  end
+
+  def self.uncached_stats_for(app_ids)
+    time_range = (@cache_date_cutoff.to_time..)
+    included_dates = (@cache_date_cutoff..Date.today).to_a
+    stats_for(app_ids:, time_range:, included_dates:)
+  end
+
+  def self.stats_for(app_ids:, time_range:, included_dates:)
+    activity_groups = get_activity_groups_for(app_ids:, time_range:)
+    format_activity(activity_groups:, included_dates:)
+  end
+
+  def self.activity_groups_for(app_ids:, time_range:)
+    ActivityEntry.requests
+      .where(app_id: app_ids, created_at: date_range)
+      .group(:app_id, "created_at::date", :status)
+      .count
+  end
+
+  def self.format_activity(activity_groups:, included_dates:)
+    included_dates_hash = included_dates.map do |date|
+      [date, { date:, count: {} }]
+    end.to_h
+
+    results = {}
+    activity_groups.each do |(app_id, date, status), value|
+      results[app_id] ||= { app_id:, stats: included_dates_hash }
+      results[app_id][:stats][date][:count][status] = value
+    end
+
+    results.each do |_, inner_hash|
+      inner_hash[:stats] = inner_hash[:stats].values
+    end
+  end
 
   def credentials_name
     "credentials/#{name}"

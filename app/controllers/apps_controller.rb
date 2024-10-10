@@ -74,17 +74,10 @@ class AppsController < ApplicationController
   def collection_activity_stats
     app_names = params[:app_names].to_s.split(',')
     raise 'Invalid app_names provided' unless app_names.any?
+    raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:name) & app_names).length == app_names.length
+    date_cutoff = params[:date_cutoff].to_date || Date.today - 7.days
 
-    app_id_names_map = App.where(name: app_names).pluck(:id, :name).to_h
-    app_ids = app_id_names_map.keys
-    raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
-
-    date_cutoff ||= Time.now.midnight - 7.days
-    cache_cutoff = Time.now.midnight
-    cached_app_activity_stats = cached_activity_for(app_ids, app_id_names_map, date_cutoff, cache_cutoff)
-    todays_app_activity_stats = uncached_activity_for(app_ids, app_id_names_map, cache_cutoff)
-
-    app_activity_stats = merge_activity_stats(cached_app_activity_stats, todays_app_activity_stats)
+    app_activity_stats = App.get_activity_stats_for(app_names, date_cutoff)
     render json: app_activity_stats.to_json, status: :ok
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
@@ -92,15 +85,9 @@ class AppsController < ApplicationController
 
   def activity_stats
     authorize! :read, app
+    date_cutoff = params[:date_cutoff].to_date || Date.today - 7.days
 
-    app_id_names_map = { app.id => app.name }
-    date_cutoff ||= Time.now.midnight - 7.days
-    cache_cutoff = Time.now.midnight
-    cached_app_activity_stats = cached_activity_for([app.id], app_id_names_map, date_cutoff, cache_cutoff)
-    todays_app_activity_stats = uncached_activity_for([app.id], app_id_names_map, cache_cutoff)
-
-    app_activity_stats = merge_activity_stats(cached_app_activity_stats, todays_app_activity_stats)
-
+    app_activity_stats = App.get_activity_stats_for([app.name], date_cutoff)
     render json: app_activity_stats.to_json
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
