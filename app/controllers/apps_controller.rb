@@ -79,8 +79,9 @@ class AppsController < ApplicationController
     app_ids = app_id_names_map.keys
     raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
 
-    app_activity_groups = get_activity_for(app_ids)
-    app_activity_stats = format_activity(app_activity_groups, app_id_names_map)
+    date_cutoff ||= Time.now.midnight - 7.days
+    app_activity_groups = get_activity_for(app_ids, date_cutoff)
+    app_activity_stats = format_activity(app_activity_groups, app_id_names_map, date_cutoff)
 
     render json: app_activity_stats.to_json, status: :ok
   rescue StandardError => exception
@@ -91,8 +92,9 @@ class AppsController < ApplicationController
     authorize! :read, app
 
     app_id_names_map = { app.id => app.name }
-    app_activity_group = get_activity_for(app.id)
-    app_activity_stats = format_activity(app_activity_group, app_id_names_map).first[:stats]
+    date_cutoff ||= Time.now.midnight - 7.days
+    app_activity_group = get_activity_for(app.id, date_cutoff)
+    app_activity_stats = format_activity(app_activity_group, app_id_names_map, date_cutoff).first[:stats]
 
     render json: app_activity_stats.to_json
   rescue StandardError => exception
@@ -129,19 +131,21 @@ class AppsController < ApplicationController
     @activity_params
   end
 
-  def get_activity_for(app_ids, date_cutoff = nil)
-    date_cutoff ||= Time.now.midnight - 7.days
+  def get_activity_for(app_ids, date_cutoff)
     ActivityEntry.requests
       .where(app_id: app_ids, created_at: date_cutoff..)
       .group(:app_id, "created_at::date", :status)
       .count
   end
 
-  def format_activity(activity, app_id_names_map)
+  def format_activity(activity, app_id_names_map, date_cutoff)
+    included_dates_hash = (date_cutoff.to_date..Date.today).map do |date|
+      [date, { date:, count: {} }]
+    end.to_h
+
     results = {}
     activity.each do |(app_id, date, status), value|
-      results[app_id] ||= { app_id: app_id_names_map[app_id], stats: {} }
-      results[app_id][:stats][date] ||= { date:, count: {} }
+      results[app_id] ||= { app_id: app_id_names_map[app_id], stats: included_dates_hash }
       results[app_id][:stats][date][:count][status] = value
     end
     results.each do |app_id, inner_hash|
