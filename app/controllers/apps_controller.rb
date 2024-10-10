@@ -72,12 +72,16 @@ class AppsController < ApplicationController
   end
 
   def collection_activity_stats
-    app_names = params[:app_names] || []
-    app_ids = app_names.any? ? App.where(name: app_names).pluck(:id) : apps.pluck(:id)
+    app_names = params[:app_names].to_s.split(',')
+    raise 'Invalid app_names provided' unless app_names.any?
+
+    app_id_names_map = App.where(name: app_names).pluck(:id, :name).to_h
+    app_ids = app_id_names_map.keys
     raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
 
-    app_activity_groups = get_activity_for(app_ids)
-    app_activity_stats = format_activity(app_activity_groups)
+    date_cutoff ||= Time.now.midnight - 7.days
+    app_activity_groups = get_activity_for(app_ids, date_cutoff)
+    app_activity_stats = format_activity(app_activity_groups, app_id_names_map, date_cutoff)
 
     render json: app_activity_stats.to_json, status: :ok
   rescue StandardError => exception
@@ -87,8 +91,10 @@ class AppsController < ApplicationController
   def activity_stats
     authorize! :read, app
 
-    app_activity_group = get_activity_for(app.id)
-    app_activity_stats = format_activity(app_activity_group).first[:stats]
+    app_id_names_map = { app.id => app.name }
+    date_cutoff ||= Time.now.midnight - 7.days
+    app_activity_group = get_activity_for(app.id, date_cutoff)
+    app_activity_stats = format_activity(app_activity_group, app_id_names_map, date_cutoff).first[:stats]
 
     render json: app_activity_stats.to_json
   rescue StandardError => exception
@@ -126,19 +132,21 @@ class AppsController < ApplicationController
   end
 
   def get_activity_for(app_ids, date_cutoff)
-    date_cutoff ||= Time.now.midnight - 7.days
     ActivityEntry.requests
-      .where(app_ids:, created_at: date_cutoff..)
+      .where(app_id: app_ids, created_at: date_cutoff..)
       .group(:app_id, "created_at::date", :status)
       .count
   end
 
-  def format_activity(activity)
+  def format_activity(activity, app_id_names_map, date_cutoff)
+    included_dates_hash = (date_cutoff.to_date..Date.today).map do |date|
+      [date, { date:, count: {} }]
+    end.to_h
+
     results = {}
     activity.each do |(app_id, date, status), value|
-      results_hash[app_id] ||= { app_id:, stats: {} }
-      results_hash[app_id][:stats][date] ||= { date:, count: {} }
-      results_hash[app_id][:stats][date][:count][status] = value
+      results[app_id] ||= { app_id: app_id_names_map[app_id], stats: included_dates_hash }
+      results[app_id][:stats][date][:count][status] = value
     end
     results.each do |app_id, inner_hash|
       inner_hash[:stats] = inner_hash[:stats].values
