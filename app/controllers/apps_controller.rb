@@ -156,7 +156,8 @@ class AppsController < ApplicationController
 
       past_activity_stats.each do |app_id, formatted_stats|
         cache_key = "app_activity_stats/#{app_id}/#{date_cutoff}"
-        Rails.cache.write(cache_key, formatted_stats, expires_in: 12.hours)
+        expires_in = (Time.now.end_of_day - Time.now).seconds
+        Rails.cache.write(cache_key, formatted_stats, expires_in:)
         cached_activity_stats[app_id] = formatted_stats
       end
     end
