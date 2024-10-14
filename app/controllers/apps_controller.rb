@@ -75,7 +75,7 @@ class AppsController < ApplicationController
     app_names = params[:app_names].to_s.split(',')
     raise 'Invalid app_names provided' unless app_names.any?
     raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:name) & app_names).length == app_names.length
-    date_cutoff = params[:date_cutoff].to_date || Date.today - 7.days
+    date_cutoff = params[:date_cutoff]&.to_date || Date.today - 7.days
 
     collection_activity_stats = App.get_activity_stats_for(app_names:, date_cutoff:)
     render json: collection_activity_stats.to_json, status: :ok
@@ -85,7 +85,7 @@ class AppsController < ApplicationController
 
   def activity_stats
     authorize! :read, app
-    date_cutoff = params[:date_cutoff].to_date || Date.today - 7.days
+    date_cutoff = params[:date_cutoff]&.to_date || Date.today - 7.days
 
     app_activity_stats = App.get_activity_stats_for(app_names: [app.name], date_cutoff:)
     render json: app_activity_stats.to_json
