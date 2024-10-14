@@ -3,7 +3,7 @@ FactoryBot.define do
   factory :activity_entry do
     association :owner, factory: :user
     app { FactoryBot.create(:app, owner: owner) }
-    activity_type { 'test' }
+    activity_type { 'request' }
     status { '200' }
     source { 'localhost' }
     duration_ms { rand(200..5000) }
