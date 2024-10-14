@@ -74,28 +74,20 @@ class AppsController < ApplicationController
   def collection_activity_stats
     app_names = params[:app_names].to_s.split(',')
     raise 'Invalid app_names provided' unless app_names.any?
+    raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:name) & app_names).length == app_names.length
+    date_cutoff = params[:date_cutoff]&.to_date || Date.today - 7.days
 
-    app_id_names_map = App.where(name: app_names).pluck(:id, :name).to_h
-    app_ids = app_id_names_map.keys
-    raise CanCan::AccessDenied unless (current_user.associated_apps.pluck(:id) & app_ids).length == app_ids.length
-
-    date_cutoff ||= Time.now.midnight - 7.days
-    app_activity_groups = get_activity_for(app_ids, date_cutoff)
-    app_activity_stats = format_activity(app_activity_groups, app_id_names_map, date_cutoff)
-
-    render json: app_activity_stats.to_json, status: :ok
+    collection_activity_stats = App.get_activity_stats_for(app_names:, date_cutoff:)
+    render json: collection_activity_stats.to_json, status: :ok
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
   end
 
   def activity_stats
     authorize! :read, app
+    date_cutoff = params[:date_cutoff]&.to_date || Date.today - 7.days
 
-    app_id_names_map = { app.id => app.name }
-    date_cutoff ||= Time.now.midnight - 7.days
-    app_activity_group = get_activity_for(app.id, date_cutoff)
-    app_activity_stats = format_activity(app_activity_group, app_id_names_map, date_cutoff).first[:stats]
-
+    app_activity_stats = App.get_activity_stats_for(app_names: [app.name], date_cutoff:)
     render json: app_activity_stats.to_json
   rescue StandardError => exception
     render_errors(exception, status: :unprocessable_entity)
@@ -129,28 +121,5 @@ class AppsController < ApplicationController
     @activity_params = {}
     @activity_params[:payload] = JSON.parse(request.body.read)["payload"]
     @activity_params
-  end
-
-  def get_activity_for(app_ids, date_cutoff)
-    ActivityEntry.requests
-      .where(app_id: app_ids, created_at: date_cutoff..)
-      .group(:app_id, "created_at::date", :status)
-      .count
-  end
-
-  def format_activity(activity, app_id_names_map, date_cutoff)
-    included_dates_hash = (date_cutoff.to_date..Date.today).map do |date|
-      [date, { date:, count: {} }]
-    end.to_h
-
-    results = {}
-    activity.each do |(app_id, date, status), value|
-      results[app_id] ||= { app_id: app_id_names_map[app_id], stats: included_dates_hash }
-      results[app_id][:stats][date][:count][status] = value
-    end
-    results.each do |app_id, inner_hash|
-      inner_hash[:stats] = inner_hash[:stats].values
-    end
-    results.values
   end
 end
