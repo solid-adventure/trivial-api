@@ -20,11 +20,11 @@ class CacheWarmUpJob < ApplicationJob
 
   private
 
-  def warm_up_app_activity_stats(app_ids: App.kept.pluck(:id), date_cutoff: Date.today - 7.days)
+  def warm_up_app_activity_stats(app_ids: App.kept.pluck(:id), date_cutoff: Date.today - 7.days, sleep: rand(0..900))
     raise 'app_ids must be an array of integers' unless app_ids.is_a? Array
     raise 'date_cutoff must be a Date type' unless date_cutoff.is_a? Date
 
-    sleep(rand(0..5400)) # sleep up to 1.5 hours to decrease DB collisions on multiple Rails instances
+    sleep(sleep) # sleep to decrease DB collisions on multiple Rails instances
 
     Timeout.timeout(2.hours) do
       Rails.logger.info("Warming up app_activity_stats cache with #{app_ids.size} apps and cutoff date #{date_cutoff}")
