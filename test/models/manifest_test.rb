@@ -4,7 +4,7 @@ class ManifestTest < ActiveSupport::TestCase
     def setup
         @manifest = Manifest.new
         @manifest.app_id = 'BrownShirt'
-        @manifest.content = '{"x":1}'
+        @manifest.content = { "x": 1 }
         @manifest.owner = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
         @manifest.app = App.create(owner: @manifest.owner, name: 'BrownShirt')
         @manifest.save!
@@ -36,12 +36,6 @@ class ManifestTest < ActiveSupport::TestCase
         assert_equal @manifest.errors[:owner], ["must exist"]
     end
 
-    test 'content app id updates to app_id' do
-        @manifest.set_content_app_id
-        content = JSON.parse(@manifest.content)
-        assert_equal content["app_id"], "BrownShirt"
-    end
-
     test 'copy_to_app! updates app and user' do
         new_app = App.new(descriptive_name: "Hold Steady")
         new_app.owner = @user2
@@ -50,5 +44,6 @@ class ManifestTest < ActiveSupport::TestCase
         new_manifest = @manifest.copy_to_app!(new_app)
         assert_equal new_manifest.owner, @user2
         assert_equal new_manifest.app, new_app
+        assert_equal new_manifest.content['app_id'], new_app.name
     end
 end
