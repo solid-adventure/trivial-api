@@ -4,7 +4,7 @@ class ManifestTest < ActiveSupport::TestCase
     def setup
         @manifest = Manifest.new
         @manifest.app_id = 'BrownShirt'
-        @manifest.content = '{"x":1}'
+        @manifest.content = { "x": 1 }
         @manifest.owner = User.create(name: 'bilbo', email: 'test@gmail.com', password: '12345678')
         @manifest.app = App.create(owner: @manifest.owner, name: 'BrownShirt')
         @manifest.save!
@@ -44,5 +44,6 @@ class ManifestTest < ActiveSupport::TestCase
         new_manifest = @manifest.copy_to_app!(new_app)
         assert_equal new_manifest.owner, @user2
         assert_equal new_manifest.app, new_app
+        assert_equal new_manifest.content['app_id'], new_app.name
     end
 end
