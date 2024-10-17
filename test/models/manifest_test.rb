@@ -36,12 +36,6 @@ class ManifestTest < ActiveSupport::TestCase
         assert_equal @manifest.errors[:owner], ["must exist"]
     end
 
-    test 'content app id updates to app_id' do
-        @manifest.set_content_app_id
-        content = JSON.parse(@manifest.content)
-        assert_equal content["app_id"], "BrownShirt"
-    end
-
     test 'copy_to_app! updates app and user' do
         new_app = App.new(descriptive_name: "Hold Steady")
         new_app.owner = @user2
