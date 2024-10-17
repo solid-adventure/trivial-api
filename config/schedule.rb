@@ -19,11 +19,10 @@
 
 # Learn more: http://github.com/javan/whenever
 
-set :output, '/log/cron.log'
-set :environment, ENV['RAILS_ENV'] || 'production'
-
-job_type :runner, "bundle exec rails runner -e :environment ':task' :output"
+env :PATH, ENV['PATH']
+set :output, "#{path}/log/cron.log"
+set :environment, ENV['RAILS_ENV']
 
 every 1.day, at: '12:01 am' do
-  runner "CacheWarmupJob.perform_later('app_activity_stats')"
+  runner "CacheWarmupJob.perform_now(cache_name: 'app_activity_stats', sleep: 0)"
 end
