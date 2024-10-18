@@ -18,6 +18,6 @@ class CreateDashboards < ActiveRecord::Migration[7.0]
         }
       )
     end
-    Dashboard.insert_all(default_dashboards)
+    Dashboard.insert_all(default_dashboards) if default_dashboards.any?
   end
 end
