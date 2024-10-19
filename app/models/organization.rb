@@ -26,6 +26,30 @@ class Organization < ApplicationRecord
     org_roles.find_by(user: user)&.role == 'admin'
   end
 
+def own_and_associated_audits
+    Audited::Audit.where(<<-SQL,
+      (auditable_type = ? AND auditable_id = ?) OR
+      (associated_type = ? AND associated_id = ?) OR
+      (auditable_type = ? AND auditable_id IN (?)) OR
+      (auditable_type = ? AND auditable_id IN (?)) OR
+      (auditable_type = ? AND auditable_id IN (?)) OR
+      (auditable_type = ? AND auditable_id IN (?)) OR
+      (auditable_type = ? AND auditable_id IN (?)) OR
+      (auditable_type = ? AND auditable_id IN (?)) OR
+      (auditable_type = ? AND auditable_id IN (?))
+    SQL
+      'Organization', id,
+      'Organization', id,
+      'App', owned_apps.pluck(:id),
+      'Manifest', owned_manifests.pluck(:id),
+      'ManifestDraft', owned_manifest_drafts.pluck(:id),
+      'CredentialSet', owned_credential_sets.pluck(:id),
+      'Register', owned_registers.pluck(:id),
+      'Dashboard', owned_dashboards.pluck(:id),
+      'User', users.pluck(:id)
+    )
+  end
+
   private
     def create_default_register
       Register.create!(
