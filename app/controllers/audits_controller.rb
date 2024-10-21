@@ -81,6 +81,20 @@ class AuditsController < ApplicationController
         audited_changes: audit.audited_changes.map do |key, value|
 
           if pretty_json_diff? audit.auditable_type, key
+
+
+            # TODO: This "Invalid JSON" message happens when you copy an app, because the content changes at the same time as
+            #       the other attributes. We should separate the content diff from the
+            #       other attribute changes
+
+            # Invalid JSON
+            # owner_id: 18
+            # owner_type: Organization
+            # internal_app_id: 1476
+            # The rescue is silencing this:
+            # ArgumentError (wrong number of arguments (given 11, expected 0..2)):
+            # app/models/manifest.rb:55:in `json_patch'
+
             begin
               {
                 attribute: key,
