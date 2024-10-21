@@ -81,12 +81,22 @@ class AuditsController < ApplicationController
         audited_changes: audit.audited_changes.map do |key, value|
 
           if pretty_json_diff? audit.auditable_type, key
-            {
-              attribute: key,
-              patch: Manifest.json_patch(*value),
-              old_value: value.is_a?(Array) ? value[0] : nil,
-              new_value: value.is_a?(Array) ? value[1] : value
-            }
+            begin
+              {
+                attribute: key,
+                patch: Manifest.json_patch(*value),
+                old_value: value.is_a?(Array) ? value[0] : nil,
+                new_value: value.is_a?(Array) ? value[1] : value
+              }
+            rescue JSON::ParserError
+              Rails.logger.error "Invalid JSON in audit #{audit.id}"
+              {
+                attribute: key,
+                patch: "Invalid JSON",
+                old_value: value.is_a?(Array) ? value[0] : nil,
+                new_value: value.is_a?(Array) ? value[1] : value
+              }
+            end
           elsif audit.auditable_type == 'User' && key == 'tokens'
             {
               attribute: key,
@@ -112,6 +122,7 @@ class AuditsController < ApplicationController
 
         end.flatten
       }
+
     end
   end
 
