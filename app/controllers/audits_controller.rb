@@ -90,18 +90,26 @@ class AuditsController < ApplicationController
           elsif audit.auditable_type == 'User' && key == 'tokens'
             {
               attribute: key,
-              patch: "Log In",
+              patch: "Log In / Out"
               old_value: value.is_a?(Array) ? value[0] : nil,
               new_value: value.is_a?(Array) ? value[1] : value
             }
-          else
+          elsif value.is_a?(Array)
             {
               attribute: key,
               patch: "- #{key}: #{value[0]}\n+ #{key}: #{value[1]}",
               old_value: value.is_a?(Array) ? value[0] : nil,
               new_value: value.is_a?(Array) ? value[1] : value
             }
+          else
+            {
+              attribute: key,
+              patch: "#{key}: #{value}",
+              old_value: value.is_a?(Array) ? value[0] : nil,
+              new_value: value.is_a?(Array) ? value[1] : value
+            }
           end
+
         end.flatten
       }
     end
