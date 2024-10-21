@@ -88,7 +88,7 @@ class AuditsController < ApplicationController
                 old_value: value.is_a?(Array) ? value[0] : nil,
                 new_value: value.is_a?(Array) ? value[1] : value
               }
-            rescue JSON::ParserError
+            rescue
               Rails.logger.error "Invalid JSON in audit #{audit.id}"
               {
                 attribute: key,
