@@ -3,7 +3,6 @@ class CacheWarmUpJob < ApplicationJob
   queue_as :default
 
   def perform(cache_name:, options: {})
-    puts("CacheWarmUpJob started for cache: #{cache_name}")
     case cache_name
     when 'app_activity_stats'
       warm_up_app_activity_stats(**options)
@@ -12,7 +11,7 @@ class CacheWarmUpJob < ApplicationJob
       return
     end
 
-    puts("Cache warm up successful. Exiting.")
+    puts("CacheWarmUpJob successful. Exiting.")
   rescue Timeout::Error
     puts("CacheWarmUpJob timed out after 2 hours, cache: #{cache}")
   rescue => e
@@ -22,8 +21,8 @@ class CacheWarmUpJob < ApplicationJob
   private
 
   def warm_up_app_activity_stats(app_ids: App.kept.pluck(:id), date_cutoff: Date.today - 7.days, delay_duration: rand(0..900))
-    raise 'app_ids must be an array of integers' unless app_ids.is_a? Array
-    raise 'date_cutoff must be a Date type' unless date_cutoff.is_a? Date
+    raise 'app_ids for app_activity_stats must be an array of integers' unless app_ids.is_a? Array
+    raise 'date_cutoff for app_activity_stats must be a Date type' unless date_cutoff.is_a? Date
 
     puts("CacheWarmUpJob Warm up app_activity_stats will start after #{delay_duration} seconds") if delay_duration > 0
     sleep(delay_duration) # sleep to decrease DB collisions on multiple Rails instances

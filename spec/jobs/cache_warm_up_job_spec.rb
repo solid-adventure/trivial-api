@@ -39,14 +39,16 @@ RSpec.describe CacheWarmUpJob, type: :job do
 
     it 'logs an error if app_ids is not an array' do
       options = { app_ids: "not_an_array", date_cutoff: }
-      expect(Rails.logger).to receive(:error).with("CacheWarmUpJob failed: app_ids must be an array of integers")
-      instance.perform(cache_name:, options:)
+      expect {
+        instance.perform(cache_name:, options:)
+      }.to output("CacheWarmUpJob failed: app_ids for app_activity_stats must be an array of integers\n").to_stdout
     end
 
     it 'logs an error if date_cutoff is not a Date' do
       options = { app_ids: , date_cutoff: 'not_a_date' }
-      expect(Rails.logger).to receive(:error).with("CacheWarmUpJob failed: date_cutoff must be a Date type")
-      instance.perform(cache_name:, options:)
+      expect {
+        instance.perform(cache_name:, options:)
+      }.to output("CacheWarmUpJob failed: date_cutoff for app_activity_stats must be a Date type\n").to_stdout
     end
   end
 end
