@@ -90,7 +90,7 @@ class AuditsController < ApplicationController
           elsif audit.auditable_type == 'User' && key == 'tokens'
             {
               attribute: key,
-              patch: "Log In / Out"
+              patch: "Log In / Out",
               old_value: value.is_a?(Array) ? value[0] : nil,
               new_value: value.is_a?(Array) ? value[1] : value
             }
