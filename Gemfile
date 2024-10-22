@@ -90,3 +90,5 @@ end
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
 gem "devise_invitable", "~> 2.0"
+
+gem "whenever", "~> 1.0"
