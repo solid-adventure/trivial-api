@@ -52,6 +52,44 @@ class Manifest < ApplicationRecord
         end
     end
 
+    def self.json_patch(new_value={}, old_value={})
+        formatted_new_value, formatted_old_value = [new_value, old_value].map do |value|
+          parsed = value.is_a?(String) ? JSON.parse(value) : value
+          parsed = deep_sort(parsed)
+          JSON.pretty_generate(parsed)
+        end
+        out = Diffy::Diff.new(formatted_new_value, formatted_old_value, context: 4).to_s
+        .split("\n").reject { |line| line.strip == '\\ No newline at end of file' }.join("\n")
+        out.length > 0 ? strip_left_whitespace(out) : 'Whitespace changes only'
+    end
+
+    # Strip indentation on text diffs on pretty JSON when only a section of the file is displayed
+    def self.strip_left_whitespace(text)
+      lines = text.split("\n")
+      min_indent = lines.reject(&:empty?)
+                        .map { |line| line.sub(/^[+-]/, '')[/\A\s*/].length }
+                        .min || 0
+      lines.map do |line|
+        if line.start_with?('-', '+')
+          "#{line[0]} #{line[1..-1].sub(/^\s{#{min_indent}}/, '')}"
+        else
+          " #{line.sub(/^\s{#{min_indent}}/, '')}"
+        end
+      end.join("\n")
+    end
+
+    # Alphabetize the keys in the manifest content to avoid whitespace changes
+    def self.deep_sort(obj)
+      case obj
+      when Hash
+        obj.sort.to_h.transform_values { |v| deep_sort(v) }
+      when Array
+        obj.map { |v| deep_sort(v) }
+      else
+        obj
+      end
+    end
+
     private
 
     def create_activity_entry
