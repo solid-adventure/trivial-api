@@ -1,6 +1,6 @@
 FROM ruby:3.1.2
 
-RUN apt-get update && apt-get install -y cron nodejs postgresql-client at
+RUN apt-get update && apt-get install -y cron nodejs postgresql-client
 WORKDIR /app
 COPY Gemfile* .
 RUN gem install bundler
@@ -11,8 +11,6 @@ COPY . .
 
 RUN chmod +x docker/entrypoint.sh
 RUN chmod +x docker/start-web.sh
-RUN bundle exec whenever --update-crontab
-RUN mkdir -p /var/run/atd
 
 ENTRYPOINT ["./docker/entrypoint.sh"]
 
