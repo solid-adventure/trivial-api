@@ -6,5 +6,11 @@
 #
 #           Tasks that cannot complete in that timeframe must be run in the background.
 
+
+# Run the cache warmup job in the background
+# >> /proc/1/fd/1 2>&1) prints logs to STDOUT
+# & runs the command in the background
+rails runner 'CacheWarmUpJob.perform_now(cache_name: "app_activity_stats", options: {delay_duration: 0})' >> /proc/1/fd/1 2>&1 &
+
 rails db:migrate
 rails server -b 0.0.0.0
