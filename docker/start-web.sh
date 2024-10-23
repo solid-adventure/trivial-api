@@ -12,5 +12,8 @@
 # & runs the command in the background
 rails runner 'CacheWarmUpJob.perform_now(cache_name: "app_activity_stats", options: {delay_duration: 0})' >> /proc/1/fd/1 2>&1 &
 
+# Start the cron service for the whenever gem
+service cron start
+
 rails db:migrate
 rails server -b 0.0.0.0

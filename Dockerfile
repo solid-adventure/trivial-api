@@ -11,6 +11,7 @@ COPY . .
 
 RUN chmod +x docker/entrypoint.sh
 RUN chmod +x docker/start-web.sh
+RUN bundle exec whenever --update-crontab
 
 ENTRYPOINT ["./docker/entrypoint.sh"]
 
