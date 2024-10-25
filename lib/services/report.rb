@@ -18,7 +18,7 @@ module Services
     end
 
     def cache_key(stat, args)
-      "simple_stat_lookup/#{stat}_#{args.reject { |k, _| k == :user }.to_s}"
+      "simple_stat_lookup/#{stat}_#{args.to_s}"
     end
 
     private
