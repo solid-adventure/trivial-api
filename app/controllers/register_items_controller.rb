@@ -35,20 +35,18 @@ class RegisterItemsController < ApplicationController
 
   # POST /register_items
   def create
-    @register_item = RegisterItem.new(register_item_params)
-    @register_item.owner = @register.owner
-    authorize! :create, @register_item
-    if @register_item.save
-      render json: @register_item, adapter: :attributes, status: :created
-    else
-      render json: @register_item.errors, status: :unprocessable_entity
-    end
+    @register_items = create_register_items
+    render json: @register_items, adapter: :attributes, status: :created
+  rescue CanCan::AccessDenied
+    render json: { error: 'Not authorized' }, status: :forbidden
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # PUT /register_items/1
   def update
     authorize! :update, @register_item
-    if @register_item.update(register_item_params)
+    if @register_item.update(register_item_params(@register))
       render json: @register_item, adapter: :attributes
     else
       render json: @register_item.errors, status: :unprocessable_entity
@@ -131,14 +129,51 @@ class RegisterItemsController < ApplicationController
     filter_register_items
   end
 
-  def register_item_params
-    permitted_params = params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
-    if @register
-      @register.meta.each do |column, label|
-        permitted_params[column] = params[label] if params[label]
+  def register_item_params(item_params = params, register)
+    permitted_params = item_params.permit(
+      :unique_key,
+      :description,
+      :register_id,
+      :amount,
+      :units,
+      :originated_at
+    )
+    if register
+      register.meta.each do |column, label|
+        permitted_params[column] = item_params[label] if item_params&.[](label)
       end
     end
     permitted_params
+  end
+
+  def create_register_items
+    ActiveRecord::Base.transaction do
+      params[:register_items].is_a?(Array) ? create_multiple_items : create_single_item
+    end
+  end
+
+  def create_multiple_items
+    register_ids = params[:register_items].map { |item| item[:register_id] }.uniq
+    registers = Register.where(id: register_ids).index_by(&:id)
+
+    params[:register_items].map do |item_params|
+      register = registers[item_params[:register_id].to_i]
+      raise ActiveRecord::RecordNotFound, "Register not found for item #{item_params[:unique_key]}" unless register
+
+      create_item(register_item_params(item_params, register), register)
+    end
+  end
+
+  def create_single_item
+    create_item(register_item_params(params, @register), @register)
+  end
+
+  def create_item(item_params, register)
+    item = RegisterItem.new(item_params)
+    item.owner = register.owner
+    authorize! :create, item
+    item.save!
+    item
   end
 
   MAX_CSV_ROWS = 500000
