@@ -58,8 +58,7 @@ module Services
       start_at, end_at = validate_time_range!(args[:start_at], args[:end_at], timezone)
       raise ArgumentError, 'Invalid register_id' unless register = Register.find_by(id: args[:register_id]).freeze
 
-      results = args[:user].associated_register_items
-        .where(register_id: register.id)
+      results = RegisterItem.where(register_id: register.id)
 
       if args[:group_by_period].present?
         results = group_by_period(results, args[:group_by_period], start_at, end_at, timezone)

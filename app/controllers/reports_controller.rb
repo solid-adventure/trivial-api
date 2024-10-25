@@ -5,8 +5,9 @@ class ReportsController < ApplicationController
   # POST reports/item_average
   # POST reports/item_list
   def show
+    raise CanCan::AccessDenied unless current_user.associated_registers.pluck(:id).include? report_params[:register_id]
     report = Services::Report.new()
-    render json: report.__send__(report_name, report_params.merge(user: current_user))
+    render json: report.__send__(report_name, report_params)
   rescue ArgumentError => e
     Rails.logger.error e
     render json: {error: e.message}, status: :unprocessable_entity
