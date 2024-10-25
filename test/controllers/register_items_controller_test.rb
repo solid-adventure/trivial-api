@@ -25,6 +25,72 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     @auth_headers["uid"] = @user.uid
   end
 
+  test "should create single register item" do
+    assert_difference('RegisterItem.count') do
+      post register_items_url,
+        params: {
+          unique_key: "ABC123",
+          description: "Test Item",
+          register_id: @register.id,
+          amount: 100,
+          units: 'USD',
+          originated_at: Time.current
+        },
+        headers: @auth_headers,
+        as: :json
+    end
+
+    assert_response :success
+    response_item = JSON.parse(response.body)
+    assert_equal "ABC123", response_item["unique_key"]
+    assert_equal "Test Item", response_item["description"]
+  end
+
+  test "should handle invalid single item creation" do
+    post register_items_url,
+      params: {
+        unique_key: nil,
+        description: "Test Item",
+        register_id: @register.id,
+        units: 'USD',
+        amount: 100
+      },
+      headers: @auth_headers,
+      as: :json
+
+    assert_response :unprocessable_entity
+    error_response = JSON.parse(response.body)
+    assert_equal error_response.keys, ["unique_key"]
+  end
+
+  test "should handle meta params when creating register item" do
+    # Setup register with numbered meta columns
+    @register.update(meta: {
+      "meta0" => "channel",
+      "meta1" => "custom_thing"
+    })
+
+    assert_difference('RegisterItem.count') do
+      post register_items_url,
+        params: {
+          unique_key: Time.now.to_i,
+          description: "Test Item",
+          register_id: @register.id,
+          units: 'USD',
+          amount: 100,
+          channel: "Online",           # This maps to meta0
+          custom_thing: "Special",   # This maps to meta1
+        },
+        headers: @auth_headers,
+        as: :json
+    end
+
+    assert_response :success
+    response_item = JSON.parse(response.body)
+    assert_equal "Online", response_item["channel"]
+    assert_equal "Special", response_item["custom_thing"]
+  end
+
   test "should create register item with correct meta attributes" do
     assert_difference('RegisterItem.count') do
       post register_items_url, params: @register_item_params, headers: @auth_headers, as: :json
