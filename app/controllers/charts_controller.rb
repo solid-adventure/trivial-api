@@ -66,7 +66,7 @@ class ChartsController < ApplicationController
     end
 
     def chart_params
-      params.require(:chart).permit(:register_id, :name, :chart_type, :color_scheme, :invert_sign, :report_period)
+      params.require(:chart).permit(:register_id, :name, :chart_type, :color_scheme, :default_time_range, :invert_sign, :report_period, default_timezones: [])
     end
 
     # this is an aliased parameter for several underlying chart columns

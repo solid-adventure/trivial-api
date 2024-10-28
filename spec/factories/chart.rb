@@ -7,6 +7,8 @@ FactoryBot.define do
     sequence(:name) { |n| "Chart #{n}" }
     sequence :chart_type, %i[bar line heat_map random pie].cycle
     report_period { 'month' }
+    default_timezones { ['America/New_York', 'America/Los_Angeles'] }
+    default_time_range { 'ytd' }
     meta0 { register.meta.key?('meta0') ? false : nil }
     meta1 { register.meta.key?('meta1') ? false : nil }
     meta2 { register.meta.key?('meta2') ? false : nil }
