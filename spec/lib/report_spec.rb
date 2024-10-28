@@ -22,7 +22,6 @@ RSpec.describe Services::Report do
         start_at: start_at.iso8601,
         end_at: end_at.iso8601,
         register_id:,
-        user: owner
       }
     }
     let(:originated_at) { start_at + 1.month } # Feb 1, 2023 12:00:00AM EDT
