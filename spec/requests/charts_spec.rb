@@ -20,6 +20,11 @@ describe "Charts API", type: :request do
         chart_type: { type: :string },
         color_scheme: { type: :string },
         report_period: { type: :string },
+        default_time_range: { type: :string },
+        default_timezones: {
+          type: :array,
+          items: { type: :string }
+        },
         report_groups: {
           type: :object,
           additionalProperties: { type: :boolean }
@@ -38,6 +43,11 @@ describe "Charts API", type: :request do
         chart_type: { type: :string },
         color_scheme: { type: :string },
         report_period: { type: :string },
+        default_time_range: { type: :string },
+        default_timezones: {
+          type: :array,
+          items: { type: :string }
+        },
         report_groups: {
           type: :object,
           additionalProperties: { type: :boolean }
@@ -103,7 +113,9 @@ describe "Charts API", type: :request do
             income_account: true,
             entity_type: true,
             entity_id: true
-          }
+          },
+          default_time_range: 'last_year',
+          default_timezones: ['America/New_York', 'America/Los_Angeles']
         }
       }
       let(:report_period) { 'year' }
@@ -113,6 +125,8 @@ describe "Charts API", type: :request do
 
         run_test! do |response|
           data = JSON.parse(response.body)
+          expect(data['chart']['default_timezones']).to match_array(['America/New_York', 'America/Los_Angeles'])
+          expect(data['chart']['default_time_range']).to eq('last_year')
           expect(data['chart']['report_groups']['customer_id']).to be false
           expect(data['chart']['report_groups']['income_account']).to be true
           expect(data['chart']['report_groups']['entity_type']).to be true
@@ -178,7 +192,9 @@ describe "Charts API", type: :request do
       parameter name: :chart_update, in: :body, schema: update_chart_schema
       let(:chart_update) {
         {
-          name: name
+          name: name,
+          default_time_range: 'last_7_days',
+          default_timezones: ['America/New_York', 'UTC']
         }
       }
       let(:name) { 'Test Chart' }
@@ -189,6 +205,8 @@ describe "Charts API", type: :request do
         run_test! do |response|
           data = JSON.parse(response.body)
           expect(data['chart']['name']).to eq(name)
+          expect(data['chart']['default_time_range']).to eq('last_7_days')
+          expect(data['chart']['default_timezones']).to match_array(['America/New_York', 'UTC'])
         end
       end
 

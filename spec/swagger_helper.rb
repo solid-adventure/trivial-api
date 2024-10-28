@@ -70,13 +70,22 @@ RSpec.configure do |config|
               name: { type: :string },
               chart_type: { type: :string },
               color_scheme: { type: :string },
+              default_time_range: { type: :string },
+              default_timezones: {
+                type: :array,
+                items: { type: :string }
+              },
+              time_range_bounds: {
+                type: :object,
+                additionalProperties: { type: :string }
+              },
               report_period: { type: :string },
               report_groups: {
                 type: :object,
                 additionalProperties: { type: :boolean }
               }
             },
-            required: %i[id dashboard_id register_id name chart_type color_scheme report_period report_groups]
+            required: %i[id dashboard_id register_id name chart_type color_scheme default_time_range default_timezones time_range_bounds report_period report_groups]
           }
         }
       }
