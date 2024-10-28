@@ -1,5 +1,5 @@
 class ChartSerializer < ActiveModel::Serializer
-  attributes :id, :dashboard_id, :register_id, :name, :chart_type, :color_scheme, :invert_sign, :report_period, :report_groups
+  attributes :id, :dashboard_id, :register_id, :name, :chart_type, :color_scheme, :invert_sign, :report_period, :default_timezone, :default_time_range, :report_groups
 
   def report_groups
     object.aliased_groups()
