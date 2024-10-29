@@ -4,6 +4,7 @@ class Chart < ApplicationRecord
   audited associated_with: :dashboard
 
   VALID_REPORT_PERIODS = %w[day week month quarter year].freeze
+  VALID_REPORT_TYPES = %w[item_count item_sum item_average].freeze
   VALID_TIME_RANGES = %w[today yesterday last_week last_month last_year ytd].freeze
 
   validates :name,
@@ -21,6 +22,12 @@ class Chart < ApplicationRecord
     inclusion: {
       in: VALID_REPORT_PERIODS,
       message: "%{value} is not a valid report period"
+    }
+  validates :report_type,
+    presence: true,
+    inclusion: {
+      in: VALID_REPORT_TYPES,
+      message: "%{value} is not a valid report type"
     }
   validates :default_time_range,
     presence: true,
