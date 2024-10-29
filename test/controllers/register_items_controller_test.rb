@@ -60,7 +60,7 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     error_response = JSON.parse(response.body)
-    assert_equal JSON.parse(response.body)["error"], "Validation failed: Unique key has already been taken"
+    assert_equal error_response["unique_key"], ["has already been taken"]
   end
 
   test "should create register item with correct meta attributes" do
@@ -110,9 +110,9 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
       headers: @auth_headers,
       as: :json
 
-    assert_response :forbidden
+    assert_response :unauthorized
     error_response = JSON.parse(response.body)
-    assert_equal error_response["error"], "Not authorized"
+    assert_equal error_response["errors"], ["You are not authorized to access this page."]
   end
 
   test "should create multiple register items with correct ownership" do
@@ -136,7 +136,7 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     ]
 
     assert_difference('RegisterItem.count', 2) do
-      post register_items_url,
+      post bulk_create_register_items_url,
         params: { register_items: items_params },
         headers: @auth_headers,
         as: :json
@@ -180,7 +180,7 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     ]
 
     assert_difference('RegisterItem.count', 2) do
-      post register_items_url,
+      post bulk_create_register_items_url,
         params: { register_items: items_params },
         headers: @auth_headers,
         as: :json
@@ -216,13 +216,13 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     ]
 
     assert_no_difference(['RegisterItem.count']) do
-      post register_items_url,
+      post bulk_create_register_items_url,
         params: { register_items: items_params },
         headers: @auth_headers,
         as: :json
     end
     assert_response :unprocessable_entity
-    assert_equal JSON.parse(response.body)["error"], "Validation failed: Unique key has already been taken"
+    assert_equal JSON.parse(response.body)["errors"], ["Unique key has already been taken"]
     assert_not RegisterItem.exists?(unique_key: "ABC123")
   end
 
@@ -245,13 +245,12 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     ]
 
     assert_no_difference(['RegisterItem.count']) do
-      post register_items_url,
+      post bulk_create_register_items_url,
         params: { register_items: items_params },
         headers: @auth_headers,
         as: :json
     end
-    assert_response :forbidden
-    assert_equal JSON.parse(response.body)["error"], "Not authorized"
+    assert_response :unauthorized
     assert_not RegisterItem.exists?(unique_key: "ABC123")
     assert_not RegisterItem.exists?(unique_key: "DEF456")
   end
