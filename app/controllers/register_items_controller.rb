@@ -47,18 +47,24 @@ class RegisterItemsController < ApplicationController
 
   # POST /register_items/bulk_create
   def bulk_create
+    max_items = 100
+    raise "register_items must be an array" unless params[:register_items].is_a?(Array)
+    raise "Maximum limit of #{max_items} items exceeded" if params[:register_items].size > max_items
+
     RegisterItem.transaction do
-      register_items = []
-      params[:register_items].each do |item_params|
-        # Always hard-assign register from the item_params, to avoid security issues
-        @register = Register.find(item_params[:register_id])
+      register_ids = params[:register_items].map { |item| item[:register_id] }.uniq
+      registers = Register.where(id: register_ids).index_by(&:id)
+      register_items_attributes = params[:register_items].map do |item_params|
+        @register = registers[item_params[:register_id]]
         register_item = RegisterItem.new(register_item_params(item_params))
         register_item.owner = @register&.owner
         authorize! :create, register_item
-        register_items << register_item if register_item.save!
+        register_item.attributes
       end
+      # Let create! handle all validations, including missing references
+      register_items = RegisterItem.create!(register_items_attributes)
       render json: register_items, adapter: :attributes, status: :created
-    rescue ActiveRecord::Rollback => e
+    rescue ActiveRecord => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
   end
