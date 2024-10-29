@@ -27,3 +27,15 @@ two:
   }
   owner_type: Organization
   owner_id: 1
+
+three:
+  id: 3
+  name: Register 3
+  units: USD
+  meta: {
+    "meta1": "income_account",
+    "meta2": "channel",
+    "meta3": "warehouse",
+  }
+  owner_type: Organization
+  owner_id: 2
