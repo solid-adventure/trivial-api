@@ -45,6 +45,30 @@ class RegisterItemsController < ApplicationController
     end
   end
 
+  # POST /register_items/bulk_create
+  def bulk_create
+    max_items = 100
+    raise "register_items must be an array" unless params[:register_items].is_a?(Array)
+    raise "Maximum limit of #{max_items} items exceeded" if params[:register_items].size > max_items
+
+    RegisterItem.transaction do
+      register_ids = params[:register_items].map { |item| item[:register_id] }.uniq
+      registers = Register.where(id: register_ids).index_by(&:id)
+      register_items_attributes = params[:register_items].map do |item_params|
+        @register = registers[item_params[:register_id]]
+        register_item = RegisterItem.new(register_item_params(item_params))
+        register_item.owner = @register&.owner
+        authorize! :create, register_item
+        register_item.attributes
+      end
+      # Let create! handle all validations, including missing references
+      register_items = RegisterItem.create!(register_items_attributes)
+      render json: register_items, adapter: :attributes, status: :created
+    rescue ActiveRecord => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+  end
+
   # PUT /register_items/1
   def update
     authorize! :update, @register_item
@@ -131,11 +155,12 @@ class RegisterItemsController < ApplicationController
     filter_register_items
   end
 
-  def register_item_params
-    permitted_params = params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
+  def register_item_params(args=nil)
+    register_item_params = args || params
+    permitted_params = register_item_params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
     if @register
       @register.meta.each do |column, label|
-        permitted_params[column] = params[label] if params[label]
+        permitted_params[column] = register_item_params[label] if register_item_params[label]
       end
     end
     permitted_params
