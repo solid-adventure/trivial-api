@@ -14,7 +14,9 @@ module Services
     end
 
     def cache_cutoff(timezone)
-      (Time.now - 2.days).beginning_of_day.in_time_zone(timezone)
+      Time.use_zone(timezone) do
+        return Time.current.beginning_of_day - 2.days
+      end
     end
 
     def cache_key(stat, args)
