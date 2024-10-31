@@ -44,7 +44,7 @@ class CacheWarmUpJob < ApplicationJob
     Timeout.timeout(2.hours) do
       puts("CacheWarmUpJob Warming up report_charts with #{chart_ids.size} charts")
       report = Services::Report.new()
-      charts = Chart.where(id: chart_ids)
+      charts = Chart.where(id: chart_ids) || []
       charts.each do |chart|
         group_by = chart.aliased_groups.reject{ |k, v| !v }.keys
         group_by_period = chart.report_period
@@ -60,6 +60,7 @@ class CacheWarmUpJob < ApplicationJob
           })
           report.send(chart.report_type, report_params)
         end
+      end
     end
   end
 end
