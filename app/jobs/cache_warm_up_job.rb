@@ -6,6 +6,8 @@ class CacheWarmUpJob < ApplicationJob
     case cache_name
     when 'app_activity_stats'
       warm_up_app_activity_stats(**options)
+    when 'chart_reports'
+      warm_up_chart_reports(**options)
     else
       puts("CacheWarmUpJob invalid cache_name: #{cache_name}. Exiting.")
       return
@@ -30,6 +32,35 @@ class CacheWarmUpJob < ApplicationJob
     Timeout.timeout(2.hours) do
       puts("CacheWarmUpJob Warming up app_activity_stats cache with #{app_ids.size} apps and cutoff date #{date_cutoff}")
       App.cache_stats_for!(app_ids:, date_cutoff:)
+    end
+  end
+
+  def warm_up_chart_reports(chart_ids: Chart.pluck(:id), delay_duration: rand(0..900))
+    raise 'chart_ids for chart_reports must be an array of integers' unless chart_ids.is_a? Array
+
+    puts("CacheWarmUpJob Warm up chart_reports will start after #{delay_duration} seconds") if delay_duration > 0
+    sleep(delay_duration)
+
+    Timeout.timeout(2.hours) do
+      puts("CacheWarmUpJob Warming up report_charts with #{chart_ids.size} charts")
+      report = Services::Report.new()
+      charts = Chart.where(id: chart_ids) || []
+      charts.each do |chart|
+        group_by = chart.aliased_groups.reject{ |k, v| !v }.keys
+        group_by_period = chart.report_period
+        invert_sign = chart.invert_sign
+        register_id = chart.register_id
+        chart.default_timezones.each do |timezone|
+          report_params = chart.time_range_bounds.merge({
+            group_by:,
+            group_by_period:,
+            invert_sign:,
+            register_id:,
+            timezone:
+          })
+          report.send(chart.report_type, report_params)
+        end
+      end
     end
   end
 end
