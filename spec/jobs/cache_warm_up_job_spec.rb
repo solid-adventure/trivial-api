@@ -15,6 +15,9 @@ RSpec.describe CacheWarmUpJob, type: :job do
     it 'calls the correct helper method' do
       expect(instance).to receive(:warm_up_app_activity_stats)
       instance.perform(cache_name: 'app_activity_stats')
+
+      expect(instance).to receive(:warm_up_chart_reports)
+      instance.perform(cache_name: 'chart_reports')
     end
 
     it 'passes options to the helper method' do
@@ -49,6 +52,23 @@ RSpec.describe CacheWarmUpJob, type: :job do
       expect {
         instance.perform(cache_name:, options:)
       }.to output("CacheWarmUpJob failed: date_cutoff for app_activity_stats must be a Date type\n").to_stdout
+    end
+  end
+
+  describe '#warm_up_chart_reports' do
+    let(:cache_name) { 'chart_reports' }
+    let!(:organization) { FactoryBot.create :organization }
+
+    it 'uses default parameters if none are provided' do
+      expect(Chart).to receive(:where).with(id: Chart.pluck(:id))
+      instance.perform(cache_name:)
+    end
+
+    it 'logs and error if chart_ids is not an array' do
+      options = { chart_ids: "not_an_array" }
+      expect {
+        instance.perform(cache_name:, options:)
+      }.to output("CacheWarmUpJob failed: chart_ids for chart_reports must be an array of integers\n").to_stdout
     end
   end
 end
