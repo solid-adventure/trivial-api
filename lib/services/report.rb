@@ -20,7 +20,17 @@ module Services
     end
 
     def cache_key(stat, args)
-      "simple_stat_lookup/#{stat}_#{args.to_s}"
+      # Normalize args to ensure consistent cache keys, removing empty values
+      # and placing into a consistent order
+      args_hash = args.is_a?(Hash) ? args : args.to_h
+      cleaned_args = args_hash.reject { |_, v| v.nil? || v.to_s.empty? }
+      normalized_args = cleaned_args.transform_values(&:to_s)
+                                   .sort_by { |k, _| k.to_s }
+                                   .to_h
+      args_string = normalized_args.map { |k, v| "#{k}:#{v}" }.join('_')
+      key = "simple_stat_lookup/#{stat}"
+      key += "_#{args_string}" unless args_string.empty?
+      key
     end
 
     private
