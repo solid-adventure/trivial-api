@@ -13,7 +13,7 @@ class CacheWarmUpJob < ApplicationJob
       return
     end
 
-    puts("CacheWarmUpJob successful. Exiting.")
+    puts("CacheWarmUpJob all jobs successful. Exiting.")
   rescue Timeout::Error
     puts("CacheWarmUpJob timed out after 2 hours, cache: #{cache}")
   rescue => e
@@ -30,8 +30,9 @@ class CacheWarmUpJob < ApplicationJob
     sleep(delay_duration) # sleep to decrease DB collisions on multiple Rails instances
 
     Timeout.timeout(2.hours) do
-      puts("CacheWarmUpJob Warming up app_activity_stats cache with #{app_ids.size} apps and cutoff date #{date_cutoff}")
+      puts("CacheWarmUpJob warming up app_activity_stats cache with #{app_ids.size} apps and cutoff date #{date_cutoff}")
       App.cache_stats_for!(app_ids:, date_cutoff:)
+      puts("CacheWarmUpJob completed for app_activity_stats")
     end
   end
 
@@ -42,7 +43,7 @@ class CacheWarmUpJob < ApplicationJob
     sleep(delay_duration)
 
     Timeout.timeout(2.hours) do
-      puts("CacheWarmUpJob Warming up report_charts with #{chart_ids.size} charts")
+      puts("CacheWarmUpJob warming up report_charts with #{chart_ids.size} charts")
       report = Services::Report.new()
       charts = Chart.where(id: chart_ids) || []
       charts.each do |chart|
@@ -61,6 +62,7 @@ class CacheWarmUpJob < ApplicationJob
           report.send(chart.report_type, report_params)
         end
       end
+      puts("CacheWarmUpJob completed warmup for all charts")
     end
   end
 end
