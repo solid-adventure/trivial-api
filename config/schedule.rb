@@ -24,5 +24,9 @@ set :output, "#{path}/log/cron.log"
 set :environment, ENV['RAILS_ENV']
 
 every 1.day, at: '2:30 am' do
+  runner "CacheWarmUpJob.perform_now(cache_name: 'chart_reports')"
+end
+
+every 1.day, at: '2:35 am' do
   runner "CacheWarmUpJob.perform_now(cache_name: 'app_activity_stats')"
 end

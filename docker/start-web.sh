@@ -10,7 +10,9 @@
 # Run the cache warmup job in the background
 # >> /proc/1/fd/1 2>&1) prints logs to STDOUT
 # & runs the command in the background
-rails runner 'CacheWarmUpJob.perform_now(cache_name: "app_activity_stats", options: {delay_duration: 0})' >> /proc/1/fd/1 2>&1 &
+# delay_duration in seconds
+rails runner 'CacheWarmUpJob.perform_now(cache_name: "chart_reports", options: {delay_duration: 0})' >> /proc/1/fd/1 2>&1 &
+rails runner 'CacheWarmUpJob.perform_now(cache_name: "app_activity_stats", options: {delay_duration: 300})' >> /proc/1/fd/1 2>&1 &
 
 # Start the cron service for the whenever gem
 service cron start
