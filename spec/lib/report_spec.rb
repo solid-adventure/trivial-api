@@ -163,7 +163,7 @@ RSpec.describe Services::Report do
 
     it 'produces a valid cache key' do
       key = report.send(:cache_key, 'count', args)
-      expect(key).to eq("simple_stat_lookup/count_{:start_at=>\"2023-01-01T00:00:00-04:00\", :end_at=>\"2023-12-31T23:59:59-04:00\", :register_id=>#{args[:register_id]}}")
+      expect(key).to eq("simple_stat_lookup/count_end_at:2023-12-31T23:59:59-04:00_register_id:#{args[:register_id]}_start_at:2023-01-01T00:00:00-04:00")
     end
 
     it 'only includes specified dates' do
