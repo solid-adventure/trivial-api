@@ -153,6 +153,7 @@ class App < ApplicationRecord
   end
 
   def self.stats_for(app_ids:, time_range:, included_dates:)
+    return {} if app_ids.blank?
     activity_groups = activity_groups_for(app_ids:, time_range:)
     format_activity(activity_groups:, app_ids:, included_dates:)
   end
