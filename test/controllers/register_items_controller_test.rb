@@ -226,6 +226,63 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     assert_not RegisterItem.exists?(unique_key: "ABC123")
   end
 
+  test "should rollback if key has been used in a separate transaction" do
+    post register_items_url,
+      params: {
+        unique_key: "ABC123",
+        description: "Test Item",
+        register_id: @register.id,
+        amount: 100,
+        units: 'USD',
+        originated_at: Time.current
+      },
+      headers: @auth_headers,
+      as: :json
+
+    assert_response :success
+    response_item = JSON.parse(response.body)
+    assert_equal "ABC123", response_item["unique_key"]
+
+    post register_items_url,
+      params: {
+        unique_key: "ABC123",
+        description: "Test Item",
+        register_id: @register.id,
+        amount: 100,
+        units: 'USD',
+        originated_at: Time.current
+      },
+      headers: @auth_headers,
+      as: :json
+
+    assert_response :unprocessable_entity
+    response_item = JSON.parse(response.body)
+    assert_equal response_item["unique_key"], ["has already been taken"]
+  end
+
+  test "accepts a meta attribute of JSON content" do
+    items_params = [
+      {
+        unique_key: "ABC123",
+        description: "Test Item 1",
+        register_id: @register.id,
+        amount: 100,
+        units: 'USD',
+        income_account:  {"example_json": 1}
+      }
+    ]
+
+    assert_difference('RegisterItem.count', 1) do
+      post bulk_create_register_items_url,
+        params: { register_items: items_params },
+        headers: @auth_headers,
+        as: :json
+    end
+
+    assert_response :success
+    assert_equal JSON.parse(response.body)[0]["income_account"], "{\"example_json\":1}"
+  end
+
   test "should rollback if any item has invalid ownership" do
     items_params = [
       {
