@@ -260,8 +260,6 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response_item["unique_key"], ["has already been taken"]
   end
 
-
-
   test "accepts a meta attribute of JSON content" do
     items_params = [
       {
@@ -282,8 +280,7 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    expected_output = "{\"example_json\"=>1}" # the test interpolates the response and prints as a hash; it's actually JSON
-    assert_equal JSON.parse(response.body)[0]["income_account"], expected_output
+    assert_equal JSON.parse(response.body)[0]["income_account"], "{\"example_json\":1}"
   end
 
   test "should rollback if any item has invalid ownership" do

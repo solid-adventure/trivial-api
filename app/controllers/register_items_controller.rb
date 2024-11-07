@@ -159,10 +159,11 @@ class RegisterItemsController < ApplicationController
     if @register
       @register.meta.each do |column, label|
         next unless register_item_params[label]
-        permitted_params[column] = register_item_params[label] if register_item_params[label].is_a? String
-        # Accept JSON values for meta columns
-        if register_item_params[label].is_a? ActionController::Parameters
-          permitted_params[column] = register_item_params[label].permit!
+        case register_item_params[label]
+        when String
+          permitted_params[column] = register_item_params[label]
+        when ActionController::Parameters
+          permitted_params[column] = register_item_params[label].to_json
         end
       end
     end
