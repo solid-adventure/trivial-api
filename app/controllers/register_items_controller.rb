@@ -64,8 +64,6 @@ class RegisterItemsController < ApplicationController
       # Let create! handle all validations, including missing references
       register_items = RegisterItem.create!(register_items_attributes)
       render json: register_items, adapter: :attributes, status: :created
-    rescue ActiveRecord => e
-      render json: { error: e.message }, status: :unprocessable_entity
     end
   end
 
@@ -160,7 +158,13 @@ class RegisterItemsController < ApplicationController
     permitted_params = register_item_params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
     if @register
       @register.meta.each do |column, label|
-        permitted_params[column] = register_item_params[label] if register_item_params[label]
+        next unless register_item_params[label]
+        case register_item_params[label]
+        when String
+          permitted_params[column] = register_item_params[label]
+        when ActionController::Parameters
+          permitted_params[column] = register_item_params[label].to_json
+        end
       end
     end
     permitted_params

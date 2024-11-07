@@ -11,6 +11,7 @@ class ApplicationController < ActionController::API
 
   rescue_from ActiveRecord::RecordInvalid, with: :render_invalid_record
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from ActiveRecord::RecordNotUnique, with: :render_not_unique
   rescue_from CanCan::AccessDenied, with: :render_unauthorized
   rescue_from EnvHandler::MissingEnvVariableError, with: :render_env_error
 
@@ -54,6 +55,10 @@ class ApplicationController < ActionController::API
 
   def render_not_found(err)
     render status: :not_found
+  end
+
+  def render_not_unique(err)
+    render json: {errors: err}, status: :conflict
   end
 
   def render_env_error(err)
