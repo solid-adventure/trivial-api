@@ -72,7 +72,7 @@ module Services
 
       results = RegisterItem.where(register_id: register.id)
 
-      if args[:group_by_period].present?
+      if args[:group_by_period].present? && args[:group_by_period] != 'all'
         results = group_by_period(results, args[:group_by_period], start_at, end_at, timezone)
       else
         results = results.between(start_at, end_at)
