@@ -283,6 +283,29 @@ class RegisterItemsControllerTest < ActionDispatch::IntegrationTest
     assert_equal JSON.parse(response.body)[0]["income_account"], "{\"example_json\":1}"
   end
 
+  test "accepts a meta attribute of numeric content" do
+    items_params = [
+      {
+        unique_key: "ABC123",
+        description: "Test Item 1",
+        register_id: @register.id,
+        amount: 100,
+        units: 'USD',
+        income_account: 2
+      }
+    ]
+
+    assert_difference('RegisterItem.count', 1) do
+      post bulk_create_register_items_url,
+        params: { register_items: items_params },
+        headers: @auth_headers,
+        as: :json
+    end
+
+    assert_response :success
+    assert_equal JSON.parse(response.body)[0]["income_account"], "2"
+  end
+
   test "should rollback if any item has invalid ownership" do
     items_params = [
       {
