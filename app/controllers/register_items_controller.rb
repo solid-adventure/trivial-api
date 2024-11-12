@@ -160,7 +160,7 @@ class RegisterItemsController < ApplicationController
       @register.meta.each do |column, label|
         next unless register_item_params[label]
         case register_item_params[label]
-        when String
+        when String, Integer, Float, BigDecimal
           permitted_params[column] = register_item_params[label]
         when ActionController::Parameters
           permitted_params[column] = register_item_params[label].to_json
