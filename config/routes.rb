@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     end
 
     member do 
+      put 'reprocess_activity'
       get 'activity_stats'
       post 'copy'
       post 'last_request'

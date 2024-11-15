@@ -71,6 +71,21 @@ class AppsController < ApplicationController
     render json: {suggestion: App.new.name_suggestion}
   end
 
+  def reprocess_activity
+    authorize! :update, app
+    start_at = params.require(:start_at)
+    start_at = Time.parse(start_at) if start_at.is_a?(String)
+    service = Services::ActivityReprocess.new(app, start_at)
+    service.call
+
+    # Todo, we probably need to stream this back to the client, with a timer that checks the status
+
+
+    render json: { status: 200 }
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
+  end
+
   def collection_activity_stats
     app_names = params[:app_names].to_s.split(',')
     raise 'Invalid app_names provided' unless app_names.any?

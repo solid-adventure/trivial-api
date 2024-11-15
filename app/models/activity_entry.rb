@@ -51,7 +51,7 @@ class ActivityEntry < ApplicationRecord
   end
 
   def resend_kafka
-    self.class.kafka.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: payload["key"])
+    KAFKA.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: payload["key"])
     return OpenStruct.new(code: 200, message: 'OK')
   end
 
