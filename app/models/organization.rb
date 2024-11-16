@@ -23,8 +23,15 @@ class Organization < ApplicationRecord
 
   default_scope { order(created_at: :asc) }
 
+  alias_attribute :reference_name, :name
+
   def admin?(user)
     org_roles.find_by(user: user)&.role == 'admin'
+  end
+
+  def all_audits
+    audits = super
+    audits.or(Audited.audit_class.where(auditable: self.users))
   end
 
   private

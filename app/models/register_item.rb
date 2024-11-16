@@ -16,6 +16,10 @@ class RegisterItem < ApplicationRecord
   belongs_to :register
   has_many :activity_entries
 
+  default_scope do
+    includes(:register)
+  end
+
   @@initialized_registers = {}
   @@initialization_lock = Mutex.new
 
@@ -36,6 +40,10 @@ class RegisterItem < ApplicationRecord
 
   # Denormalized from register
   before_create :set_register_attrs
+
+  def reference_name
+    register.reference_name
+  end
 
   def set_register_attrs
     self.units ||= register.units

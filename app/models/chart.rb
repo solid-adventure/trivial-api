@@ -47,6 +47,8 @@ class Chart < ApplicationRecord
   belongs_to :dashboard, inverse_of: :charts
   belongs_to :register, inverse_of: :charts
 
+  alias_attribute :reference_name, :name
+
   def aliased_groups
     register.meta.each_with_object({}) do |(column, label), groups|
       groups[label] = __send__(column)

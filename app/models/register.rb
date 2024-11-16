@@ -25,6 +25,8 @@ class Register < ApplicationRecord
   before_validation :set_defaults
   after_create :create_gross_revenue_chart
 
+  alias_attribute :reference_name, :name
+
   private
     def set_defaults
       self.sample_type ||= 'increment'

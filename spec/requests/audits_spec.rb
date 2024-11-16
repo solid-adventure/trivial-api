@@ -18,20 +18,7 @@ describe "Audits API", type: :request do
         audits: {
           type: :array,
           items: {
-            type: :object,
-            properties: {
-              id: { type: :integer },
-              auditable_id: { type: :integer },
-              auditable_type: { type: :string },
-              associated_id: { type: :integer },
-              associated_type: { type: :string },
-              user_id: { type: :integer },
-              action: { type: :string },
-              version: { type: :integer },
-              remote_address: { type: :string },
-              created_at: { type: :string }
-            },
-            required: %w[id auditable_id auditable_type associated_id associated_type user_id action version remote_address created_at]
+            type: audit_schema,
           }
         },
         required: %w[page total_pages audits]
@@ -39,28 +26,47 @@ describe "Audits API", type: :request do
     }
   end
 
-  def self.show_audit_schema
+  def self.audit_schema
     {
       type: :object,
       properties: {
         id: { type: :integer },
-        auditable_id: { type: :integer },
-        auditable_type: { type: :string },
-        associated_id: { type: :integer },
-        associated_type: { type: :string },
+        reference_id: { type: :integer },
+        reference_type: { type: :string },
+        reference_name: { type: :string },
         user_id: { type: :integer },
+        user_name: { type: :string },
+        user_email: { type: :string },
         action: { type: :string },
         audited_changes: {
           type: :object,
-          additionalProperties: {
-            oneOf: []
-          }
+          properties: {
+            attribute: { type: :string },
+            patch: { type: :string },
+            old_value: {
+              oneOf: [
+                { type: :string },
+                { type: :integer },
+                { type: :object },
+                { type: :array }
+              ]
+            },
+            new_value: {
+              oneOf: [
+                { type: :string },
+                { type: :integer },
+                { type: :object },
+                { type: :array }
+              ]
+            }
+          },
+          required: %w[attribute patch]
         },
         version: { type: :integer },
         remote_address: { type: :string },
         created_at: { type: :string }
       },
-      required: %w[id auditable_id auditable_type associated_id associated_type user_id action audited_changes version remote_address created_at]
+      required: %w[id user_id user_name user_email reference_id reference_type reference_name action audited_changes created_at]
     }
   end
 
@@ -92,13 +98,12 @@ describe "Audits API", type: :request do
 
           audits = data['audits']
           expect(audits.count).to eq(2)
-          expect(audits[0]['auditable_type']).to eq(@associated_auditable.class.to_s)
-          expect(audits[0]['auditable_id']).to eq(@associated_auditable.id)
-          expect(audits[0]['associated_type']).to eq(@auditable.class.to_s)
-          expect(audits[0]['associated_id']).to eq(@auditable.id)
+          expect(audits[0]['reference_type']).to eq(@associated_auditable.class.to_s)
+          expect(audits[0]['reference_id']).to eq(@associated_auditable.id)
+          expect(audits[0]['reference_name']).to eq(@auditable.name)
           expect(audits[0]['action']).to eq('create')
-          expect(audits[1]['auditable_type']).to eq(@auditable.class.to_s)
-          expect(audits[1]['auditable_id']).to eq(@auditable.id)
+          expect(audits[1]['reference_type']).to eq(@auditable.class.to_s)
+          expect(audits[1]['reference_id']).to eq(@auditable.id)
           expect(audits[1]['action']).to eq('create')
         end
       end
@@ -132,15 +137,15 @@ describe "Audits API", type: :request do
       produces 'audit/json'
 
       response '200', "show audit for resource" do
-        schema type: :show_audit_schema
+        schema type: :audit_schema
 
         run_test! do |response|
           data = JSON.parse response.body
 
           audit = data['audit']
           expect(audit['id']).to eq(@audit.id)
-          expect(audit['auditable_type']).to eq(@auditable.class.to_s)
-          expect(audit['auditable_id']).to eq(@auditable.id)
+          expect(audit['reference_type']).to eq(@auditable.class.to_s)
+          expect(audit['reference_id']).to eq(@auditable.id)
         end
       end
 

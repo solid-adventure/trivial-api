@@ -12,6 +12,8 @@ class CredentialSet < ApplicationRecord
 
   before_create :set_external_id
 
+  alias_attribute :reference_name, :name
+
   def credentials
     @credentials ||= CredentialSetCredentials.find_or_build_by_user_and_name owner, credentials_name
   end

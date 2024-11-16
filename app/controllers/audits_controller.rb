@@ -4,12 +4,12 @@ class AuditsController < ApplicationController
   before_action :set_pagination, only: %i[index]
 
   def index
-    @audits = @auditable.own_and_associated_audits
+    @audits = @auditable.all_audits
     paginate_audits
     response = {
       current_page: @page,
       total_pages: @total_pages,
-      audits: @audits.as_json(except: %i[user_type username audited_changes comment request_uuid])
+      audits: ActiveModel::Serializer::CollectionSerializer.new(@audits)
     }
 
     render json: response, status: :ok
@@ -30,9 +30,11 @@ class AuditsController < ApplicationController
   end
 
   def load_and_authorize_audit
-    @audit = Audited::Audit.find(params[:id])
+    @audit = Audited.audit_class.find(params[:id])
 
-    raise CanCan::AccessDenied unless @audit.auditable == @auditable || @audit.associated == @auditable
+    raise CanCan::AccessDenied unless @audit.auditable == @auditable ||
+      @audit.associated == @auditable ||
+      @audit.owner == @auditable
   end
 
   def set_pagination

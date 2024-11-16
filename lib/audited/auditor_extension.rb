@@ -10,9 +10,10 @@ module Audited
 
     module AuditedInstanceMethodsExtension
       def all_audits
-        Audited.audit_class.unscoped.where(auditable: self)
-          .or(Audited.audit_class.unscoped.where(associated: self))
-          .or(Audited.audit_class.unscoped.where(owner: self))
+        Audited.audit_class
+          .where(auditable: self)
+          .or(Audited.audit_class.where(associated: self))
+          .or(Audited.audit_class.where(owner: self))
           .order(created_at: :desc)
       end
 

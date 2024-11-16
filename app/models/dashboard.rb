@@ -26,4 +26,6 @@ class Dashboard < ApplicationRecord
   has_many :permitted_users, through: :permissions, source: :user, inverse_of: :permitted_dashboards
 
   has_many :charts, inverse_of: :dashboard
+
+  alias_attribute :reference_name, :name
 end
