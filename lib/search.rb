@@ -4,7 +4,7 @@ module Search
   end
 
   JSONB_OPERATORS = %w[? ?& ?| @> @? @@]
-  COMPERATORS = %w[< > <= >= = <> !=]
+  COMPERATORS = %w[< > <= >= = <> != IN]
   PREDICATES = ['IS NULL','IS NOT NULL','IS TRUE','IS NOT TRUE','IS FALSE','IS NOT FALSE']
   ORDERINGS = ['ASC', 'DESC', 'ASC NULLS FIRST', 'DESC NULLS FIRST', 'ASC NULLS LAST', 'DESC NULLS LAST']
 
@@ -65,6 +65,12 @@ module Search
           raise InvalidPredicateError unless PREDICATES.include?(predicate)
         else
           raise InvalidOperatorError unless COMPERATORS.include?(operator)
+
+          if operator == 'IN'
+            raise InvalidPredicateError, 'IN operator requires an array' unless predicate.is_a?(Array)
+            return sanitize_sql_array(["#{query.strip} IN (?)", predicate])
+          end
+
           query << "#{operator}"
         end
       end

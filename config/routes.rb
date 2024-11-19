@@ -72,6 +72,7 @@ Rails.application.routes.draw do
       get 'columns'
       get 'keys'
       post 'keys', action: :refresh_keys
+      post 'search'
     end
 
     member do

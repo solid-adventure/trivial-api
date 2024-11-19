@@ -4,7 +4,7 @@ require 'search'
 
 class ActivityEntry < ApplicationRecord
   include Search
-  SEARCHABLE_COLUMNS = %w[ payload diagnostics status register_item_id ].freeze
+  SEARCHABLE_COLUMNS = %w[ id payload diagnostics status register_item_id ].freeze
 
   validates :source, presence: true, if: :is_request?
 

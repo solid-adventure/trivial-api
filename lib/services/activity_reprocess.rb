@@ -13,13 +13,14 @@
 module Services
 
   class ActivityReprocess
-    BATCH_SIZE = 2000
+    BATCH_SIZE = 1000
 
     def initialize(app, start_at)
       @app = app
       @start_at = start_at
       @logger = Rails.logger
-      @last_created_at = nil
+      @last_id = nil
+      @run_id = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
     end
 
     def call
@@ -29,10 +30,10 @@ module Services
       ActiveRecord::Base.transaction do
 
         # TODO Create an audit
-        # TODO Create a DB lock to prevent multiple reprocesses from happening at the same time
+        # TODO Create an advisory lock to prevent multiple reprocesses from happening at the same time
 
-        deleted_count = delete_register_items
         reset_count = reset_activity_entries
+        deleted_count = delete_register_items
         queued_count = queue_activities_for_reprocessing
 
         # We completed resending them; from a user perspective, the doesn't complete until the stream is finished processing
@@ -42,7 +43,7 @@ module Services
 
     private
 
-    attr_reader :app, :start_at, :logger, :last_created_at
+    attr_reader :app, :start_at, :logger, :last_id, :run_id
 
     def validate_params!
       raise "start_at required" unless start_at.present?
@@ -50,57 +51,81 @@ module Services
     end
 
     def delete_register_items
-      count = RegisterItem
+      total_count = 0
+       RegisterItem
         .where(
           app_id: app.id,
           originated_at: start_at..,
           invoice_id: nil
         )
-        .delete_all
+      .in_batches(of: BATCH_SIZE) do |register_items|
+        batch_count = register_items.delete_all
+        total_count += batch_count
 
-      log_info("Register items deleted. count=#{count}")
-      count
+        log_info("Register items batch deleted. batch_count: #{batch_count}, total_count: #{total_count}")
+      end
+
+      log_info("Register items deleted. count=#{total_count}")
+      total_count
     end
 
     def reset_activity_entries
-      count = ActivityEntry
-        .where(app_id: app.id, created_at: start_at.., activity_type: 'request')
-        .update_all(register_item_id: nil)
+      total_count = 0
+      ActivityEntry
+        .where(
+          app_id: app.id,
+          created_at: start_at..,
+          activity_type: 'request',
+        )
+        .where.not(register_item_id: nil)
+        .in_batches(of: BATCH_SIZE) do |activity_entries|
+          batch_count = activity_entries.update_all(
+            register_item_id: nil,
+            diagnostics: nil,
+            status: nil,
+            duration_ms: nil
+          )
+          total_count += batch_count
 
-      log_info("Activity entries reset. count=#{count}")
-      count
+          log_info("Activity entries batch reset. batch_count: #{batch_count}, total_count: #{total_count}")
+        end
+
+      log_info("Activity entries reset. count=#{total_count}")
+      total_count
     end
 
     def queue_activities_for_reprocessing
-      activities = ActivityEntry
-        .select(:id, :app_id, :payload, :created_at)
+      key = "app_#{app.id}_rerun_#{run_id}"
+      queued_count = 0
+      last_id = nil
+      ActivityEntry
+        .select(:id, :app_id, :created_at)
         .where(app_id: app.id, created_at: start_at.., activity_type: 'request')
-        .order(:id)
-
-      total = activities.size
-      processed = 0
-      log_info("Queueing activities. total=#{total}")
-
-      begin
-        activities.find_each(batch_size: BATCH_SIZE) do |activity_entry|
-          activity_entry.resend
-          processed += 1
-          last_created_at = activity_entry.created_at
-
-          if (processed % BATCH_SIZE).zero?
-            log_info("Batch added to queue. processed=#{processed} total=#{total}")
-          end
+        # .limit(1100) # TEMP
+        .in_batches(of: BATCH_SIZE) do |activity_entries|
+          payload = {
+            activity_entry_ids: activity_entries.collect(&:id),
+            key: key,
+          }
+          KAFKA.produce_sync(
+            topic: Services::Kafka.topic,
+            payload: payload.to_json,
+            key: key
+          )
+          queued_count += activity_entries.size
+          last_id = activity_entries.last.id
         end
-      rescue
-        log_info("Requeing failed. processed=#{processed} total=#{total}, last_created_at=#{last_created_at}")
-      end
-
-      log_info("Activities queued. count=#{processed}")
-      processed
+        log_info("Activities queued. count=#{queued_count}")
+        return queued_count
+      rescue StandardError => e
+        log_info("Requeing failed. last_id=#{last_id}")
+        puts e.message
+        puts e.backtrace.join("\n")
+        raise
     end
 
     def log_info(message)
-      logger.info("[ActivityReprocess] app_id=#{app.name} start_at=#{start_at.iso8601} #{message}")
+      logger.info("[ActivityReprocess] run_id=#{run_id} app_id=#{app.name} start_at=#{start_at.iso8601} #{message}")
     end
 
   end # class ActivityReprocess
