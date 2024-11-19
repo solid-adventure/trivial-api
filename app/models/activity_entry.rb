@@ -4,7 +4,7 @@ require 'search'
 
 class ActivityEntry < ApplicationRecord
   include Search
-  SEARCHABLE_COLUMNS = %w[ payload diagnostics status register_item_id ].freeze
+  SEARCHABLE_COLUMNS = %w[ id payload diagnostics status register_item_id ].freeze
 
   validates :source, presence: true, if: :is_request?
 
@@ -51,7 +51,7 @@ class ActivityEntry < ApplicationRecord
   end
 
   def resend_kafka
-    self.class.kafka.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: payload["key"])
+    KAFKA.produce_sync(topic: Services::Kafka.topic, payload: payload.to_json, key: payload["key"])
     return OpenStruct.new(code: 200, message: 'OK')
   end
 

@@ -1,6 +1,6 @@
 class ActivityEntriesController < ApplicationController
   skip_before_action :authenticate_user!, only: [:update, :create_from_request]
-  before_action :set_activity_entries, only: %i[index]
+  before_action :set_activity_entries, only: %i[index search]
 
   def index
     authorize! :index, ActivityEntry
@@ -20,6 +20,23 @@ class ActivityEntriesController < ApplicationController
     @activity_entries = @activity_entries.order(id: :desc).limit(limit)
     render json: @activity_entries, status: :ok, adapter: :attributes, each_serializer: ActivityEntryIndexSerializer
   rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
+  end
+
+  def search
+    authorize! :index, ActivityEntry
+    search = if params[:search].is_a?(String)
+      JSON.parse(params[:search])
+    elsif params[:search].is_a?(Array)
+      params[:search]
+    end
+    raise 'search required' unless search.any?
+
+    @activity_entries = ActivityEntry.search(@activity_entries, search).order(id: :desc)
+
+    render json: @activity_entries, status: :ok , adapter: :attributes, each_serializer: ActivityEntryMemberSerializer
+  rescue StandardError => exception
+    Rails.logger.error "Search failed: #{exception.message}"
     render_errors(exception, status: :unprocessable_entity)
   end
 
