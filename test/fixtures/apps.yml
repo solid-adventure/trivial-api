@@ -1,6 +1,6 @@
 one:
   id: 1
-  port: 777
+  port: 3002
   name: one
   descriptive_name: friendly name one
   hostname: ''
@@ -10,7 +10,7 @@ one:
   owner_id: 1
 two:
   id: 2
-  port: 778
+  port: 3003
   name: two
   descriptive_name: friendly name two
   hostname: ''

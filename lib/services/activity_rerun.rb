@@ -53,6 +53,7 @@ module Services
 
     def delete_register_items
       total_count = 0
+
        RegisterItem
         .where(
           app_id: app.id,
@@ -66,7 +67,6 @@ module Services
         # We do this in a separate step because there isn't a 1:1 between activities and register_items
         ActivityEntry.where(register_item_id: register_items.pluck(:id))
         .update_all(register_item_id: nil)
-
         batch_count = register_items.delete_all
         total_count += batch_count
 

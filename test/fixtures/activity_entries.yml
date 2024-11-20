@@ -1,0 +1,29 @@
+rerun_before_start_date:
+  id: 1
+  app_id: 1
+  update_id:
+  activity_type: request
+  status: 200
+  source: test
+  duration_ms: 100
+  payload: {}
+  diagnostics: []
+  owner_id: 1
+  owner_type: Organization
+  register_item_id: 3
+  created_at: <%= Time.parse("2024-11-01 00:00:00") - 1.day %>
+
+rerun_after_start_date:
+  id: 2
+  app_id: 1
+  update_id:
+  activity_type: request
+  status: 200
+  source: test
+  duration_ms: 100
+  payload: {}
+  diagnostics: []
+  owner_id: 1
+  owner_type: Organization
+  register_item_id: 3
+  created_at: <%= Time.parse("2024-11-01 00:00:00") + 1.day %>

@@ -6,6 +6,7 @@
 #
 one:
   id: 1
+  app_id: 1
   register_id: 1
   description: "Register Item 1 description"
   units: USD
@@ -19,7 +20,8 @@ one:
 
 two:
   id: 2
-  register_id: 2
+  app_id: 1
+  register_id: 1
   description: "Register Item 2 description"
   units: USD
   amount: 9.55
@@ -30,57 +32,77 @@ two:
   owner_type: Organization
   originated_at: 2023-09-22 17:00:00
 
-before_start_date:  # Used in filtering tests to verify date range exclusions
-  app: one
+rerun_before_start_date:
+  id: 3
+  app_id: 1
+  register_id: 1
+  description: "Test Item 3"
+  units: USD
+  amount: 300
+  meta1:
+  meta2:
+  meta3:
+  owner_id: 1
+  owner_type: Organization
   originated_at: <%= Time.parse("2024-11-01 00:00:00") - 1.day %>
   invoice_id:
-  register: one
-  description: "Test Item 3"
-  amount: 300
-  units: 3
-  owner: one
-  unique_key: 1
 
-with_invoice:  # Used in deletion tests to verify items with invoices are preserved
-  app: one
-  originated_at: <%= Time.parse("2024-11-01 00:00:00") + 1.day %>
-  invoice_id: 123
-  register: one
+rerun_with_invoice:
+  id: 4
+  app_id: 1
+  register_id: 1
   description: "Test Item 4"
+  units: USD
   amount: 400
-  units: 4
-  owner: one
-  unique_key: 2
-
-other_app:  # Used in app-specific filtering tests
-  app: two
+  meta1:
+  meta2:
+  meta3:
+  owner_id: 1
+  owner_type: Organization
   originated_at: <%= Time.parse("2024-11-01 00:00:00") + 1.day %>
-  invoice_id:
-  register: one
+  invoice_id: 1
+
+rerun_other_app:
+  id: 5
+  app_id: 2
+  register_id: 1
   description: "Test Item 5"
+  units: USD
   amount: 500
-  units: 5
-  owner: one
-  unique_key: 3
-
-deletable_one:  # Used in bulk deletion tests
-  app: one
+  meta1:
+  meta2:
+  meta3:
+  owner_id: 1
+  owner_type: Organization
   originated_at: <%= Time.parse("2024-11-01 00:00:00") + 1.day %>
   invoice_id:
-  register: one
-  description: "Test Item 1"
-  amount: 100
-  units: 1
-  owner: one
-  unique_key: 4
 
-deletable_two:  # Used in bulk deletion tests
-  app: one
+rerun_deletable_one:
+  id: 6
+  app_id: 1
+  register_id: 1
+  description: "Test Item 1"
+  units: USD
+  amount: 100
+  meta1:
+  meta2:
+  meta3:
+  owner_id: 1
+  owner_type: Organization
+  originated_at: <%= Time.parse("2024-11-01 00:00:00") + 1.day %>
+  invoice_id:
+
+rerun_deletable_two:
+  id: 7
+  app_id: 1
+  register_id: 1
+  description: "Test Item 2"
+  units: USD
+  amount: 200
+  meta1:
+  meta2:
+  meta3:
+  owner_id: 1
+  owner_type: Organization
   originated_at: <%= Time.parse("2024-11-01 00:00:00") + 2.days %>
   invoice_id:
-  register: one
-  description: "Test Item 2"
-  amount: 200
-  units: 2
-  owner: one
-  unique_key: 5

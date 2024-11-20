@@ -1,40 +1,19 @@
 require 'test_helper'
 
 class ActivityRerunTest < ActiveSupport::TestCase
-  fixtures :apps
 
   def setup
     @app = apps(:one)
-    @start_at = Time.parse"2024-11-01 00:00:00"
-
+    @start_at = Time.parse("2024-11-01 00:00:00")
     @register = registers(:one)
     @owner = organizations(:one)
 
-  # Store IDs as we create records
-    @before_start_at_id = RegisterItem.create!(
-      app: @app, originated_at: @start_at - 1.day, invoice_id: nil,
-      register: @register, description: "Test Item 3", amount: 300, units: 3, owner: @owner, unique_key: 1
-    ).id
-
-    @with_invoice_id = RegisterItem.create!(
-      app: @app, originated_at: @start_at + 1.day, invoice_id: 123,
-      register: @register, description: "Test Item 4", amount: 400, units: 4, owner: @owner, unique_key: 2
-    ).id
-
-    @other_app_id = RegisterItem.create!(
-      app: apps(:two), originated_at: @start_at + 1.day, invoice_id: nil,
-      register: @register, description: "Test Item 5", amount: 500, units: 5, owner: @owner, unique_key: 3
-    ).id
-
-    @deletable_id_1 = RegisterItem.create!(
-      app: @app, originated_at: @start_at + 1.day, invoice_id: nil,
-      register: @register, description: "Test Item 1", amount: 100, units: 1, owner: @owner, unique_key: 4
-    ).id
-
-    @deletable_id_2 = RegisterItem.create!(
-      app: @app, originated_at: @start_at + 2.days, invoice_id: nil,
-      register: @register, description: "Test Item 2", amount: 200, units: 2, owner: @owner, unique_key: 5
-    ).id
+    # Store fixture IDs for easy reference in tests
+    @before_start_at_id = register_items(:rerun_before_start_date).id
+    @with_invoice_id = register_items(:rerun_with_invoice).id
+    @other_app_id = register_items(:rerun_other_app).id
+    @deletable_id_1 = register_items(:rerun_deletable_one).id
+    @deletable_id_2 = register_items(:rerun_deletable_two).id
 
     @register_item_ids = [
       @before_start_at_id,
@@ -43,6 +22,10 @@ class ActivityRerunTest < ActiveSupport::TestCase
       @deletable_id_1,
       @deletable_id_2
     ]
+
+    @rerun_after_start_date = activity_entries(:rerun_after_start_date)
+    @rerun_before_start_date = activity_entries(:rerun_before_start_date)
+
   end
 
   test 'can instantiate' do
@@ -73,6 +56,25 @@ class ActivityRerunTest < ActiveSupport::TestCase
     # These IDs should be gone
     refute RegisterItem.exists?(@deletable_id_1), "Expected ID @deletable_id_1 to be deleted"
     refute RegisterItem.exists?(@deletable_id_2), "Expected ID @deletable_id_2 to be deleted"
+  end
+
+  test 'reset_activity_entries resets eligible records after start' do
+    service = Services::ActivityRerun.new(@app, @start_at)
+
+    reset_count = service.send(:reset_activity_entries)
+    assert_equal 1, reset_count, "Expected 1 records to be reset"
+
+    assert_nil @rerun_after_start_date.reload.register_item_id, "Expected register_item_id to be nil"
+    assert_nil @rerun_after_start_date.diagnostics, "Expected diagnostics to be nil"
+    assert_nil @rerun_after_start_date.status, "Expected status to be nil"
+    assert_nil @rerun_after_start_date.duration_ms, "Expected duration_ms to be nil"
+
+    # This record should be unchanged
+    @rerun_before_start_date.reload
+    assert_not_nil @rerun_before_start_date.register_item_id, "Expected register_item_id to be unchanged"
+    assert_not_nil @rerun_before_start_date.diagnostics, "Expected diagnostics to be unchanged"
+    assert_not_nil @rerun_before_start_date.status, "Expected status to be unchanged"
+    assert_not_nil @rerun_before_start_date.duration_ms, "Expected duration_ms to be unchanged"
   end
 
 end
