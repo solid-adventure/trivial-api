@@ -90,6 +90,32 @@ RSpec.describe Search do
         }.not_to raise_error
       end
 
+      it 'handles IN operator with arrays correctly' do
+        # Setup additional test data
+        model.create(name: 'Frodo', age: 33)
+        model.create(name: 'Sam', age: 38)
+
+        values = ['Bilbo', 'Frodo', 'Sam']
+        query = model.create_query(string_col, 'IN', values)
+        expect(query).to eq("name IN ('Bilbo','Frodo','Sam')")
+
+        # Test actual query execution
+        results = model.where(Arel.sql(query))
+        expect(results.count).to eq(3)
+        expect(results.pluck(:name)).to match_array(['Bilbo', 'Frodo', 'Sam'])
+
+        # Test subset of values
+        subset_query = model.create_query(string_col, 'IN', ['Bilbo', 'Frodo'])
+        subset_results = model.where(Arel.sql(subset_query))
+        expect(subset_results.count).to eq(2)
+        expect(subset_results.pluck(:name)).to match_array(['Bilbo', 'Frodo'])
+
+        # Test with non-array predicate
+        expect {
+          model.create_query(string_col, 'IN', 'not_an_array')
+        }.to raise_error(Search::InvalidPredicateError, 'IN operator requires an array')
+      end
+
       it 'sanitizes queries against injection attempts' do
         inject_col = "'; INSERT INTO users (username, password) VALUES ('injected_user', 'password');--"
         expect { model.create_query(inject_col, comperator, str) }.to raise_error(Search::InvalidColumnError)
