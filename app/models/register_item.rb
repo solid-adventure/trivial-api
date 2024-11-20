@@ -14,6 +14,7 @@ class RegisterItem < ApplicationRecord
   SEARCHABLE_COLUMNS = %w[originated_at description amount units unique_key].freeze
 
   belongs_to :register
+  belongs_to :app
   has_many :activity_entries
 
   @@initialized_registers = {}

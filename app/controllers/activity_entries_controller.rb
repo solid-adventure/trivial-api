@@ -40,6 +40,22 @@ class ActivityEntriesController < ApplicationController
     render_errors(exception, status: :unprocessable_entity)
   end
 
+  def reprocess
+    @app = current_user.associated_apps.kept.find_by_name!(params[:app_id])
+    authorize! :update, @app
+    start_at = params.require(:start_at)
+    start_at = Time.parse(start_at) if start_at.is_a?(String)
+    service = Services::ActivityRerun.new(@app, start_at)
+    service.call
+
+    # Todo, we probably need to stream this back to the client, on a  timer or ?
+
+
+    render json: { status: 200 }
+  rescue StandardError => exception
+    render_errors(exception, status: :unprocessable_entity)
+  end
+
   def show
     activity_entry = ActivityEntry.find(params[:id])
     authorize! :read, activity_entry
