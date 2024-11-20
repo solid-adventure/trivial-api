@@ -15,6 +15,8 @@ module Services
   class ActivityRerun
     BATCH_SIZE = 1000
 
+    attr_accessor :app, :start_at, :logger, :last_id, :run_id
+
     def initialize(app, start_at)
       @app = app
       @start_at = start_at
@@ -26,29 +28,37 @@ module Services
     def call
       log_info("Reun started")
       validate_params!
-
       ActiveRecord::Base.transaction do
-
         # TODO Create an audit
-        # TODO Create an advisory lock to prevent multiple reprocesses from happening at the same time
-        # TODO implement last_id
-
+        unless get_advisory_lock
+          log_info("Rerun already in progress, skipping")
+          return
+        end
         reset_count = reset_activity_entries
         deleted_count = delete_register_items
         queued_count = queue_activities_for_reun
-
-        # We completed resending them; from a user perspective, the doesn't complete until the stream is finished processing
         log_info("Reun completed. register_items_deleted=#{deleted_count} activities_reset=#{reset_count} queued=#{queued_count}")
+        return true
       end
     end
 
     private
 
-    attr_reader :app, :start_at, :logger, :last_id, :run_id
+    def lock_key
+      "rerun_app_#{@app.id}"
+    end
+
+    # Prevent multiple instances from running at the same, per app/contract
+    def get_advisory_lock
+      ActiveRecord::Base.connection.select_value(<<-SQL)
+        SELECT pg_try_advisory_xact_lock(#{Zlib.crc32(lock_key)})
+      SQL
+    end
 
     def validate_params!
       raise "start_at required" unless start_at.present?
       raise "app required" unless app.present?
+      raise "app must be an App" unless app.is_a?(App)
     end
 
     def delete_register_items
@@ -105,7 +115,6 @@ module Services
     def queue_activities_for_reun
       key = "app_#{app.id}_rerun_#{run_id}"
       queued_count = 0
-      last_id = nil
       ActivityEntry
         .select(:id, :app_id, :created_at)
         .where(app_id: app.id, created_at: start_at.., activity_type: 'request')
@@ -120,7 +129,7 @@ module Services
             key: key
           )
           queued_count += activity_entries.size
-          last_id = activity_entries.last.id
+          @last_id = activity_entries.last.id
         end
         log_info("Activities queued. count=#{queued_count}")
         return queued_count

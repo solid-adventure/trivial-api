@@ -23,8 +23,9 @@ class ActivityRerunTest < ActiveSupport::TestCase
       @deletable_id_2
     ]
 
-    @rerun_after_start_date = activity_entries(:rerun_after_start_date)
     @rerun_before_start_date = activity_entries(:rerun_before_start_date)
+    @rerun_after_start_date = activity_entries(:rerun_after_start_date)
+    @rerun_after_start_date_two = activity_entries(:rerun_after_start_date_two)
 
   end
 
@@ -62,8 +63,9 @@ class ActivityRerunTest < ActiveSupport::TestCase
     service = Services::ActivityRerun.new(@app, @start_at)
 
     reset_count = service.send(:reset_activity_entries)
-    assert_equal 1, reset_count, "Expected 1 records to be reset"
+    assert_equal 2, reset_count, "Expected 2 records to be reset"
 
+    # This record should be reset
     assert_nil @rerun_after_start_date.reload.register_item_id, "Expected register_item_id to be nil"
     assert_nil @rerun_after_start_date.diagnostics, "Expected diagnostics to be nil"
     assert_nil @rerun_after_start_date.status, "Expected status to be nil"
@@ -75,6 +77,18 @@ class ActivityRerunTest < ActiveSupport::TestCase
     assert_not_nil @rerun_before_start_date.diagnostics, "Expected diagnostics to be unchanged"
     assert_not_nil @rerun_before_start_date.status, "Expected status to be unchanged"
     assert_not_nil @rerun_before_start_date.duration_ms, "Expected duration_ms to be unchanged"
+  end
+
+  test 'queue_activities_for_reun queues eligible records after start' do
+    service = Services::ActivityRerun.new(@app, @start_at)
+    queued_count = service.send(:queue_activities_for_reun)
+    assert_equal 2, queued_count, "Expected 2 records to be queued"
+    assert_equal @rerun_after_start_date_two.id, service.last_id, "Expected last_id to be set to the last queued record"
+  end
+
+  test 'lock key contains app id' do
+    service = Services::ActivityRerun.new(@app, @start_at)
+    assert_equal "rerun_app_#{@app.id}", service.send(:lock_key)
   end
 
 end
