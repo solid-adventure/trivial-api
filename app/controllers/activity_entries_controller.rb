@@ -32,7 +32,7 @@ class ActivityEntriesController < ApplicationController
     end
     raise 'search required' unless search.any?
 
-    @activity_entries = ActivityEntry.search(@activity_entries, search).order(id: :desc)
+    @activity_entries = ActivityEntry.search(@activity_entries, search).limit(search_result_limit).order(id: :desc)
 
     render json: @activity_entries, status: :ok , adapter: :attributes, each_serializer: ActivityEntryMemberSerializer
   rescue StandardError => exception
@@ -159,7 +159,14 @@ class ActivityEntriesController < ApplicationController
   end
 
   private
+  # These can likely be unified in a future pass
+  # The 20 limit is likely much too low after a misdiagnosed missing index
   MAX_RESULTS = 20
+  MAX_SEARCH_RESULTS = 1000
+
+  def search_result_limit
+    [[(params[:limit] || MAX_SEARCH_RESULTS).to_i, 1].max, MAX_SEARCH_RESULTS].min
+  end
 
   def limit
     [[(params[:limit] || MAX_RESULTS).to_i, 1].max, MAX_RESULTS].min
