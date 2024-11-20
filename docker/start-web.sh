@@ -17,5 +17,6 @@ rails runner 'CacheWarmUpJob.perform_now(cache_name: "app_activity_stats", optio
 # Start the cron service for the whenever gem
 service cron start
 
-rails db:migrate
+# NOTE: temporarily disabled automatic migrations
+# rails db:migrate
 rails server -b 0.0.0.0
