@@ -86,7 +86,11 @@ module Services
         end
         results = results.group(meta_groups)
       end
-      results = results.__send__(stat ,:amount)
+      results = if stat == 'count'
+                  results.count
+                else
+                  results.__send__(stat ,:amount)
+                end
       results = format(results, args[:group_by_period].present?, args[:group_by].present?, args[:invert_sign])
 
       title = generate_title(stat, args[:group_by_period], args[:group_by])

@@ -10,4 +10,6 @@ class Tag < ApplicationRecord
   validates :name, uniqueness: { 
     scope: [:taggable_type, :taggable_id, :context] },
     strict: TagExists
+
+  alias_attribute :reference_name, :name
 end

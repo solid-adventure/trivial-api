@@ -42,6 +42,8 @@ class User < ActiveRecord::Base
   before_save :set_values_for_individual
   before_create :set_trial_expires_at
 
+  alias_attribute :reference_name, :name
+
   def ensure_aws_role!
     begin
       aws_env_set?

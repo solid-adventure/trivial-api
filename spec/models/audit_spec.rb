@@ -39,10 +39,10 @@ RSpec.describe Audited::Audit do
 
     it 'has the all_audits instance methods' do
       expect(organization.respond_to? :all_audits).to be true
-      # all_audits: create org, create org_role, create register, create dashboard, create chart
-      expect(organization.all_audits.count).to eq(5)
-      item
+      # all_audits: create org, create org_role, create user, create register, create dashboard, create chart
       expect(organization.all_audits.count).to eq(6)
+      item
+      expect(organization.all_audits.count).to eq(7)
     end
   end
 end

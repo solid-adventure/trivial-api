@@ -16,6 +16,10 @@ class Manifest < ApplicationRecord
 
     after_save :create_activity_entry
 
+    def reference_name
+        app.reference_name
+    end
+
     def copy_to_app!(new_app)
         new_manifest = self.dup
         new_manifest.app_id = new_app.name
