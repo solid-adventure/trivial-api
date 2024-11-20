@@ -10,6 +10,7 @@ class User < ActiveRecord::Base
   include EnvHandler
 
   audited
+  has_owned_audits
 
   has_and_belongs_to_many :customers
   has_many :org_roles, :dependent => :destroy

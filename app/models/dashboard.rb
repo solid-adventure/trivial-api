@@ -2,7 +2,7 @@ class Dashboard < ApplicationRecord
   include Ownable
   include Permissible
 
-  audited
+  audited owned_audits: true
   has_associated_audits
 
   validates :owner,

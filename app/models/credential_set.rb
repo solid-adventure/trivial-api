@@ -2,7 +2,7 @@ class CredentialSet < ApplicationRecord
   include Ownable
   include Permissible
 
-  audited
+  audited owned_audits: true
 
   belongs_to :owner, polymorphic: true
   has_many :permissions, as: :permissible

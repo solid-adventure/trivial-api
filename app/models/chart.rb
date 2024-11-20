@@ -1,7 +1,7 @@
 # app/model/chart.rb
 
 class Chart < ApplicationRecord
-  audited associated_with: :dashboard
+  audited associated_with: :dashboard, owned_audits: true
 
   VALID_REPORT_PERIODS = %w[day week month quarter year all].freeze
   VALID_REPORT_TYPES = %w[item_count item_sum item_average].freeze

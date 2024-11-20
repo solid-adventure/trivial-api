@@ -3,7 +3,7 @@ class Register < ApplicationRecord
   include Ownable
   include Permissible
 
-  audited
+  audited owned_audits: true
   has_associated_audits
 
   # Register identity basics
