@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_29_204855) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_15_132020) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -102,9 +102,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_29_204855) do
     t.string "remote_address"
     t.string "request_uuid"
     t.datetime "created_at"
+    t.string "owner_type"
+    t.bigint "owner_id"
     t.index ["associated_type", "associated_id"], name: "associated_index"
     t.index ["auditable_type", "auditable_id", "version"], name: "auditable_index"
     t.index ["created_at"], name: "index_audits_on_created_at"
+    t.index ["owner_type", "owner_id"], name: "index_audits_on_owner"
     t.index ["request_uuid"], name: "index_audits_on_request_uuid"
     t.index ["user_id", "user_type"], name: "user_index"
   end
@@ -252,6 +255,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_29_204855) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "originated_at"
+    t.integer "invoice_id"
+    t.integer "app_id"
+    t.index ["app_id"], name: "index_register_items_on_app_id"
+    t.index ["invoice_id"], name: "index_register_items_on_invoice_id"
     t.index ["originated_at"], name: "index_register_items_on_originated_at"
     t.index ["owner_type", "owner_id"], name: "index_register_items_on_owner_type_and_owner_id"
     t.index ["register_id"], name: "index_register_items_on_register_id"
