@@ -2,6 +2,12 @@ class ActivityEntriesController < ApplicationController
   skip_before_action :authenticate_user!, only: [:update, :create_from_request]
   before_action :set_activity_entries, only: %i[index search]
 
+  # Prevent an extra auth header from being set after a stream is opened
+  skip_after_action :update_auth_header, only: [:rerun]
+
+  # Enable streaming
+  include ActionController::Live
+
   def index
     authorize! :index, ActivityEntry
 
@@ -45,15 +51,18 @@ class ActivityEntriesController < ApplicationController
     authorize! :update, @app
     start_at = params.require(:start_at)
     start_at = Time.parse(start_at) if start_at.is_a?(String)
+    headers["Content-Type"] = "text/event-stream"
+    response.headers["Last-Modified"] = Time.now.httpdate # Add this line if your Rack version is 2.2.x, which we are as of 2024-11-21
+
     service = Services::ActivityRerun.new(@app, start_at)
-    service.call
+    service.call do |progress|
+      response.stream.write("#{progress.to_json}\n\n")
+    end
 
-    # Todo, we probably need to stream this back to the client, on a  timer or ?
-
-
-    render json: { status: 200 }
   rescue StandardError => exception
-    render_errors(exception, status: :unprocessable_entity)
+    response.stream.write("error: #{exception.message}\n\n")
+  ensure
+    response.stream.close
   end
 
   def show
