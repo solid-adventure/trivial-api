@@ -79,9 +79,9 @@ class ActivityRerunTest < ActiveSupport::TestCase
     assert_not_nil @rerun_before_start_date.duration_ms, "Expected duration_ms to be unchanged"
   end
 
-  test 'queue_activities_for_reun queues eligible records after start' do
+  test 'queue_activities_for_rerun queues eligible records after start' do
     service = Services::ActivityRerun.new(@app, @start_at)
-    queued_count = service.send(:queue_activities_for_reun)
+    queued_count = service.send(:queue_activities_for_rerun)
     assert_equal 2, queued_count, "Expected 2 records to be queued"
     assert_equal @rerun_after_start_date_two.id, service.last_id, "Expected last_id to be set to the last queued record"
   end

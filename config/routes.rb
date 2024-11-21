@@ -72,6 +72,7 @@ Rails.application.routes.draw do
       get 'keys'
       post 'keys', action: :refresh_keys
       post 'search'
+      put 'rerun'
     end
 
     member do

@@ -40,7 +40,7 @@ class ActivityEntriesController < ApplicationController
     render_errors(exception, status: :unprocessable_entity)
   end
 
-  def reprocess
+  def rerun
     @app = current_user.associated_apps.kept.find_by_name!(params[:app_id])
     authorize! :update, @app
     start_at = params.require(:start_at)

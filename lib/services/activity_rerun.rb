@@ -1,14 +1,9 @@
-# Usage:
-# ActivityRerun.new(app, start_at).call
-
 # Logging signature:
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Reun started
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Register items deleted. count=1500
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Activity entries reset. count=1500
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Queueing activities. total=10000
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Batch processed. processed=2000 total=10000
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Activities queued. count=10000
-# [ActivityRerun] app_id=123 start_at=2024-11-14T10:00:00Z Reun completed. deleted=1500 reset=1500 reprocessed=10000
+# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Rerun started
+# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Activity entries reset. count=0
+# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Register items deleted. count=0
+# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Activities queued. count=19392
+# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Rerun completed. register_items_deleted=0 activities_reset=0 queued=19392
 
 module Services
 
@@ -26,7 +21,7 @@ module Services
     end
 
     def call
-      log_info("Reun started")
+      log_info("Rerun started")
       validate_params!
       ActiveRecord::Base.transaction do
         # TODO Create an audit
@@ -36,9 +31,9 @@ module Services
         end
         reset_count = reset_activity_entries
         deleted_count = delete_register_items
-        queued_count = queue_activities_for_reun
-        log_info("Reun completed. register_items_deleted=#{deleted_count} activities_reset=#{reset_count} queued=#{queued_count}")
-        return true
+        queued_count = queue_activities_for_rerun
+        log_info("Rerun completed. register_items_deleted=#{deleted_count} activities_reset=#{reset_count} queued=#{queued_count}")
+        true
       end
     end
 
@@ -112,7 +107,7 @@ module Services
       total_count
     end
 
-    def queue_activities_for_reun
+    def queue_activities_for_rerun
       key = "app_#{app.id}_rerun_#{run_id}"
       queued_count = 0
       ActivityEntry
@@ -132,7 +127,7 @@ module Services
           @last_id = activity_entries.last.id
         end
         log_info("Activities queued. count=#{queued_count}")
-        return queued_count
+        queued_count
       rescue StandardError => e
         log_info("Requeing failed. last_id=#{last_id}")
         puts e.message
