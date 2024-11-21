@@ -56,32 +56,6 @@ module Services
       raise "app must be an App" unless app.is_a?(App)
     end
 
-    def delete_register_items(&block)
-      total_count = 0
-
-       RegisterItem
-        .where(
-          app_id: app.id,
-          originated_at: start_at..,
-          invoice_id: nil
-        )
-      .in_batches(of: BATCH_SIZE) do |register_items|
-
-        # We'll do a full reset of the activity in a separate step, but we need to dissassociate the register items
-        # from the activity entries first, to satisfy the foriegn key constraint.
-        # We do this in a separate step because there isn't a 1:1 between activities and register_items
-        ActivityEntry.where(register_item_id: register_items.pluck(:id))
-        .update_all(register_item_id: nil)
-        batch_count = register_items.delete_all
-        total_count += batch_count
-
-        log_info("Register items batch deleted. batch_count: #{batch_count}, total_count: #{total_count}", &block)
-      end
-
-      log_info("Register items deleted. count=#{total_count}", &block)
-      total_count
-    end
-
     def reset_activity_entries(&block)
       total_count = 0
       ActivityEntry
@@ -90,7 +64,6 @@ module Services
           created_at: start_at..,
           activity_type: 'request',
         )
-        .where.not(register_item_id: nil)
         .in_batches(of: BATCH_SIZE) do |activity_entries|
           batch_count = activity_entries.update_all(
             register_item_id: nil,
@@ -104,6 +77,25 @@ module Services
         end
 
       log_info("Activity entries reset. count=#{total_count}", &block)
+      total_count
+    end
+
+    def delete_register_items(&block)
+      total_count = 0
+
+       RegisterItem
+        .where(
+          app_id: app.id,
+          originated_at: start_at..,
+          invoice_id: nil
+        )
+      .in_batches(of: BATCH_SIZE) do |register_items|
+        batch_count = register_items.delete_all
+        total_count += batch_count
+        log_info("Register items batch deleted. batch_count: #{batch_count}, total_count: #{total_count}", &block)
+      end
+
+      log_info("Register items deleted. count=#{total_count}", &block)
       total_count
     end
 
