@@ -155,7 +155,7 @@ class RegisterItemsController < ApplicationController
 
   def register_item_params(args=nil)
     register_item_params = args || params
-    permitted_params = register_item_params.permit(:unique_key, :description, :register_id, :amount, :units, :originated_at)
+    permitted_params = register_item_params.permit(:app_id, :unique_key, :description, :register_id, :amount, :units, :originated_at)
     if @register
       @register.meta.each do |column, label|
         next unless register_item_params[label]
