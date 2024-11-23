@@ -35,7 +35,8 @@ class RegisterItemsController < ApplicationController
 
   # POST /register_items
   def create
-    @register_item = RegisterItem.new(register_item_params)
+    @register_item = RegisterItem.new
+    @register_item.assign_attributes(register_item_params)
     @register_item.owner = @register.owner
     authorize! :create, @register_item
     if @register_item.save
@@ -56,7 +57,8 @@ class RegisterItemsController < ApplicationController
       registers = Register.where(id: register_ids).index_by(&:id)
       register_items_attributes = params[:register_items].map do |item_params|
         @register = registers[item_params[:register_id]]
-        register_item = RegisterItem.new(register_item_params(item_params))
+        register_item = RegisterItem.new
+        register_item.assign_attributes(register_item_params(item_params))
         register_item.owner = @register&.owner
         authorize! :create, register_item
         register_item.attributes
@@ -155,7 +157,7 @@ class RegisterItemsController < ApplicationController
 
   def register_item_params(args=nil)
     register_item_params = args || params
-    permitted_params = register_item_params.permit(:app_id, :unique_key, :description, :register_id, :amount, :units, :originated_at)
+    permitted_params = register_item_params.permit(:public_app_id, :unique_key, :description, :register_id, :amount, :units, :originated_at)
     if @register
       @register.meta.each do |column, label|
         next unless register_item_params[label]

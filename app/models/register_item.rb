@@ -38,8 +38,16 @@ class RegisterItem < ApplicationRecord
   # Denormalized from register
   before_create :set_register_attrs
 
+  # Allow the public app id to derive the internal app id
+  attr_reader :public_app_id
+
   def set_register_attrs
     self.units ||= register.units
+  end
+
+  def public_app_id=(value)
+    @public_app_id = value
+    self.app = App.find_by_name!(value) if value.present?
   end
 
   def resolved_column(label)
