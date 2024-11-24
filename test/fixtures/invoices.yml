@@ -6,7 +6,7 @@ one:
   payor_org_id: 3
   register_id: 1
   currency: MyString
-  total: 9.99
+  total: 19.98
   notes: MyText
   owner_type: 'Organization'
   owner_id: 1

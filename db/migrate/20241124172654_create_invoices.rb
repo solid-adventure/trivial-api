@@ -6,7 +6,7 @@ class CreateInvoices < ActiveRecord::Migration[7.0]
       t.integer :payor_org_id, null: false
       t.integer :register_id, null: false
       t.string :currency, null: false
-      t.decimal :total, precision: 15, scale: 2, null: false
+      t.decimal :total, precision: 15, scale: 4, null: false
       t.text :notes
       t.references :owner, null: false, polymorphic: true, index: true
       t.timestamps

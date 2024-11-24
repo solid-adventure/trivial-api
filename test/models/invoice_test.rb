@@ -50,7 +50,10 @@ class InvoiceTest < ActiveSupport::TestCase
     assert_not @invoice.valid?
     assert_includes @invoice.errors[:total], "must be greater than or equal to 0"
 
-    @invoice.total = 0.00
+    @invoice.total = 19.99
+    assert_not @invoice.valid?
+
+    @invoice.total = 19.98
     assert @invoice.valid?
   end
 

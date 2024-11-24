@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_24_172654) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_24_180129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -177,13 +177,30 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_24_172654) do
     t.index ["owner_type", "owner_id"], name: "index_dashboards_on_owner"
   end
 
+  create_table "invoice_items", force: :cascade do |t|
+    t.bigint "invoice_id", null: false
+    t.decimal "quantity", precision: 15, scale: 4, null: false
+    t.decimal "unit_price", precision: 15, scale: 4, null: false
+    t.decimal "extended_amount", precision: 15, scale: 4, null: false
+    t.string "income_account", null: false
+    t.string "income_account_group", null: false
+    t.string "owner_type", null: false
+    t.bigint "owner_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["income_account"], name: "index_invoice_items_on_income_account"
+    t.index ["income_account_group"], name: "index_invoice_items_on_income_account_group"
+    t.index ["invoice_id"], name: "index_invoice_items_on_invoice_id"
+    t.index ["owner_type", "owner_id"], name: "index_invoice_items_on_owner"
+  end
+
   create_table "invoices", force: :cascade do |t|
     t.datetime "date", null: false
     t.integer "payee_org_id", null: false
     t.integer "payor_org_id", null: false
     t.integer "register_id", null: false
     t.string "currency", null: false
-    t.decimal "total", precision: 15, scale: 2, null: false
+    t.decimal "total", precision: 15, scale: 4, null: false
     t.text "notes"
     t.string "owner_type", null: false
     t.bigint "owner_id", null: false
@@ -347,6 +364,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_24_172654) do
   add_foreign_key "activity_entries", "register_items"
   add_foreign_key "charts", "dashboards"
   add_foreign_key "charts", "registers"
+  add_foreign_key "invoice_items", "invoices"
   add_foreign_key "invoices", "organizations", column: "payee_org_id"
   add_foreign_key "invoices", "organizations", column: "payor_org_id"
   add_foreign_key "manifest_drafts", "apps"
