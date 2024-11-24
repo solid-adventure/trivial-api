@@ -11,6 +11,7 @@ class Organization < ApplicationRecord
   has_many :owned_registers, class_name: 'Register', as: :owner
   has_many :owned_register_items, class_name: 'RegisterItem', as: :owner
   has_many :owned_dashboards, class_name: 'Dashboard', as: :owner, inverse_of: :owner
+  has_many :owned_invoices, class_name: 'Invoice', as: :owner
 
   has_many :org_roles, dependent: :destroy
   has_many :users, through: :org_roles
