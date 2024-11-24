@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_15_132020) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_24_172654) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -177,6 +177,24 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_132020) do
     t.index ["owner_type", "owner_id"], name: "index_dashboards_on_owner"
   end
 
+  create_table "invoices", force: :cascade do |t|
+    t.datetime "date", null: false
+    t.integer "payee_org_id", null: false
+    t.integer "payor_org_id", null: false
+    t.integer "register_id", null: false
+    t.string "currency", null: false
+    t.decimal "total", precision: 15, scale: 2, null: false
+    t.text "notes"
+    t.string "owner_type", null: false
+    t.bigint "owner_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["date"], name: "index_invoices_on_date"
+    t.index ["owner_type", "owner_id"], name: "index_invoices_on_owner"
+    t.index ["payee_org_id"], name: "index_invoices_on_payee_org_id"
+    t.index ["payor_org_id"], name: "index_invoices_on_payor_org_id"
+  end
+
   create_table "manifest_drafts", force: :cascade do |t|
     t.bigint "app_id", null: false
     t.bigint "manifest_id", null: false
@@ -329,6 +347,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_132020) do
   add_foreign_key "activity_entries", "register_items"
   add_foreign_key "charts", "dashboards"
   add_foreign_key "charts", "registers"
+  add_foreign_key "invoices", "organizations", column: "payee_org_id"
+  add_foreign_key "invoices", "organizations", column: "payor_org_id"
   add_foreign_key "manifest_drafts", "apps"
   add_foreign_key "manifest_drafts", "manifests"
   add_foreign_key "manifests", "apps", column: "internal_app_id"
