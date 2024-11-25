@@ -70,13 +70,15 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :activity_entries, only: [:index, :create, :show, :create_from_request, :update] do
+  resources :activity_entries, only: [:index, :create, :show, :update] do
     collection do
+      post '', action: :create_from_request
       get 'stats'
       get 'columns'
       get 'keys'
       post 'keys', action: :refresh_keys
       post 'search'
+      put 'rerun'
     end
 
     member do
