@@ -60,6 +60,7 @@ gem 'net-smtp', require: false
 gem 'net-imap', require: false
 gem 'net-pop', require: false
 gem "scenic", "~> 1.8"
+gem 'diffy'
 
 group :production, :development do
   gem 'ddtrace', require: 'ddtrace/auto_instrument'

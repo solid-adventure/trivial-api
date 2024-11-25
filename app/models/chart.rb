@@ -1,7 +1,7 @@
 # app/model/chart.rb
 
 class Chart < ApplicationRecord
-  audited associated_with: :dashboard
+  audited associated_with: :dashboard, owned_audits: true
 
   VALID_REPORT_PERIODS = %w[day week month quarter year].freeze
   VALID_REPORT_TYPES = %w[item_count item_sum item_average].freeze
@@ -46,6 +46,8 @@ class Chart < ApplicationRecord
 
   belongs_to :dashboard, inverse_of: :charts
   belongs_to :register, inverse_of: :charts
+
+  alias_attribute :reference_name, :name
 
   def aliased_groups
     register.meta.each_with_object({}) do |(column, label), groups|

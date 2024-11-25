@@ -3,7 +3,7 @@ class Register < ApplicationRecord
   include Ownable
   include Permissible
 
-  audited
+  audited owned_audits: true
   has_associated_audits
 
   # Register identity basics
@@ -24,6 +24,8 @@ class Register < ApplicationRecord
 
   before_validation :set_defaults
   after_create :create_gross_revenue_chart
+
+  alias_attribute :reference_name, :name
 
   private
     def set_defaults
