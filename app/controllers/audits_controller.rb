@@ -1,10 +1,15 @@
+require 'csv'
+
 class AuditsController < ApplicationController
+  include ActionController::Live
+
   before_action :load_and_authorize_auditable
+  before_action :load_and_filter_audits, only: %i[index csv]
   before_action :load_and_authorize_audit, only: %i[show]
   before_action :set_pagination, only: %i[index]
+  skip_after_action :update_auth_header, only: %i[csv]
 
   def index
-    @audits = @auditable.all_audits
     paginate_audits
     response = {
       current_page: @page,
@@ -13,6 +18,26 @@ class AuditsController < ApplicationController
     }
 
     render json: response, status: :ok
+  end
+
+  def csv
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = "attachment; filename=audits-#{Date.today}.csv"
+    # Add this line if your Rack version is 2.2.x, which we are as of 2024-11-22
+    response.headers['Last-Modified'] = Time.now.httpdate
+
+    serializer = OwnedAuditSerializer.new(@audits.first)
+    csv_headers = serializer.serializable_hash.keys
+    response.stream.write CSV.generate_line(csv_headers)
+
+    @audits.find_in_batches(batch_size: 1000) do |audits_batch|
+      serialized_batch = ActiveModel::Serializer::CollectionSerializer.new(audits_batch).as_json
+      serialized_batch.each do |row|
+        response.stream.write CSV.generate_line(row.values)
+      end
+    end
+  ensure
+    response.stream.close
   end
 
   def show
@@ -27,6 +52,18 @@ class AuditsController < ApplicationController
     @auditable = resource.singularize.classify.constantize.find(id)
 
     raise CanCan::AccessDenied unless @auditable.admin?(current_user)
+  end
+
+  def load_and_filter_audits
+    @audits = @auditable.all_audits
+    filter_audits
+  end
+
+  def filter_audits
+    search = params[:search] ? JSON.parse(params[:search]) : []
+    if search.any?
+      @audits = OwnedAudit.search(@audits, search)
+    end
   end
 
   def load_and_authorize_audit
