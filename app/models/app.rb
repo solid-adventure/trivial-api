@@ -7,7 +7,7 @@ class App < ApplicationRecord
 
   MINIMUM_PORT_NUMBER = 3001
 
-  audited
+  audited owned_audits: true
   has_associated_audits
 
   belongs_to :owner, polymorphic: true
@@ -26,6 +26,8 @@ class App < ApplicationRecord
   scope :publicReadable, -> { where(readable_by: 'public') }
 
   before_validation :set_defaults
+
+  alias_attribute :reference_name, :name
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps

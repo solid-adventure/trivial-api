@@ -2,7 +2,7 @@ class Dashboard < ApplicationRecord
   include Ownable
   include Permissible
 
-  audited
+  audited owned_audits: true
   has_associated_audits
 
   validates :owner,
@@ -26,4 +26,6 @@ class Dashboard < ApplicationRecord
   has_many :permitted_users, through: :permissions, source: :user, inverse_of: :permitted_dashboards
 
   has_many :charts, inverse_of: :dashboard
+
+  alias_attribute :reference_name, :name
 end
