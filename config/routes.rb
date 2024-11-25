@@ -4,7 +4,8 @@ Rails.application.routes.draw do
   concern :auditable do
     resources :audits, only: [:index, :show] do
       collection do
-        get '', to: 'audits#csv', constraints: { format: 'csv' }
+        get '', to: 'audits#index', constraints: { format: :html }
+        get '', to: 'audits#csv', constraints: { format: :csv }
       end
     end
   end
