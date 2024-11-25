@@ -1,0 +1,20 @@
+one:
+  id: 1
+  port: 3002
+  name: one
+  descriptive_name: friendly name one
+  hostname: ''
+  domain: ''
+  load_balancer: ''
+  owner_type: Organization
+  owner_id: 1
+two:
+  id: 2
+  port: 3003
+  name: two
+  descriptive_name: friendly name two
+  hostname: ''
+  domain: ''
+  load_balancer: ''
+  owner_type: Organization
+  owner_id: 2
