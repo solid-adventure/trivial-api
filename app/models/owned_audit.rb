@@ -1,6 +1,10 @@
 # app/models/owned_audit.rb
+require 'search'
 
 class OwnedAudit < Audited::Audit
+  include Search
+  SEARCHABLE_COLUMNS = %w[id user_id created_at]
+
   belongs_to :owner, polymorphic: true, optional: true
 
   delegate :name, :email, to: :user, prefix: true, allow_nil: true
@@ -20,6 +24,15 @@ class OwnedAudit < Audited::Audit
     end
     diff_text = Diffy::Diff.new(formatted_old_value, formatted_new_value, context: 3).to_s
     diff_text.blank? ? nil : strip_left_whitespace(diff_text)
+  end
+
+  def self.search(audits, search)
+    search.each do |hash|
+      next unless SEARCHABLE_COLUMNS.include?(hash['c'])
+      query = create_query(hash['c'], hash['o'], hash['p'])
+      audits = audits.where(query)
+    end
+    return audits
   end
 
   private
