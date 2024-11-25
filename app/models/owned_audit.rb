@@ -3,7 +3,7 @@ require 'search'
 
 class OwnedAudit < Audited::Audit
   include Search
-  SEARCHABLE_COLUMNS = %w[id created_at]
+  SEARCHABLE_COLUMNS = %w[id user_id created_at]
 
   belongs_to :owner, polymorphic: true, optional: true
 
@@ -30,9 +30,9 @@ class OwnedAudit < Audited::Audit
     search.each do |hash|
       next unless SEARCHABLE_COLUMNS.include?(hash['c'])
       query = create_query(hash['c'], hash['o'], hash['p'])
-      filtered_audits = audits.where(query)
+      audits = audits.where(query)
     end
-    return filtered_audits
+    return audits
   end
 
   private
