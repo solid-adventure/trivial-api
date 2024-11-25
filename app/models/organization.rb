@@ -1,6 +1,7 @@
 class Organization < ApplicationRecord
   audited
   has_associated_audits
+  has_owned_audits
 
   has_many :owned_apps, class_name: 'App', as: :owner
   has_many :owned_manifests, class_name: 'Manifest', as: :owner
@@ -22,8 +23,15 @@ class Organization < ApplicationRecord
 
   default_scope { order(created_at: :asc) }
 
+  alias_attribute :reference_name, :name
+
   def admin?(user)
     org_roles.find_by(user: user)&.role == 'admin'
+  end
+
+  def all_audits
+    audits = super
+    audits.or(Audited.audit_class.where(auditable: self.users))
   end
 
   private

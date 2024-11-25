@@ -2,7 +2,7 @@ class Manifest < ApplicationRecord
     include Ownable
     include Permissible
 
-    audited associated_with: :app
+    audited associated_with: :app, owned_audits: true
 
     validates :app_id, presence: true
     validates :content, presence: true
@@ -15,6 +15,10 @@ class Manifest < ApplicationRecord
     has_one_attached :bundle
 
     after_save :create_activity_entry
+
+    def reference_name
+        app.reference_name
+    end
 
     def copy_to_app!(new_app)
         new_manifest = self.dup

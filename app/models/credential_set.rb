@@ -2,7 +2,7 @@ class CredentialSet < ApplicationRecord
   include Ownable
   include Permissible
 
-  audited
+  audited owned_audits: true
 
   belongs_to :owner, polymorphic: true
   has_many :permissions, as: :permissible
@@ -11,6 +11,8 @@ class CredentialSet < ApplicationRecord
   validates :name, :credential_type, presence: true
 
   before_create :set_external_id
+
+  alias_attribute :reference_name, :name
 
   def credentials
     @credentials ||= CredentialSetCredentials.find_or_build_by_user_and_name owner, credentials_name
