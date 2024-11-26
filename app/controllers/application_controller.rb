@@ -65,6 +65,20 @@ class ApplicationController < ActionController::API
     render json: { error: err.message }, status: :internal_server_error
   end
 
+  def disable_audits
+    model = controller_name.classify.safe_constantize
+    if model&.respond_to? :auditing_enabled
+      begin
+        model.auditing_enabled = false
+        yield
+      ensure
+        model.auditing_enabled = true
+      end
+    else
+      yield
+    end
+  end
+
   def auth_key
     auth = request.headers['Authorization']
     match = /^Bearer\s+(\S+)/i.match(auth)
