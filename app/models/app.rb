@@ -27,7 +27,7 @@ class App < ApplicationRecord
 
   before_validation :set_defaults
 
-  alias_attribute :reference_name, :name
+  alias_attribute :reference_name, :descriptive_name
 
   def descriptive_name_unique?
     # custom validator to factor for deleted apps
