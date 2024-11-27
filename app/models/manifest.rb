@@ -16,9 +16,7 @@ class Manifest < ApplicationRecord
 
     after_save :create_activity_entry
 
-    def reference_name
-        app.reference_name
-    end
+    delegate :reference_name, to: :app
 
     def copy_to_app!(new_app)
         new_manifest = self.dup

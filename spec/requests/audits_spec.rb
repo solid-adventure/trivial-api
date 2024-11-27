@@ -100,7 +100,7 @@ describe "Audits API", type: :request do
           expect(audits.count).to eq(2)
           expect(audits[0]['reference_type']).to eq(@associated_auditable.class.to_s)
           expect(audits[0]['reference_id']).to eq(@associated_auditable.id)
-          expect(audits[0]['reference_name']).to eq(@auditable.name)
+          expect(audits[0]['reference_name']).to eq(@auditable.reference_name)
           expect(audits[0]['action']).to eq('create')
           expect(audits[1]['reference_type']).to eq(@auditable.class.to_s)
           expect(audits[1]['reference_id']).to eq(@auditable.id)

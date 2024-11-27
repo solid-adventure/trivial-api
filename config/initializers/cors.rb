@@ -19,7 +19,9 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
         'client',
         'expiry',
         'uid',
-        'X-Items-Count'
+        'X-Items-Count',
+        'Content-Type',
+        'Content-Disposition'
       ]
   end
   origins = all_resources[0].instance_variable_get(:@origins)
