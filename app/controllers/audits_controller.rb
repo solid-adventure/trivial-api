@@ -37,6 +37,8 @@ class AuditsController < ApplicationController
         response.stream.write CSV.generate_line(row.values)
       end
     end
+  rescue ActionController::Live::ClientDisconnected => e
+    Rails.logger.info "Client disconnected: #{e.message}"
   ensure
     response.stream.close
   end
