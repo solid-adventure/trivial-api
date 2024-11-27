@@ -7,6 +7,7 @@ class RegisterItemsController < ApplicationController
   before_action :set_register_items, only: %i[ index sum ]
   before_action :set_pagination, only: %i[index]
   before_action :set_ordering, only: %i[index]
+  around_action :disable_audits, if: -> { current_user.role == 'client' }
 
   # GET /register_items
   def index

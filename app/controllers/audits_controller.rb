@@ -23,6 +23,7 @@ class AuditsController < ApplicationController
   def csv
     response.headers['Content-Type'] = 'text/csv'
     response.headers['Content-Disposition'] = "attachment; filename=audits-#{Date.today}.csv"
+    response.headers['X-Items-Count'] = @audits.size
     # Add this line if your Rack version is 2.2.x, which we are as of 2024-11-22
     response.headers['Last-Modified'] = Time.now.httpdate
 
@@ -36,6 +37,8 @@ class AuditsController < ApplicationController
         response.stream.write CSV.generate_line(row.values)
       end
     end
+  rescue ActionController::Live::ClientDisconnected => e
+    Rails.logger.info "Client disconnected: #{e.message}"
   ensure
     response.stream.close
   end

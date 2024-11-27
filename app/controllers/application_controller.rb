@@ -14,6 +14,7 @@ class ApplicationController < ActionController::API
   rescue_from ActiveRecord::RecordNotUnique, with: :render_not_unique
   rescue_from CanCan::AccessDenied, with: :render_unauthorized
   rescue_from EnvHandler::MissingEnvVariableError, with: :render_env_error
+  rescue_from FrozenError, with: :render_frozen_header_error
 
   protected
 
@@ -63,6 +64,24 @@ class ApplicationController < ActionController::API
 
   def render_env_error(err)
     render json: { error: err.message }, status: :internal_server_error
+  end
+
+  def render_frozen_header_error(err)
+    Rails.logger.error err.message
+  end
+
+  def disable_audits
+    model = controller_name.classify.safe_constantize
+    if model&.respond_to? :auditing_enabled
+      begin
+        model.auditing_enabled = false
+        yield
+      ensure
+        model.auditing_enabled = true
+      end
+    else
+      yield
+    end
   end
 
   def auth_key
