@@ -7,6 +7,26 @@ locals {
     "com.datadoghq.tags.version" : local.datadog_version
   }
 
+
+  kafka_secrets = [
+    {
+      name : "KAFKA_USERNAME",
+      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_USERNAME::"
+    },
+    {
+      name : "KAFKA_PASSWORD",
+      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_PASSWORD::"
+    },
+    {
+      name : "KAFKA_BOOTSTRAP_SERVERS",
+      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_BOOTSTRAP_SERVERS::"
+    },
+    {
+      name : "KAFKA_TOPIC",
+      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_TOPIC::"
+    },
+  ]
+
   task_definition_secrets = [
     {
       "name" : "WHIPLASH_CLIENT_ID",
