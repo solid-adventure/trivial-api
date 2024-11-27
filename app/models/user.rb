@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'env_handler'
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   extend Devise::Models
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -9,7 +9,7 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
   include EnvHandler
 
-  audited
+  audited redacted: filtered_attributes
   has_owned_audits
 
   has_and_belongs_to_many :customers
