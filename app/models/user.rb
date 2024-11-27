@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'env_handler'
 
-class User < ApplicationRecord
+class User < ActiveRecord::Base
   extend Devise::Models
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
