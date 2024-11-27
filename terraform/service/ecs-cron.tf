@@ -1,25 +1,6 @@
 locals {
   new_period_cron_name = "new-period-cron"
 
-  kafka_secrets = [
-    {
-      name : "KAFKA_USERNAME",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_USERNAME::"
-    },
-    {
-      name : "KAFKA_PASSWORD",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_PASSWORD::"
-    },
-    {
-      name : "KAFKA_BOOTSTRAP_SERVERS",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_BOOTSTRAP_SERVERS::"
-    },
-    {
-      name : "KAFKA_TOPIC",
-      valueFrom : "${data.aws_secretsmanager_secret.trivial_api_secrets.arn}:KAFKA_TOPIC::"
-    },
-  ]
-
   new_period_cron_task_definition = {
     name      = "${local.name_prefix}-trivial-api-${local.new_period_cron_name}"
     image     = var.ecr_tag
@@ -48,10 +29,7 @@ locals {
         hostPort      = 3000
       }
     ]
-    secrets = concat(
-      local.task_definition_secrets,
-      local.kafka_secrets
-    )
+    secrets     = local.task_definition_secrets
     environment = local.task_definition_env_vars
   }
 }
