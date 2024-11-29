@@ -3,6 +3,7 @@ class Invoice < ApplicationRecord
   belongs_to :payor, class_name: 'Organization', foreign_key: 'payor_org_id'
   belongs_to :owner, polymorphic: true
   has_many :invoice_items, dependent: :destroy
+  has_many :register_items
 
   validates :date, presence: true
   validates :currency, presence: true
