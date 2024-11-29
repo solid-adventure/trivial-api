@@ -178,15 +178,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_24_172654) do
   end
 
   create_table "invoices", force: :cascade do |t|
-    t.datetime "date", null: false
-    t.integer "payee_org_id", null: false
-    t.integer "payor_org_id", null: false
-    t.integer "register_id", null: false
-    t.string "currency", null: false
-    t.decimal "total", precision: 15, scale: 2, null: false
-    t.text "notes"
     t.string "owner_type", null: false
     t.bigint "owner_id", null: false
+    t.bigint "payee_org_id", null: false
+    t.bigint "payor_org_id", null: false
+    t.datetime "date", null: false
+    t.text "notes"
+    t.string "currency", null: false
+    t.decimal "total", precision: 15, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["date"], name: "index_invoices_on_date"
