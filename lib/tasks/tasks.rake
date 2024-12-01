@@ -1,4 +1,80 @@
 namespace :tasks do
+
+  desc "Create invoices for all customers ending on a specific date"
+  task :create_invoices, [:end_date, :period, :groups] => :environment do |t, args|
+    # Set defaults for optional parameters
+    args.with_defaults(
+      end_date: Date.current.to_s,
+      period: 'month',
+      groups: 'customer_id,warehouse_id'
+    )
+
+    puts "[create_invoices] Invoice creation started."
+    timezones = ["America/New_York", "America/Los_Angeles"]
+    registers = Register.all
+    report = Services::Report.new()
+
+    group_by = args[:groups].split(',').map(&:strip)
+
+    begin
+      end_date = Date.parse(args[:end_date])
+    rescue ArgumentError
+      raise ArgumentError, "end_date must be a valid date string (e.g., '2024-04-30')"
+    end
+
+    ActiveRecord::Base.transaction do
+      registers.each do |register|
+        if !register.meta.values.include?("customer_id")
+          # TEMP
+          # puts "[create_invoices] Skipping register, no meta column customer_id: #{register.id}, #{register.name}"
+          next
+        end
+
+        if !register.meta.values.include?("warehouse_id")
+          # TEMP
+          # puts "[create_invoices] Skipping register: no meta column warehouse_id: #{register.id}, #{register.name}"
+          next
+        end
+
+        puts "[create_invoices] Processing register: #{register.id}, #{register.name}"
+        timezones.each do |timezone|
+          puts "[create_invoices] Processing timezone: #{timezone}"
+
+          # Calculate date range using end_date as the anchor and period for the duration
+          timezone_end = end_date.in_time_zone(timezone)
+
+          # Use end_date as the end date (including the full day) and calculate start date based on period
+          end_at = timezone_end.end_of_day
+          start_at = case args[:period]
+          when 'month'
+            end_at.beginning_of_month
+          when 'week'
+            end_at - 1.week
+          when 'day'
+            end_at - 1.day
+          else
+            raise ArgumentError, "Unsupported period: #{args[:period]}"
+          end
+
+          report_params = {
+            register_id: register.id,
+            start_at: start_at.iso8601,
+            end_at: end_at.iso8601,
+            group_by_period: args[:period],
+            group_by: group_by,
+            timezone: timezone
+          }
+
+          result = report.item_sum(report_params)
+          puts "[create_invoices] Results for #{timezone}"
+          puts result.inspect
+        end # timezones.each
+      end # registers.each
+      true # commit transaction
+    end
+    puts "[create_invoices] Invoice creation completed."
+  end
+
   # rake tasks:send_new_period_started_events
   desc "Create Kafka events when new billing period is started"
   task :send_new_period_started_events => :environment do
