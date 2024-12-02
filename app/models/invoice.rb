@@ -1,7 +1,16 @@
 class Invoice < ApplicationRecord
+  include Ownable
+  include Permissible
+
+  audited owned_audits: true
+  has_associated_audits
+
   belongs_to :payee, class_name: 'Organization', foreign_key: 'payee_org_id'
   belongs_to :payor, class_name: 'Organization', foreign_key: 'payor_org_id'
   belongs_to :owner, polymorphic: true
+  belongs_to :register
+  has_many :permissions, as: :permissible
+  has_many :permitted_users, through: :permissions, source: :user
   has_many :invoice_items, dependent: :destroy
 
   validates :date, presence: true

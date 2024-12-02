@@ -86,6 +86,44 @@ RSpec.configure do |config|
               }
             },
             required: %i[id dashboard_id register_id name chart_type color_scheme default_time_range default_timezones time_range_bounds report_period report_groups]
+          },
+          invoice_schema: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              owner_type: { type: :string },
+              owner_id: { type: :integer },
+              payee_org_id: { type: :integer },
+              payor_org_id: { type: :integer },
+              date: { type: :string },
+              notes: { type: :string },
+              currency: { type: :string },
+              total: { type: :string },
+              created_at: { type: :string },
+              updated_at: { type: :string },
+              invoice_items: {
+                type: :array,
+                items: { '$ref' => '#/components/schemas/invoice_item_schema' }
+              },
+            },
+            required: %i[id owner_type owner_id payee_org_id payor_org_id date notes currency total created_at updated_at invoice_items]
+          },
+          invoice_item_schema: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              owner_type: { type: :string },
+              owner_id: { type: :integer },
+              invoice_id: { type: :integer },
+              income_account: { type: :string },
+              income_account_group: { type: :string },
+              quanity: { type: :string },
+              unit_price: { type: :string },
+              extended_amount: { type: :string },
+              created_at: { type: :string },
+              updated_at: { type: :string }
+            },
+            required: %i[id owner_type owner_id invoice_id income_account income_account_group quantity unit_price extended_amount created_at updated_at]
           }
         }
       }
