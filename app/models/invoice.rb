@@ -8,18 +8,18 @@ class Invoice < ApplicationRecord
   validates :currency, presence: true
   validates :total, presence: true,
             numericality: { greater_than_or_equal_to: 0 }
-  # validate :total_matches_items_sum TEMP
 
   before_destroy :unassociate_register_items
 
-  private
-
   def total_matches_items_sum
     calculated_total = invoice_items.sum(&:extended_amount)
-    if total != calculated_total
-      errors.add(:total, "must equal sum of invoice items (#{calculated_total})")
-    end
+    return true if total == calculated_total
+
+    errors.add(:total, "must equal sum of invoice items (#{calculated_total})")
+    false
   end
+
+  private
 
   def unassociate_register_items
     RegisterItem.where(invoice_id: id).update_all(invoice_id: nil)

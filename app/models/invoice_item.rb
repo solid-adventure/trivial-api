@@ -10,9 +10,6 @@ class InvoiceItem < ApplicationRecord
   validates :unit_price, presence: true,
             numericality: { greater_than_or_equal_to: 0 }
   validates :income_account, presence: true
-  # validates :income_account_group, presence: true
-
-  # before_validation :calculate_extended_amount
 
   private
 

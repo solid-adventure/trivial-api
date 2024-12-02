@@ -49,12 +49,13 @@ class InvoiceTest < ActiveSupport::TestCase
     @invoice.total = -1.00
     assert_not @invoice.valid?
     assert_includes @invoice.errors[:total], "must be greater than or equal to 0"
+  end
 
-    @invoice.total = 19.99
-    assert_not @invoice.valid?
-
-    @invoice.total = 19.98
-    assert @invoice.valid?
+  test "invoice total must equal sum of invoice items" do
+    assert @invoice.total_matches_items_sum
+    assert @invoice.invoice_items.sum(&:extended_amount), 19.98
+    @invoice.total = 10.00 # wrong answer
+    assert_not @invoice.total_matches_items_sum
   end
 
   test "organization can access its owned invoices" do

@@ -1,6 +1,8 @@
 module Services
   class InvoiceCreator
 
+    REQUIRED_META_COLUMNS = %w(customer_id warehouse_id income_account income_account_group)
+
     def initialize(register, customer_id, end_date, period, invoice_groups)
       @register = register
       @customer_id = customer_id
@@ -11,23 +13,19 @@ module Services
 
 
     def valid
-      if !@register.meta.values.include?("customer_id")
-        puts "[create_invoices] Skipping register, no meta column customer_id: #{@register.id}, #{@register.name}"
-        return false
+      missing_columns = REQUIRED_META_COLUMNS - @register.meta.values
+      missing_columns.each do |column|
+        # puts "[create_invoices] Skipping register, missing meta column: #{column}: #{@register.id}, #{@register.name}"
       end
-
-      if !@register.meta.values.include?("warehouse_id")
-        puts "[create_invoices] Skipping register: no meta column warehouse_id: #{@register.id}, #{@register.name}"
-        return false
-      end
+      return false if missing_columns.any?
       true
     end
 
     def create!
       return unless valid
       ActiveRecord::Base.transaction do
-        puts "[create_invoices] Processing register: #{@register.id}, #{@register.name} for customer_id: #{@customer_id}"
-        timezone = timezone_for_scenario(@invoice_groups[0], @invoice_groups[1])
+        puts "[create_invoices] Creating invoices for customer_id: #{@customer_id}"
+        timezone = timezone_for_scenario(@invoice_groups[0])
         set_range(timezone)
         to_invoice.group(meta_groups(@invoice_groups))
         .sum(:amount)
@@ -36,12 +34,15 @@ module Services
           invoice = create_invoice(group_filter, total)
           invoice_items = create_invoice_items(invoice, group_filter)
           assign_register_items(invoice, group_filter)
+          puts "[create_invoices] Created invoice: #{invoice.id}, total: #{total}, #{invoice.notes}"
+          raise "Invoice items total does not match invoice" unless invoice.total_matches_items_sum
         end
         true # commit transaction
       end
     end
 
     def create_invoice(group_filter, total)
+      puts "[create_invoices] Creating invoice for #{@customer_id}, group_filter: #{group_filter}, total: #{total}"
       Invoice.create!(
         register_id: @register.id,
         date: @end_at,
@@ -55,14 +56,18 @@ module Services
     end
 
     def create_invoice_items(invoice, group_filter)
-      to_invoice(group_filter).group(meta_groups(["income_account", "income_account_group"])).sum(:amount)
-      .each do |income_group, total|
+      puts "[create_invoices] Creating invoice items for invoice: #{invoice.id}, group_filter: #{group_filter}"
+      query = to_invoice(group_filter).group(meta_groups(["income_account", "income_account_group"]))
+      totals = query.sum(:amount)
+      puts "[create_invoices] Creating invoice items for invoice: #{invoice.id}, totals: #{totals}"
+      quantities = query.size()
+      totals.zip(quantities).map do |total, quantity|
         invoice.invoice_items.create!(
-          income_account: income_group[0] || "",
-          income_account_group: income_group[1] || "",
-          extended_amount: total,
-          quantity: 1, #TEMP
-          unit_price: 1, #TEMP
+          income_account: total[0][0] || "",
+          income_account_group: total[0][1] || "",
+          extended_amount: total[1],
+          quantity: quantity[1],
+          unit_price: total[1].to_f / quantity[1],
           owner: @register.owner,
         )
       end
@@ -77,7 +82,7 @@ module Services
         .where(invoice_id: nil)
         .where(meta_groups(["customer_id"]).first => @customer_id)
         .where(originated_at: @start_at..@end_at)
-      apply_filter(register_items, group_filter) if group_filter
+      register_items = apply_filter(register_items, group_filter) if group_filter
       register_items
     end
 
@@ -87,7 +92,6 @@ module Services
       end
       register_items
     end
-
 
     def payor
       Organization.first # TEMP
@@ -119,7 +123,7 @@ module Services
       end
     end
 
-    def timezone_for_scenario(customer_id, warehouse_id)
+    def timezone_for_scenario(warehouse_id)
       timezones.first # TEMP
     end
 
