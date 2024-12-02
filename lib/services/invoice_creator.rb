@@ -55,8 +55,7 @@ module Services
     end
 
     def create_invoice_items(invoice, group_filter)
-      to_invoice(group_filter)
-      to_invoice.group(meta_groups(["income_account", "income_account_group"])).sum(:amount)
+      to_invoice(group_filter).group(meta_groups(["income_account", "income_account_group"])).sum(:amount)
       .each do |income_group, total|
         invoice.invoice_items.create!(
           income_account: income_group[0] || "",
