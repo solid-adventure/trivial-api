@@ -40,7 +40,6 @@ module Services
     # will check if the end_at time is after the cache cutoff
     # and if so, will combine the cached results with the live db results
     def simple_stat_lookup(stat, args)
-      puts args.inspect # TEMP
       timezone = validate_timezone!(args[:timezone]).freeze
       start_at, end_at = validate_time_range!(args[:start_at], args[:end_at], timezone)
       cutoff = cache_cutoff(timezone)
