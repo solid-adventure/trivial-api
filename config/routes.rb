@@ -112,6 +112,10 @@ Rails.application.routes.draw do
     resources :charts
   end
 
+  resources :invoices, only: %i[index show], concerns: :auditable do
+    resources :invoice_items, only: %i[index show], concerns: :auditable
+  end
+
   post 'reports/:report_name', to: 'reports#show'
 
   get 'credential_sets', to: 'credential_sets#index'
