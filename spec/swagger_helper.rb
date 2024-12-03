@@ -93,8 +93,22 @@ RSpec.configure do |config|
               id: { type: :integer },
               owner_type: { type: :string },
               owner_id: { type: :integer },
-              payee_org_id: { type: :integer },
-              payor_org_id: { type: :integer },
+              payee: { 
+                type: :object,
+                properties: {
+                  id: { type: :integer },
+                  name: { type: :string }
+                },
+                required: %i[id name]
+              },
+              payor: {
+                type: :object,
+                properties: {
+                  id: { type: :integer },
+                  name: { type: :string }
+                },
+                required: %i[id name]
+              },
               date: { type: :string },
               notes: { type: :string },
               currency: { type: :string },

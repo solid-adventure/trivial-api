@@ -49,6 +49,20 @@ describe "Invoices API", type: :request do
 
         run_test! do |response|
           data = JSON.parse(response.body)
+          expect(data['invoice']['id']).to eq(invoice.id)
+          expect(data['invoice']['owner_type']).to eq(invoice.owner_type)
+          expect(data['invoice']['owner_id']).to eq(invoice.owner_id)
+          expect(data['invoice']['payee']['id']).to eq(invoice.payee.id)
+          expect(data['invoice']['payee']['name']).to eq(invoice.payee.name)
+          expect(data['invoice']['payor']['id']).to eq(invoice.payor.id)
+          expect(data['invoice']['payor']['name']).to eq(invoice.payor.name)
+          expect(data['invoice']['date']).to eq(invoice.date.iso8601(3))
+          expect(data['invoice']['notes']).to eq(invoice.notes)
+          expect(data['invoice']['currency']).to eq(invoice.currency)
+          expect(data['invoice']['total']).to eq(invoice.total.to_s)
+          expect(data['invoice']['created_at']).to eq(invoice.created_at.iso8601(3))
+          expect(data['invoice']['updated_at']).to eq(invoice.updated_at.iso8601(3))
+          expect(data['invoice']['invoice_items'].size).to eq(2)
         end
       end
 
