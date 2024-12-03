@@ -41,6 +41,39 @@ module Services
       end
     end
 
+    def timezone_for_scenario(warehouse_id)
+      timezones.first # TEMP
+    end
+
+    def set_range(timezone)
+      # Calculate date range using end_date as the anchor and period for the duration
+      timezone_end = @end_date.in_time_zone(timezone)
+
+      # Use end_date as the end date (including the full day) and calculate start date based on period
+      @end_at = timezone_end.end_of_day
+      @start_at = case @period
+      when 'month'
+        @end_at.beginning_of_month
+      when 'week'
+        @end_at - 1.week
+      when 'day'
+        @end_at - 1.day
+      else
+        raise ArgumentError, "Unsupported period: #{@period}"
+      end
+    end
+
+    def to_invoice(group_filter=nil)
+      register_items = @register.register_items
+        .where(invoice_id: nil)
+        .where(meta_groups(["customer_id"]).first => @customer_id)
+        .where(originated_at: @start_at..@end_at)
+      register_items = apply_filter(register_items, group_filter) if group_filter
+      register_items
+    end
+
+  private
+
     def create_invoice(group_filter, total)
       puts "[create_invoices] Creating invoice for #{@customer_id}, group_filter: #{group_filter}, total: #{total}"
       Invoice.create!(
@@ -77,15 +110,6 @@ module Services
       to_invoice(group_filter).update_all(invoice_id: invoice.id)
     end
 
-    def to_invoice(group_filter=nil)
-      register_items = @register.register_items
-        .where(invoice_id: nil)
-        .where(meta_groups(["customer_id"]).first => @customer_id)
-        .where(originated_at: @start_at..@end_at)
-      register_items = apply_filter(register_items, group_filter) if group_filter
-      register_items
-    end
-
     def apply_filter(register_items, group_filter)
       meta_groups(group_filter.keys).each_with_index do |group, index|
         register_items = register_items.where(group => group_filter.values[index])
@@ -104,29 +128,6 @@ module Services
     def timezones
       ["America/New_York", "America/Los_Angeles"]
     end
-
-    def set_range(timezone)
-      # Calculate date range using end_date as the anchor and period for the duration
-      timezone_end = @end_date.in_time_zone(timezone)
-
-      # Use end_date as the end date (including the full day) and calculate start date based on period
-      @end_at = timezone_end.end_of_day
-      @start_at = case @period
-      when 'month'
-        @end_at.beginning_of_month
-      when 'week'
-        @end_at - 1.week
-      when 'day'
-        @end_at - 1.day
-      else
-        raise ArgumentError, "Unsupported period: #{@period}"
-      end
-    end
-
-    def timezone_for_scenario(warehouse_id)
-      timezones.first # TEMP
-    end
-
 
     def meta_groups(column_labels)
       meta = @register.meta.invert
