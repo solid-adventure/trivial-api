@@ -1,4 +1,7 @@
 class InvoiceItem < ApplicationRecord
+  include Ownable
+
+  audited associated_with: :invoice, owned_audits: true
 
   belongs_to :invoice
   belongs_to :owner, polymorphic: true
@@ -18,6 +21,4 @@ class InvoiceItem < ApplicationRecord
     errors.add(:extended_amount, "cannot be set directly") if extended_amount.present?
     self.extended_amount = quantity * unit_price
   end
-
-
 end
