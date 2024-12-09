@@ -1,8 +1,6 @@
 require 'csv'
 
 class AuditsController < ApplicationController
-  include ActionController::Live
-
   before_action :load_and_authorize_auditable
   before_action :load_and_filter_audits, only: %i[index csv]
   before_action :load_and_authorize_audit, only: %i[show]
@@ -21,26 +19,17 @@ class AuditsController < ApplicationController
   end
 
   def csv
-    response.headers['Content-Type'] = 'text/csv'
-    response.headers['Content-Disposition'] = "attachment; filename=audits-#{Date.today}.csv"
-    response.headers['X-Items-Count'] = @audits.size
-    # Add this line if your Rack version is 2.2.x, which we are as of 2024-11-22
-    response.headers['Last-Modified'] = Time.now.httpdate
+    model = OwnedAudit
+    serializer = OwnedAuditSerializer
+    sql = @audits.to_sql
 
-    serializer = OwnedAuditSerializer.new(@audits.first)
-    csv_headers = serializer.serializable_hash.keys
-    response.stream.write CSV.generate_line(csv_headers)
-
-    @audits.find_in_batches(batch_size: 1000) do |audits_batch|
-      serialized_batch = ActiveModel::Serializer::CollectionSerializer.new(audits_batch).as_json
-      serialized_batch.each do |row|
-        response.stream.write CSV.generate_line(row.values)
-      end
-    end
-  rescue ActionController::Live::ClientDisconnected => e
-    Rails.logger.info "Client disconnected: #{e.message}"
-  ensure
-    response.stream.close
+    token = SecureRandom.hex(16)
+    Rails.cache.write(
+      token,
+      { model:, serializer:, sql: },
+      expires_in: 2.minutes
+    )
+    redirect_to csv_stream_path(token:)
   end
 
   def show
