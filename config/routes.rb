@@ -130,5 +130,7 @@ Rails.application.routes.draw do
   delete '/:permissible_type/:permissible_id/permissions/users/:user_id', to: 'permissions#revoke_all'
   put '/:permissible_type/:permissible_id/transfer/:new_owner_type/:new_owner_id', to: 'permissions#transfer'
 
+  get 'csv', to: 'stream#csv', as: :csv_stream
+
   get '/up', to: 'health_check#show'
 end
