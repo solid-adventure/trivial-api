@@ -4,6 +4,7 @@ class StreamController < ApplicationController
   include ActionController::Live
   before_action :load_cache_data
   before_action :set_headers
+  skip_after_action :update_auth_header
 
   def csv
     serializer = @serializer_class.new(@relation.first)

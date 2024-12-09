@@ -5,7 +5,6 @@ class AuditsController < ApplicationController
   before_action :load_and_filter_audits, only: %i[index csv]
   before_action :load_and_authorize_audit, only: %i[show]
   before_action :set_pagination, only: %i[index]
-  skip_after_action :update_auth_header, only: %i[csv]
 
   def index
     paginate_audits
