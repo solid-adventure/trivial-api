@@ -4,7 +4,6 @@ class InvoicesController < ApplicationController
 
   # GET /invoices
   def index
-    byebug
     @invoices = if @organization
                   Invoice.where(owner: @organization)
                 else
