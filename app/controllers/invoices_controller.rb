@@ -1,9 +1,16 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: %i[show update destroy]
+  before_action :set_organization, only: %i[index]
+  before_action :set_invoice, only: %i[show]
 
   # GET /invoices
   def index
-    @invoices = current_user.associated_invoices
+    byebug
+    @invoices = if @organization
+                  Invoice.where(owner: @organization)
+                else
+                  current_user.associated_invoices
+                end
+
     render json: @invoices
   end
 
@@ -16,6 +23,11 @@ class InvoicesController < ApplicationController
   private
     def set_invoice
       @invoice = Invoice.find(params[:id])
+    end
+
+    # organization/1/invoices
+    def set_organization
+      @organization = current_user.organizations.find(params[:organization_id]) if params[:organization_id]
     end
 end
 

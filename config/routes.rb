@@ -30,8 +30,9 @@ Rails.application.routes.draw do
   resources :users
 
   resources :organizations, concerns: :auditable do
+    resources :invoices, only: %i[index]
+
     member do
-      get 'invoices'
       delete 'delete_org_role'
     end
   end

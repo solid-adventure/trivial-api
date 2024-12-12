@@ -1,5 +1,5 @@
 class OrganizationsController < ApplicationController
-  before_action :set_organization, only: %i[ show update destroy delete_org_role invoices]
+  before_action :set_organization, only: %i[ show update destroy delete_org_role ]
 
   # GET /organizations
   def index
@@ -56,13 +56,6 @@ class OrganizationsController < ApplicationController
     else
       render json: { error: "Unauthorized" }, status: :unauthorized
     end
-  end
-
-  # GET /organizations/1/invoices
-  def invoices
-    @invoices = Invoice.where(owner: @organization)
-    # authorize! :read, @invoices
-    render json: ActiveModel::Serializer::CollectionSerializer.new(@invoices, adapter: :attributes)
   end
 
   private
