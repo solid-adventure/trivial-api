@@ -1,34 +1,27 @@
 require 'csv'
 
 class AuditsController < ApplicationController
+  include Exportable
+  self.export_serializer = OwnedAuditSerializer
+
   before_action :load_and_authorize_auditable
   before_action :load_and_filter_audits, only: %i[index csv]
   before_action :load_and_authorize_audit, only: %i[show]
   before_action :set_pagination, only: %i[index]
 
   def index
-    paginate_audits
-    response = {
-      current_page: @page,
-      total_pages: @total_pages,
-      audits: ActiveModel::Serializer::CollectionSerializer.new(@audits)
-    }
+    if params[:format] == 'csv'
+      handle_csv_export(@audits)
+    else
+      paginate_audits
+      response = {
+        current_page: @page,
+        total_pages: @total_pages,
+        audits: ActiveModel::Serializer::CollectionSerializer.new(@audits)
+      }
 
-    render json: response, status: :ok
-  end
-
-  def csv
-    model = OwnedAudit
-    serializer = OwnedAuditSerializer
-    sql = @audits.to_sql
-
-    token = SecureRandom.hex(16)
-    Rails.cache.write(
-      token,
-      { model:, serializer:, sql: },
-      expires_in: 2.minutes
-    )
-    redirect_to csv_stream_path(token:)
+      render json: response, status: :ok
+    end
   end
 
   def show
