@@ -49,7 +49,7 @@ module Exportable
         yielder << CSV.generate_line(csv_headers)
 
         # stream the collection in batches
-        collection.find_in_batches(batch_size: 5) do |batch|
+        collection.find_in_batches(batch_size: 5000) do |batch|
           # serialize the current batch
           serialized_batch = ActiveModel::Serializer::CollectionSerializer.new(
             batch,
