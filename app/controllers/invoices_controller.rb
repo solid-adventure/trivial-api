@@ -4,11 +4,8 @@ class InvoicesController < ApplicationController
 
   # GET /invoices
   def index
-    @invoices = if @organization
-                  Invoice.where(owner: @organization)
-                else
-                  current_user.associated_invoices
-                end
+    @invoices = current_user.associated_invoices
+    @invoices = @invoices.where(owner: @organization) if @organization
 
     render json: @invoices
   end
