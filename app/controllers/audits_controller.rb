@@ -11,7 +11,7 @@ class AuditsController < ApplicationController
 
   def index
     if params[:format] == 'csv'
-      handle_csv_export(@audits)
+      handle_csv_export(collection: @audits)
     else
       paginate_audits
       response = {

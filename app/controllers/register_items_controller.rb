@@ -13,7 +13,7 @@ class RegisterItemsController < ApplicationController
   def index
     order_register_items
     if params[:format] == 'csv'
-      handle_csv_export(@register_items)
+      handle_csv_export(collection: @register_items)
     else
       paginate_register_items
       response = {

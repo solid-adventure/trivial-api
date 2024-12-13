@@ -14,7 +14,7 @@ module Exportable
 
   private
     MAX_CSV_ROWS = 500_000
-    def handle_csv_export(collection)
+    def handle_csv_export(collection:)
       if collection.size > MAX_CSV_ROWS
         render json: {
           error: "CSV row limit exceeded",
@@ -22,8 +22,8 @@ module Exportable
         }, status: :bad_request
         return
       end
-      set_headers(collection)
-      stream_csv(collection)
+      set_headers(collection:)
+      stream_csv(collection:)
     end
 
     def verify_export_serializer
@@ -32,7 +32,7 @@ module Exportable
       end
     end
 
-    def set_headers(collection)
+    def set_headers(collection:)
       headers.merge!(
         'Content-Type' => 'text/csv; charset=utf-8',
         'Content-Disposition' => "attachment; filename=\"#{controller_name}-#{Date.today}.csv\"",
@@ -41,7 +41,7 @@ module Exportable
       )
     end
 
-    def stream_csv(collection)
+    def stream_csv(collection:)
       self.response_body = Enumerator.new do |yielder|
         # stream the csv headers based on serializer attributes
         serializer = self.class.export_serializer.new(collection.first)
@@ -49,7 +49,8 @@ module Exportable
         yielder << CSV.generate_line(csv_headers)
 
         # stream the collection in batches
-        collection.find_in_batches(batch_size: 5000) do |batch|
+        batch_size = params[:batch_size] ? params[:batch_size].to_i : 1000
+        collection.find_in_batches(batch_size:) do |batch|
           # serialize the current batch
           serialized_batch = ActiveModel::Serializer::CollectionSerializer.new(
             batch,
