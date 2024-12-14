@@ -1,46 +1,27 @@
 require 'csv'
 
 class AuditsController < ApplicationController
-  include ActionController::Live
+  include Exportable
+  self.export_serializer = OwnedAuditSerializer
 
   before_action :load_and_authorize_auditable
   before_action :load_and_filter_audits, only: %i[index csv]
   before_action :load_and_authorize_audit, only: %i[show]
   before_action :set_pagination, only: %i[index]
-  skip_after_action :update_auth_header, only: %i[csv]
 
   def index
-    paginate_audits
-    response = {
-      current_page: @page,
-      total_pages: @total_pages,
-      audits: ActiveModel::Serializer::CollectionSerializer.new(@audits)
-    }
+    if params[:format] == 'csv'
+      handle_csv_export(collection: @audits)
+    else
+      paginate_audits
+      response = {
+        current_page: @page,
+        total_pages: @total_pages,
+        audits: ActiveModel::Serializer::CollectionSerializer.new(@audits)
+      }
 
-    render json: response, status: :ok
-  end
-
-  def csv
-    response.headers['Content-Type'] = 'text/csv'
-    response.headers['Content-Disposition'] = "attachment; filename=audits-#{Date.today}.csv"
-    response.headers['X-Items-Count'] = @audits.size
-    # Add this line if your Rack version is 2.2.x, which we are as of 2024-11-22
-    response.headers['Last-Modified'] = Time.now.httpdate
-
-    serializer = OwnedAuditSerializer.new(@audits.first)
-    csv_headers = serializer.serializable_hash.keys
-    response.stream.write CSV.generate_line(csv_headers)
-
-    @audits.find_in_batches(batch_size: 1000) do |audits_batch|
-      serialized_batch = ActiveModel::Serializer::CollectionSerializer.new(audits_batch).as_json
-      serialized_batch.each do |row|
-        response.stream.write CSV.generate_line(row.values)
-      end
+      render json: response, status: :ok
     end
-  rescue ActionController::Live::ClientDisconnected => e
-    Rails.logger.info "Client disconnected: #{e.message}"
-  ensure
-    response.stream.close
   end
 
   def show
