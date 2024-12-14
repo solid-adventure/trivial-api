@@ -1,6 +1,6 @@
 class RegisterItemsController < ApplicationController
-
-  include ActionController::MimeResponds
+  include Exportable
+  self.export_serializer = RegisterItemSerializer
 
   before_action :set_register
   before_action :set_register_item, only: %i[ show update ]
@@ -12,9 +12,8 @@ class RegisterItemsController < ApplicationController
   # GET /register_items
   def index
     order_register_items
-
     if params[:format] == 'csv'
-      render_csv
+      handle_csv_export(collection: @register_items)
     else
       paginate_register_items
       response = {
@@ -171,55 +170,5 @@ class RegisterItemsController < ApplicationController
       end
     end
     permitted_params
-  end
-
-  MAX_CSV_ROWS = 500000
-  def render_csv
-    if @register_items.size > MAX_CSV_ROWS
-      render json: {
-        error: "CSV row limit exceeded",
-        message: "Limit is #{ MAX_CSV_ROWS }, requested #{ @register_items.size } rows. "
-      }, status: :bad_request
-      return
-    end
-
-    Rails.logger.info "Starting CSV processing..."
-    @start_time = Time.now
-
-    set_file_headers
-    set_streaming_headers
-
-    response.status = 200
-
-    # rails will iterate the returned csv_lines enumerator
-    self.response_body = csv_lines
-  end
-
-  def set_file_headers
-    file_name = "register_items.csv"
-    headers["Content-Type"] = "text/csv"
-    headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
-    headers["X-Items-Count"] = @register_items.size
-  end
-
-  def set_streaming_headers
-    headers['X-Accel-Buffering'] = 'no'
-    headers["Last-Modified"] = Time.now.httpdate.to_s
-    headers["Cache-Control"] ||= "no-cache"
-    headers.delete("Content-Length")
-  end
-
-  def csv_lines
-    meta_labels = @register.meta.values || []
-    meta_symbols = meta_labels.map { |v| v.to_sym }
-    meta_db_column_names = @register.meta.keys
-    out = Enumerator.new do |y|
-      y << RegisterItem.csv_header(meta_symbols).to_s
-      @register_items.find_each(batch_size: 5000) do |register_item|
-        y << register_item.to_csv_row(meta_symbols, meta_db_column_names).to_s
-      end
-      Rails.logger.info "Finished processing CSV, duration: #{Time.now - @start_time} seconds"
-    end
-    out
   end
 end
