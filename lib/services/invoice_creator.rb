@@ -1,140 +1,105 @@
 module Services
   class InvoiceCreator
 
-    REQUIRED_META_COLUMNS = %w(customer_id warehouse_id income_account income_account_group)
-
-    def initialize(register, customer_id, end_date, period, invoice_groups)
+    def initialize(register, payee, payor, timezone, start_at, end_at, group_by, group_by_period, search)
       @register = register
-      @customer_id = customer_id
-      @end_date = end_date
-      @period = period
-      @invoice_groups = invoice_groups # [warehouse_id]
-    end
-
-
-    def valid
-      missing_columns = REQUIRED_META_COLUMNS - @register.meta.values
-      missing_columns.each do |column|
-        # puts "[create_invoices] Skipping register, missing meta column: #{column}: #{@register.id}, #{@register.name}"
-      end
-      return false if missing_columns.any?
-      true
+      @payee = payee
+      @payor = payor
+      @timezone = timezone # Used for group_by_period
+      @start_at = start_at
+      @end_at = end_at
+      @group_by = group_by
+      @group_by_period = group_by_period # TODO Should this be one invoice per result, or ?
+      @search = search
+      @invoice_ids = []
     end
 
     def create!
-      return unless valid
+      Rails.logger.info "[InvoiceCreator] started"
+      Rails.logger.info "[InvoiceCreator] #{to_invoice.size} register items to invoice"
       ActiveRecord::Base.transaction do
-        puts "[create_invoices] Creating invoices for customer_id: #{@customer_id}"
-        timezone = timezone_for_scenario(@invoice_groups[0])
-        set_range(timezone)
-        to_invoice.group(meta_groups(@invoice_groups))
-        .sum(:amount)
-        .each do |group_label, total|
-          group_filter = Hash[@invoice_groups.zip([group_label])]
-          invoice = create_invoice(group_filter, total)
-          invoice_items = create_invoice_items(invoice, group_filter)
-          assign_register_items(invoice, group_filter)
-          puts "[create_invoices] Created invoice: #{invoice.id}, total: #{total}, #{invoice.notes}"
-          raise "Invoice items total does not match invoice" unless invoice.total_matches_items_sum
-        end
-        true # commit transaction
+        invoice = create_invoice!
+        create_invoice_items!(invoice)
+        assign_register_items(invoice)
+        @invoice_ids << invoice.id
+        commit_transaction = true
+      Rails.logger.info "[InvoiceCreator] created invoice #{invoice.id}"
       end
-    end
-
-    def timezone_for_scenario(warehouse_id)
-      timezones.first # TEMP
-    end
-
-    def set_range(timezone)
-      # Calculate date range using end_date as the anchor and period for the duration
-      timezone_end = @end_date.in_time_zone(timezone)
-
-      # Use end_date as the end date (including the full day) and calculate start date based on period
-      @end_at = timezone_end.end_of_day
-      @start_at = case @period
-      when 'month'
-        @end_at.beginning_of_month
-      when 'week'
-        @end_at - 1.week
-      when 'day'
-        @end_at - 1.day
-      else
-        raise ArgumentError, "Unsupported period: #{@period}"
-      end
-    end
-
-    def to_invoice(group_filter=nil)
-      register_items = @register.register_items
-        .where(invoice_id: nil)
-        .where(meta_groups(["customer_id"]).first => @customer_id)
-        .where(originated_at: @start_at..@end_at)
-      register_items = apply_filter(register_items, group_filter) if group_filter
-      register_items
+      Rails.logger.info "[InvoiceCreator] finished"
+      @invoice_ids
     end
 
   private
 
-    def create_invoice(group_filter, total)
-      puts "[create_invoices] Creating invoice for #{@customer_id}, group_filter: #{group_filter}, total: #{total}"
+    def create_invoice!
       Invoice.create!(
         register_id: @register.id,
         date: @end_at,
-        currency: "USD",
-        payee_org_id: payee.id,
-        payor_org_id: payor.id,
-        notes: "customer_id: #{@customer_id}, invoice_group: #{group_filter}",
+        currency: @register.units,
+        payee_org_id: @payee.id,
+        payor_org_id: @payor.id,
+        notes: "#{@start_at} - #{@end_at}, #{@timezone}. Unit price is an average.",
         owner: @register.owner,
-        total: total,
+        total: to_invoice.sum(:amount),
       )
     end
 
-    def create_invoice_items(invoice, group_filter)
-      puts "[create_invoices] Creating invoice items for invoice: #{invoice.id}, group_filter: #{group_filter}"
-      query = to_invoice(group_filter).group(meta_groups(["income_account", "income_account_group"]))
-      totals = query.sum(:amount)
-      puts "[create_invoices] Creating invoice items for invoice: #{invoice.id}, totals: #{totals}"
-      quantities = query.size()
-      totals.zip(quantities).map do |total, quantity|
+    def create_invoice_items!(invoice)
+      to_invoice.group(meta_columns_from_name(@group_by))
+      .sum(:amount)
+      .each do |scope, total|
+        next unless total > 0
+        Rails.logger.info "[InvoiceCreator] scope: #{scope}, total: #{total}"
+        quantity = sum_item_count(scope)
         invoice.invoice_items.create!(
-          income_account: total[0][0] || "",
-          income_account_group: total[0][1] || "",
-          extended_amount: total[1],
-          quantity: quantity[1],
-          unit_price: total[1].to_f / quantity[1],
-          owner: @register.owner,
+          income_account: "", # TODO Implement
+          income_account_group: "", # TODO Implement ,
+          extended_amount: total,
+          quantity: quantity,
+          unit_price: total.to_f / quantity,
+          owner: @register.owner
         )
+      rescue => e
+        Rails.logger.info "[InvoiceCreator] Error: Unable to create invoice items: #{e}"
+        raise e
       end
     end
 
-    def assign_register_items(invoice, group_filter)
-      to_invoice(group_filter).update_all(invoice_id: invoice.id)
-    end
-
-    def apply_filter(register_items, group_filter)
-      meta_groups(group_filter.keys).each_with_index do |group, index|
-        register_items = register_items.where(group => group_filter.values[index])
+    def to_invoice
+      register_items = @register.register_items
+        .where(invoice_id: nil)
+        .where(originated_at: @start_at..@end_at)
+      if @search.any?
+        register_items = RegisterItem.search(register_items, @register.meta, @search)
       end
       register_items
     end
 
-    def payor
-      Organization.first # TEMP
+    def sum_item_count(scope)
+      columns = meta_columns_from_name(@group_by) # meta1, meta5
+      conditions = columns.zip(scope).to_h
+      item_count_col = meta_columns_from_name(['item_count']).first
+      raise "Cannot create invoices without an item_count meta column" unless item_count_col
+      to_invoice.where(conditions).sum("CAST(#{item_count_col} AS INTEGER)")
     end
 
-    def payee
-      @register.owner
+    def assign_register_items(invoice)
+      to_invoice.update_all(invoice_id: invoice.id)
     end
 
-    def timezones
-      ["America/New_York", "America/Los_Angeles"]
-    end
-
-    def meta_groups(column_labels)
+    def meta_columns_from_name(column_labels)
       meta = @register.meta.invert
-      meta_groups = column_labels.map do |column|
-        meta.fetch(column) { |c| raise ArgumentError, "Invalid group_by, #{c} is not a meta-column for register" }
+      meta_columns_from_name = column_labels.map do |column|
+        meta.fetch(column) { |c| raise ArgumentError, "Invalid column_labels #{c} is not a meta-column for register" }
       end
     end
+
+    def safe_meta_columns_from_name(column_labels)
+      meta_columns_from_name(column_labels)
+    rescue ArgumentError
+      return []
+    end
+
 
   end
 end

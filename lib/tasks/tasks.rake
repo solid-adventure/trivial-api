@@ -1,32 +1,5 @@
 namespace :tasks do
 
-  desc "Create invoices for all customers ending on a specific date"
-  task :create_invoices, [:end_date, :period, :groups] => :environment do |t, args|
-    # Set defaults for optional parameters
-    args.with_defaults(
-      end_date: Date.current.to_s,
-      period: 'month',
-      groups: 'warehouse_id'
-    )
-
-    puts "[create_invoices] Invoice creation started."
-    begin
-      end_date = Date.parse(args[:end_date])
-    rescue ArgumentError
-      raise ArgumentError, "end_date must be a valid date string (e.g., '2024-04-30')"
-    end
-
-    customer_ids = Tag.where(taggable_type: "App", context: "customer_id").pluck(:name).uniq
-    Register.all.each do |register|
-      group_by = args[:groups].split(',').map(&:strip)
-      customer_ids.each do |customer_id|
-        creator = Services::InvoiceCreator.new(register, customer_id, end_date, args[:period], group_by)
-        creator.create!
-      end
-    end
-    puts "[create_invoices] Invoice creation completed."
-  end
-
   # rake tasks:send_new_period_started_events
   desc "Create Kafka events when new billing period is started"
   task :send_new_period_started_events => :environment do

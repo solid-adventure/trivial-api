@@ -110,6 +110,11 @@ Rails.application.routes.draw do
   end
 
   resources :invoices, only: %i[index show], concerns: :auditable do
+
+    collection do
+      post 'create_from_register'
+    end
+
     resources :invoice_items, only: %i[index show], concerns: :auditable
   end
 

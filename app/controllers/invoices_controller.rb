@@ -16,6 +16,27 @@ class InvoicesController < ApplicationController
     render json: @invoice
   end
 
+  # POST /invoices/create_from_register
+  def create_from_register
+    register = Register.find(params[:register_id])
+    payee = register.owner
+    payor = Organization.first # TODO Implement
+    authorize! :read, register
+    creator = Services::InvoiceCreator.new(
+      register,
+      payee,
+      payor,
+      params[:timezone],
+      params[:start_at],
+      params[:end_at],
+      params[:group_by],
+      params[:group_by_period],
+      params[:search]
+    )
+    invoice_ids = creator.create!
+    render json: {invoice_ids: }
+  end
+
   private
     def set_invoice
       @invoice = Invoice.find(params[:id])
