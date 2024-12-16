@@ -52,8 +52,8 @@ module Services
         Rails.logger.info "[InvoiceCreator] scope: #{scope}, total: #{total}"
         quantity = sum_item_count(scope)
         invoice.invoice_items.create!(
-          income_account: "", # TODO Implement
-          income_account_group: "", # TODO Implement ,
+          income_account: value_from_group("income_account", scope),
+          income_account_group: value_from_group("income_account_group", scope),
           extended_amount: total,
           quantity: quantity,
           unit_price: total.to_f / quantity,
@@ -83,10 +83,6 @@ module Services
       to_invoice.where(conditions).sum("CAST(#{item_count_col} AS INTEGER)")
     end
 
-    def assign_register_items(invoice)
-      to_invoice.update_all(invoice_id: invoice.id)
-    end
-
     def meta_columns_from_name(column_labels)
       meta = @register.meta.invert
       meta_columns_from_name = column_labels.map do |column|
@@ -94,11 +90,16 @@ module Services
       end
     end
 
-    def safe_meta_columns_from_name(column_labels)
-      meta_columns_from_name(column_labels)
-    rescue ArgumentError
-      return []
+    def value_from_group(label, scope)
+      position = @group_by.index(label)
+      return "" unless position
+      scope[position] || ""
     end
+
+    def assign_register_items(invoice)
+      to_invoice.update_all(invoice_id: invoice.id)
+    end
+
 
 
   end

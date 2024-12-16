@@ -1,5 +1,4 @@
 namespace :tasks do
-
   # rake tasks:send_new_period_started_events
   desc "Create Kafka events when new billing period is started"
   task :send_new_period_started_events => :environment do
