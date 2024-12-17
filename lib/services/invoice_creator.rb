@@ -38,7 +38,7 @@ module Services
         currency: @register.units,
         payee_org_id: @payee.id,
         payor_org_id: @payor.id,
-        notes: "#{@start_at} - #{@end_at}, #{@timezone}. Unit price is an average.",
+        notes: "#{@start_at} - #{@end_at}, #{@timezone}. Rate price is calculated as Amount % Quantity, and may be an average.",
         owner: @register.owner,
         total: to_invoice.sum(:amount),
       )
