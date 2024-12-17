@@ -4,6 +4,7 @@ class InvoicesController < ApplicationController
 
   before_action :set_organization, only: %i[index]
   before_action :set_invoice, only: %i[show]
+  before_action :set_and_authorize_invoices, only: %i[index]
 
   # GET /invoices
   def index

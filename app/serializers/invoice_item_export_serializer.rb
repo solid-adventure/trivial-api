@@ -1,11 +1,5 @@
 class InvoiceItemExportSerializer < ActiveModel::Serializer
-  attributes :id,
-    :income_account,
-    :income_account_group,
-    :quantity,
-    :unit_price,
-    :extended_amount,
-    :invoice_id,
+  attributes :invoice_id,
     :owner_id,
     :owner_type,
     :payee_id,
@@ -17,7 +11,13 @@ class InvoiceItemExportSerializer < ActiveModel::Serializer
     :currency,
     :total,
     :created_at,
-    :updated_at
+    :updated_at,
+    :id,
+    :income_account,
+    :income_account_group,
+    :quantity,
+    :unit_price,
+    :extended_amount
 
   delegate :owner_id,
     :owner_name,

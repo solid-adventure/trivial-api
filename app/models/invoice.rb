@@ -32,8 +32,8 @@ class Invoice < ApplicationRecord
   before_destroy :unassociate_register_items
 
   def self.search(invoices, search)
-    search.each do |filter_hash|
-      next unless SEARCHABLE_COLUMNS.include(hash['c'])
+    search.each do |hash|
+      next unless SEARCHABLE_COLUMNS.include?(hash['c'])
       query = create_query(hash['c'], hash['o'], hash['p'])
       invoices = invoices.where(query)
     end
