@@ -14,6 +14,7 @@ class Invoice < ApplicationRecord
   has_many :permissions, as: :permissible
   has_many :permitted_users, through: :permissions, source: :user
   has_many :invoice_items, dependent: :destroy
+  has_many :register_items
 
   default_scope do
     includes(:payor, :payee)
@@ -51,7 +52,6 @@ class Invoice < ApplicationRecord
   private
 
   def unassociate_register_items
-    RegisterItem.where(invoice_id: id).update_all(invoice_id: nil)
+    register_items.update_all(invoice_id: nil)
   end
-
 end
