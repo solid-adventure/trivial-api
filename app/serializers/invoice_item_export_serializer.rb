@@ -1,10 +1,6 @@
 class InvoiceItemExportSerializer < ActiveModel::Serializer
   attributes :invoice_id,
-    :owner_id,
-    :owner_type,
-    :payee_id,
     :payee_name,
-    :payor_id,
     :payor_name,
     :date,
     :notes,
@@ -12,9 +8,8 @@ class InvoiceItemExportSerializer < ActiveModel::Serializer
     :total,
     :created_at,
     :updated_at,
-    :id,
-    :income_account,
     :income_account_group,
+    :income_account,
     :quantity,
     :unit_price,
     :extended_amount

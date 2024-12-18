@@ -69,13 +69,12 @@ module Services
         next unless total > 0
         Rails.logger.info "[InvoiceCreator] customer_id: #{customer_id}, scope: #{scope}, total: #{total}"
         quantity = sum_item_count(scope, customer_id)
-        next unless quantity > 0
         invoice.invoice_items.create!(
           income_account: value_from_group("income_account", scope),
           income_account_group: value_from_group("income_account_group", scope),
           extended_amount: total,
           quantity: quantity,
-          unit_price: total.to_f / quantity,
+          unit_price: quantity.to_i.zero? ? 0 : total.to_f / quantity,
           owner: @register.owner
         )
       rescue => e

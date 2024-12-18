@@ -9,7 +9,7 @@ class InvoicesController < ApplicationController
   # GET /invoices
   def index
     if params[:format] == 'csv'
-      handle_csv_export(InvoiceItem.with_invoice.where(invoice: @invoices))
+      handle_csv_export(collection: InvoiceItem.with_invoice.where(invoice: @invoices))
     else
       render json: @invoices, status: :ok
     end
