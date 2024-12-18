@@ -109,7 +109,7 @@ Rails.application.routes.draw do
     resources :charts
   end
 
-  resources :invoices, only: %i[index show], concerns: :auditable do
+  resources :invoices, only: %i[index show destroy], concerns: :auditable do
 
     collection do
       post 'create_from_register'
