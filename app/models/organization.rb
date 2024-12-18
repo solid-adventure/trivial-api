@@ -39,6 +39,10 @@ class Organization < ApplicationRecord
     audits.or(Audited.audit_class.where(auditable: self.users))
   end
 
+  def owner
+    self
+  end
+
   def self.find_or_create_by_customer_id(customer_id)
     org = find_by_customer_id(customer_id)
     org = create_by_customer_id(customer_id) unless org
@@ -46,13 +50,29 @@ class Organization < ApplicationRecord
   end
 
   def self.find_by_customer_id(customer_id)
-    customer_tag = Tags.find_by(context: 'customer_id', name: customer_id, taggable_type: self.name)
-    return customer_tag ? customer_tag.taggable : nil
+    customer_tag = Tag.find_by(context: 'customer_id', name: customer_id, taggable_type: self.name)
+    customer_tag ? customer_tag.taggable : nil
   end
 
   def self.create_by_customer_id(customer_id)
     org = Organization.create!(name: "Customer #{customer_id}", billing_email: 'unknown')
-    org.addTag!(context: 'customer_id', name: customer_id)
+    org.addTag!('customer_id', customer_id)
     org
   end
+
+  private
+    def create_default_register
+      Register.create!(
+          name: 'Sales',
+          owner: self,
+          meta: {}
+      )
+    end
+
+    def create_default_dashboard
+      Dashboard.create!(
+          name: "Default Dashboard",
+          owner: self
+      )
+    end
 end
