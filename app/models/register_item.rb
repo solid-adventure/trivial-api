@@ -15,6 +15,7 @@ class RegisterItem < ApplicationRecord
 
   belongs_to :register
   belongs_to :app, optional: true
+  belongs_to :invoice, optional: true
   has_many :activity_entries
 
   default_scope do

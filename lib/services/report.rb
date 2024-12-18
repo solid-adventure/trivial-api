@@ -71,6 +71,9 @@ module Services
       raise ArgumentError, 'Invalid register_id' unless register = Register.find_by(id: args[:register_id]).freeze
 
       results = RegisterItem.where(register_id: register.id)
+      if args[:search].present?
+        results = RegisterItem.search(results, register.meta, args[:search])
+      end
 
       if args[:group_by_period].present? && args[:group_by_period] != 'all'
         results = group_by_period(results, args[:group_by_period], start_at, end_at, timezone)
