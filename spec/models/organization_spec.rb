@@ -39,4 +39,32 @@ describe Organization do
       expect(@organization.admin?(@nonmember)).to be_falsey
     end
   end
+
+  context 'customer_tags' do
+    let(:customer_id) { '420' }
+
+    describe 'find_by_customer_id' do
+      before do
+        @organization = FactoryBot.create :organization
+        @organization.addTag!(:customer_id, customer_id)
+      end
+
+      it 'retrieves an organization tagged with a given customer_id' do
+        expect(Organization.find_by_customer_id(customer_id)).to eq(@organization)
+      end
+    end
+
+    describe 'create_by_customer_id' do
+      it 'creates and tags an organization with a given customer_id' do
+        organization = Organization.create_by_customer_id(customer_id)
+
+        expect(organization).to be_persisted
+        expect(organization.tags.count).to eq(1)
+
+        customer_tag = organization.tags.first
+        expect(customer_tag.name).to eq(customer_id)
+        expect(customer_tag.context).to eq('customer_id')
+      end
+    end
+  end
 end

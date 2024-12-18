@@ -25,6 +25,8 @@ Rails.application.routes.draw do
   resources :users
 
   resources :organizations, concerns: :auditable do
+    resources :invoices, only: %i[index]
+
     member do
       delete 'delete_org_role'
     end
@@ -105,6 +107,15 @@ Rails.application.routes.draw do
 
   resources :dashboards do
     resources :charts
+  end
+
+  resources :invoices, only: %i[index show destroy], concerns: :auditable do
+
+    collection do
+      post 'create_from_register'
+    end
+
+    resources :invoice_items, only: %i[index show], concerns: :auditable
   end
 
   post 'reports/:report_name', to: 'reports#show'

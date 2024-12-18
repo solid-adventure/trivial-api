@@ -82,7 +82,7 @@ RSpec.describe Search do
 
         jsonb_query = "#{jsonb_col} #{operator} '#{predicate}'"
         expect(model.create_query(jsonb_col, operator, predicate)).to eq(jsonb_query)
-        
+
         expect {
           model.where(Arel.sql(string_query))
           model.where(Arel.sql(int_query))
@@ -113,16 +113,16 @@ RSpec.describe Search do
         # Test with non-array predicate
         expect {
           model.create_query(string_col, 'IN', 'not_an_array')
-        }.to raise_error(Search::InvalidPredicateError, 'IN operator requires an array')
+        }.to raise_error(Search::InvalidPredicateError, 'IN operator requires a non-empty array')
       end
 
       it 'sanitizes queries against injection attempts' do
         inject_col = "'; INSERT INTO users (username, password) VALUES ('injected_user', 'password');--"
         expect { model.create_query(inject_col, comperator, str) }.to raise_error(Search::InvalidColumnError)
-        
+
         inject_op = "= '' OR '1'='1;--"
         expect { model.create_query(string_col, inject_op, '') }.to raise_error(Search::InvalidOperatorError)
-        
+
         inject_pred = "'; DROP TABLE test_models;--"
         expect {
           injected_query = model.create_query(string_col, comperator, inject_pred)

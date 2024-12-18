@@ -19,7 +19,7 @@ FactoryBot.define do
       elsif User.none?
         admin = create(:user)
       else
-        admin = User.first
+        admin = FactoryBot.create :user
       end
       create(:org_role, user: admin, organization: organization, role: 'admin')
 

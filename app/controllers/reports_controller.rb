@@ -17,7 +17,16 @@ class ReportsController < ApplicationController
   end
 
   def report_params
-    params.permit(:start_at, :end_at, :register_id, :invert_sign, :group_by_period, :timezone, group_by: [])
+    params.permit(
+      :start_at,
+      :end_at,
+      :register_id,
+      :invert_sign,
+      :group_by_period,
+      :timezone,
+      group_by: [],
+      search: [:c, :o, :p]
+    )
   end
 
   ALLOWED_REPORTS = %w[ item_sum item_average item_count ].freeze

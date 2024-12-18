@@ -9,3 +9,8 @@ two:
   id: 2
   name: RailsOrg2
   billing_email: railsorg2@fixture.com
+
+three:
+  id: 3
+  name: InvoicePayeeOrg
+  billing_email: InvoicePayeeOrg@fixture.com

@@ -11,10 +11,11 @@ class RegisterItem < ApplicationRecord
 
   # includes only non-meta searchable columns
   # meta columns are handled by self.search
-  SEARCHABLE_COLUMNS = %w[originated_at description amount units unique_key].freeze
+  SEARCHABLE_COLUMNS = %w[originated_at description amount units unique_key invoice_id].freeze
 
   belongs_to :register
   belongs_to :app, optional: true
+  belongs_to :invoice, optional: true
   has_many :activity_entries
 
   default_scope do

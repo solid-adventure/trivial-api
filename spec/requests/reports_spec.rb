@@ -8,7 +8,22 @@ describe "Reports API", type: :request do
   let(:uid) { user.uid }
   let(:organization) { FactoryBot.create :organization, admin: user }
   let!(:register) { organization.owned_registers.first }
-  let!(:register_item) { FactoryBot.create(:register_item, register: register, originated_at: start_at + 1.day) }
+  let!(:invoice) { FactoryBot.create(:invoice, owner: organization) }
+  let!(:register_item) {
+    FactoryBot.create(
+      :register_item,
+      register:,
+      originated_at: start_at + 1.day
+    )
+  }
+  let!(:invoiced_register_item) {
+    FactoryBot.create(
+      :register_item,
+      register:,
+      invoice:,
+      originated_at: start_at + 3.days
+    )
+  }
 
   let(:report_params) {
     {
@@ -55,6 +70,10 @@ describe "Reports API", type: :request do
           type: :array,
           items: { type: String }
         },
+        search: {
+          type: :array,
+          items: { type: :object }
+        },
       },
       required: %w[start_at end_at register_id]
     }
@@ -71,7 +90,28 @@ describe "Reports API", type: :request do
 
       response '200', 'Show Item Count' do
         schema type: report_schema
-        run_test!
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['count'].first['value']).to eq(2)
+        end
+      end
+
+      response '200', 'Item Count with Search' do
+        schema type: report_schema
+
+        before do
+          search_hash = {
+            c: 'invoice_id',
+            o: '',
+            p: 'IS NULL'
+          }
+          report_params[:search] = [search_hash]
+        end
+
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['count'].first['value']).to eq(1)
+        end
       end
     end
   end

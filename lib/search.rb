@@ -3,10 +3,10 @@ module Search
     base.extend(ClassMethods)
   end
 
-  JSONB_OPERATORS = %w[? ?& ?| @> @? @@]
-  COMPERATORS = %w[< > <= >= = <> != IN]
-  PREDICATES = ['IS NULL','IS NOT NULL','IS TRUE','IS NOT TRUE','IS FALSE','IS NOT FALSE']
-  ORDERINGS = ['ASC', 'DESC', 'ASC NULLS FIRST', 'DESC NULLS FIRST', 'ASC NULLS LAST', 'DESC NULLS LAST']
+  JSONB_OPERATORS = %w[? ?& ?| @> @? @@].freeze
+  COMPERATORS = %w[< > <= >= = <> != IN].freeze
+  PREDICATES = ['IS NULL','IS NOT NULL','IS TRUE','IS NOT TRUE','IS FALSE','IS NOT FALSE'].freeze
+  ORDERINGS = ['ASC', 'DESC', 'ASC NULLS FIRST', 'DESC NULLS FIRST', 'ASC NULLS LAST', 'DESC NULLS LAST'].freeze
 
   class InvalidColumnError < StandardError
     def initialize(msg = 'Invalid or Empty column')
@@ -54,25 +54,23 @@ module Search
     def create_query(column, operator, predicate)
       raise InvalidPredicateError unless predicate
       raise InvalidColumnError unless column_names.include?(column)
-      query = "#{column} "
-
       data_type = columns_hash[column].type
-      if data_type == :jsonb
-        raise InvalidOperatorError unless JSONB_OPERATORS.include?(operator)
-        query << "#{operator}"
-      else # string, integer, and most other data types will use standard comperators
-        if operator.empty? # no operator is necessary for SQL defined predicates
-          raise InvalidPredicateError unless PREDICATES.include?(predicate)
-        else
-          raise InvalidOperatorError unless COMPERATORS.include?(operator)
-          if operator == 'IN'
-            raise InvalidPredicateError, 'IN operator requires an array' unless predicate.is_a?(Array)
-            return sanitize_sql_array(["#{query.strip} IN (?)", predicate])
-          end
-          query << "#{operator}"
-        end
-      end
-      return sanitize_sql_array(["#{query} ?", predicate])
+      query = if operator.empty? # no operator is necessary for SQL defined predicates
+                raise InvalidPredicateError unless PREDICATES.include?(predicate)
+                "#{column} #{predicate}"
+              else
+                valid_operator = (data_type == :jsonb ? JSONB_OPERATORS : COMPERATORS).include?(operator)
+                raise InvalidOperatorError unless valid_operator
+                if operator == 'IN'
+                  unless predicate.is_a?(Array) && predicate.any?
+                    raise InvalidPredicateError, 'IN operator requires a non-empty array'
+                  end
+                  sanitize_sql_array(["#{column} IN (?)", predicate])
+                else
+                  sanitize_sql_array(["#{column} #{operator} ?", predicate])
+                end
+              end
+      query
     end
 
     def get_keys_from_path(col, path, scope)
