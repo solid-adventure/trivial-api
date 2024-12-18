@@ -92,7 +92,7 @@ describe "Reports API", type: :request do
         schema type: report_schema
         run_test! do |response|
           data = JSON.parse(response.body)
-          data['count'].first['value'] == 2
+          expect(data['count'].first['value']).to eq(2)
         end
       end
 
@@ -110,7 +110,7 @@ describe "Reports API", type: :request do
 
         run_test! do |response|
           data = JSON.parse(response.body)
-          data['count'].first['value'] == 1
+          expect(data['count'].first['value']).to eq(1)
         end
       end
     end
