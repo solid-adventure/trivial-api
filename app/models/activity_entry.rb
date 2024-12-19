@@ -38,9 +38,8 @@ class ActivityEntry < ApplicationRecord
   end
 
   def webhook_path
-    manifest = ActiveSupport::JSON.decode(
-      app.manifests.order(created_at: :desc).first.try(:content) || 'null'
-    )
+    manifest = app.manifests.order(created_at: :desc).first.try(:content) || 'null'
+    manifest = ActiveSupport::JSON.decode(manifest) if manifest.is_a?(String)
     manifest.try(:[], 'listen_at').try(:[], 'path') || '/webhooks/receive'
   end
 
