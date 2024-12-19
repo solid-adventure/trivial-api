@@ -59,14 +59,20 @@ module MockData::RegisterItems
       sample_type: "increment",
       units: "USD",
       owner_type: @owner.class.to_s,
-      owner_id: @owner.id
+      owner_id: @owner.id,
     )
+
     @register.meta = {
-        meta0: "customer_id",
-        meta1: "income_account",
-        meta2: "entity_type",
-        meta3: "entity_id",
-        meta4: "warehouse",
+      meta0: "customer_id",
+      meta1: "income_account",
+      meta2: "entity_type",
+      meta3: "entity_id",
+      meta4: "item_count",
+      meta5: "each_rate",
+      meta6: "customer_name",
+      meta7: "warehouse_id",
+      meta8: "warehouse_name",
+      meta9: "income_account_group"
     }
     @register.save
   end
@@ -89,21 +95,32 @@ module MockData::RegisterItems
 
   def self.generate_register_item
     originated_at = rand(@start_date..@end_date)
+    income_account = MockData::DataHelper.income_accounts.sample
+    each_rate = MockData::DataHelper.each_rate_from_income_account(income_account)
+    item_count = MockData::DataHelper.item_count_from_income_account(income_account)
+    customer = MockData::DataHelper.customers.sample
+    warehouse = MockData::DataHelper.warehouses.sample
+    entity = MockData::DataHelper.entity_from_income_account(income_account)
     {
       register_id: @register.id,
       owner_type: @register.owner_type,
       owner_id: @register.owner_id,
       description: "Generated event, run #{@run_id}: #{@insertion_count}",
-      amount: rand(MockData::DataHelper.amount_min..MockData::DataHelper.amount_max).round(2),
+      amount: (item_count * each_rate).round(2),
       units: "USD",
-      unique_key: "#{Time.now}-#{@insertion_count}",
+      unique_key: "#{Time.now}-#{@insertion_count}-#{rand(1000000)}",
       created_at: originated_at + 1.day,
       originated_at: originated_at,
-      meta0: MockData::DataHelper.customer_ids.sample,
-      meta1: MockData::DataHelper.income_accounts.sample,
-      meta2: MockData::DataHelper.entity_types.sample,
-      meta3: @insertion_count,
-      meta4: MockData::DataHelper.warehouses.sample
+      meta0: customer[:id],
+      meta1: income_account,
+      meta2: entity[:name],
+      meta3: entity[:id],
+      meta4: item_count,
+      meta5: each_rate,
+      meta6: customer[:name],
+      meta7: warehouse[:id],
+      meta8: warehouse[:name],
+      meta9: MockData::DataHelper.income_account_group_from_income_account(income_account)
     }
   end
 
@@ -144,11 +161,12 @@ module MockData::RegisterItems
     {
       app_id: @app.id,
       update_id: SecureRandom.uuid,
-      activity_type: 'mock event',
+      activity_type: 'request',
       status: MockData::DataHelper.status,
       source: "Mock Data run #{@run_id}",
       duration_ms: rand(100..5000),
-      payload: MockData::DataHelper.generate_payload(nil, nil, nil, nil, nil, originated_at),
+      payload: { "message": "payload for mock event not provided" },
+      # payload: MockData::DataHelper.generate_payload(nil, nil, nil, nil, nil, originated_at),
       diagnostics: { events: [], errors: [] },
       owner_type: @owner.class,
       owner_id: @owner.id,

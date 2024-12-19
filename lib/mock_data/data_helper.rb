@@ -2,6 +2,118 @@ module MockData::DataHelper
 
   CUSTOMER_IDS = Array.new(200) { rand(1000..10000) }
 
+  def self.entity_from_income_account(income_account)
+    case income_account
+    when 'items_1', 'items_2+', 'packaging'
+      {
+        name: 'order',
+        id: rand(1..1000)
+      }
+    when 'carton'
+      {
+        name: 'asn',
+        id: rand(1..1000)
+      }
+    when 'vas'
+      {
+        name: 'project',
+        id: rand(1..1000)
+      }
+    else
+      {
+        name: '',
+        id: ''
+      }
+    end
+
+  end
+
+  def self.customers
+    [{
+      id: 1000,
+      name: 'Anthropologie'
+    },
+    {
+      id: 1001,
+      name: 'Urban Outfitters'
+    },
+    {
+      id: 1002,
+      name: 'Madewell'
+    },
+    {
+      id: 1003,
+      name: 'Athleta'
+    },
+    {
+      id: 1004,
+      name: 'Zara'
+    }]
+  end
+
+  def self.warehouses
+    [
+      {
+        id: 1,
+        name: 'San Francisco'
+      },
+      {
+        id: 2,
+        name: 'New York'
+      },
+      {
+        id: 3,
+        name: 'Columbus'
+      },
+      {
+        id: 4,
+        name: 'Los Angeles'
+      }
+    ]
+  end
+
+  def self.item_count_from_income_account(income_account)
+    case income_account
+    when 'items_1', 'packaging'
+      1
+    when 'items_2+'
+      rand(2..10)
+    when 'carton'
+      rand(1..100)
+    else
+      rand(1..10)
+    end
+  end
+
+  def self.each_rate_from_income_account(income_account)
+    case income_account
+    when 'items_1'
+      1.80
+    when 'items_2+'
+      0.75
+    when 'packaging'
+      [0.25, 0.65, 0.75].sample
+    when 'carton'
+      0.05
+    when 'vas'
+      18.25
+    else
+      1.0
+    end
+  end
+
+  def self.income_account_group_from_income_account(income_account)
+    case income_account
+    when 'carrier_fees', 'items_1', 'items_2+', 'packaging'
+      'outbound'
+    when 'carton'
+      'inbound'
+    when 'storage'
+      'storage'
+    else
+      'other'
+    end
+  end
 
   def self.amount_min
     0.1
@@ -24,11 +136,7 @@ module MockData::DataHelper
   end
 
   def self.income_accounts
-    %w[postage handling storage packaging vas]
-  end
-
-  def self.warehouses
-    %w[san\ francisco ann\ arbor detroit minneapolis new\ york atlanta little\ rock london tokyo paris]
+    %w[items_1 items_2+ packaging vas carton]
   end
 
   def self.channels
