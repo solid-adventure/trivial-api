@@ -224,5 +224,16 @@ class Ability
     can [:manage, :grant, :revoke, :transfer], Chart do |chart|
       chart.dashboard.admin?(user)
     end
+
+    # Invoice Permission Blocks
+    can [:read], Invoice do |invoice|
+      invoice.member?(user)
+    end
+    can :read, Invoice do |invoice|
+      Permission.find_by(permissible: invoice, user: user, permit: READ_BIT)
+    end
+    can [:manage, :grant, :revoke, :transfer], Invoice do |invoice|
+      invoice.admin?(user)
+    end
   end
 end

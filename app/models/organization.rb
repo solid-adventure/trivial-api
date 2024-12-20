@@ -1,4 +1,6 @@
 class Organization < ApplicationRecord
+  include Taggable
+
   audited
   has_associated_audits
   has_owned_audits
@@ -11,6 +13,9 @@ class Organization < ApplicationRecord
   has_many :owned_registers, class_name: 'Register', as: :owner
   has_many :owned_register_items, class_name: 'RegisterItem', as: :owner
   has_many :owned_dashboards, class_name: 'Dashboard', as: :owner, inverse_of: :owner
+  has_many :owned_invoices, class_name: 'Invoice', as: :owner
+  has_many :owned_invoice_items, class_name: 'InvoiceItem', as: :owner
+  has_many :tags, as: :taggable
 
   has_many :org_roles, dependent: :destroy
   has_many :users, through: :org_roles
@@ -32,6 +37,27 @@ class Organization < ApplicationRecord
   def all_audits
     audits = super
     audits.or(Audited.audit_class.where(auditable: self.users))
+  end
+
+  def owner
+    self
+  end
+
+  def self.find_or_create_by_customer_id(customer_id)
+    org = find_by_customer_id(customer_id)
+    org = create_by_customer_id(customer_id) unless org
+    org
+  end
+
+  def self.find_by_customer_id(customer_id)
+    customer_tag = Tag.find_by(context: 'customer_id', name: customer_id, taggable_type: self.name)
+    customer_tag ? customer_tag.taggable : nil
+  end
+
+  def self.create_by_customer_id(customer_id)
+    org = Organization.create!(name: "Customer #{customer_id}", billing_email: 'unknown')
+    org.addTag!('customer_id', customer_id)
+    org
   end
 
   private

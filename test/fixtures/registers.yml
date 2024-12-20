@@ -39,3 +39,15 @@ three:
   }
   owner_type: Organization
   owner_id: 2
+four:
+  id: 4
+  name: Register 4
+  units: USD
+  meta: {
+    "meta1": "income_account",
+    "meta2": "income_account_group",
+    "meta3": "warehouse_id",
+    "meta4": "customer_id"
+  }
+  owner_type: Organization
+  owner_id: 1

@@ -4,6 +4,7 @@ FactoryBot.define do
   factory :register_item do
     association :register
     owner { register.owner }
+    invoice { nil }
     sequence(:description) { |n| "RegisterItem #{n}" }
     amount { 2.50 }
     units { register.units }

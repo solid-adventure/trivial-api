@@ -30,3 +30,7 @@ end
 every 1.day, at: '2:35 am' do
   runner "CacheWarmUpJob.perform_now(cache_name: 'app_activity_stats')"
 end
+
+every 1.day, at: '3:00 am' do
+  runner "CreateOrgsFromJobs.perform_now()"
+end
