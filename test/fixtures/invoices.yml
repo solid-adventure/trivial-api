@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  date: 2024-11-24 09:26:54
+  payee_org_id: 1
+  payor_org_id: 3
+  register_id: 1
+  currency: MyString
+  total: 19.98
+  notes: MyText
+  owner_type: 'Organization'
+  owner_id: 1
+
+two:
+  date: 2024-11-24 09:26:54
+  payee_org_id: 1
+  payor_org_id: 3
+  register_id: 1
+  currency: MyString
+  total: 9.99
+  notes: MyText
+  owner_type: 'Organization'
+  owner_id: 1
