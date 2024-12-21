@@ -93,8 +93,12 @@ class ActivityEntriesController < ApplicationController
   end
 
   def update
-    updatable_entry.update!(activity_entry_update_params)
-    render status: :ok, json: { message: "ok" }
+    if updatable_entry
+      updatable_entry.update!(activity_entry_update_params)
+      render status: :ok, json: { message: "ok" }
+    else
+      render status: :unprocessable_entity, json: {message: "ActivityEntry not found"}
+    end
   end
 
   def send_new
@@ -220,7 +224,7 @@ class ActivityEntriesController < ApplicationController
   end
 
   def updatable_entry
-    @updatable_entry ||= ActivityEntry.updatable.find_by_update_id!(params[:id])
+    @updatable_entry ||= ActivityEntry.updatable.find_by_update_id(params[:id])
   end
 
   MATERIALIZED_KEY_VIEWS = {
