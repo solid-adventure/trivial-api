@@ -10,11 +10,12 @@ module Services
   class ActivityRerun
     BATCH_SIZE = 1000
 
-    attr_accessor :app, :start_at, :logger, :last_id, :run_id
+    attr_accessor :app, :start_at, :end_at, :logger, :last_id, :run_id
 
-    def initialize(app, start_at)
+    def initialize(app, start_at, end_at)
       @app = app
       @start_at = start_at
+      @end_at = end_at
       @logger = Rails.logger
       @last_id = nil
       @run_id = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
@@ -52,6 +53,7 @@ module Services
 
     def validate_params!
       raise "start_at required" unless start_at.present?
+      raise "end_at required" unless end_at.present?
       raise "app required" unless app.present?
       raise "app must be an App" unless app.is_a?(App)
     end
@@ -61,7 +63,7 @@ module Services
       ActivityEntry
         .where(
           app_id: app.id,
-          created_at: start_at..,
+          created_at: start_at..end_at,
           activity_type: 'request',
         )
         .in_batches(of: BATCH_SIZE) do |activity_entries|
@@ -82,11 +84,10 @@ module Services
 
     def delete_register_items(&block)
       total_count = 0
-
        RegisterItem
         .where(
           app_id: app.id,
-          originated_at: start_at..,
+          originated_at: start_at..end_at,
           invoice_id: nil
         )
       .in_batches(of: BATCH_SIZE) do |register_items|
@@ -104,7 +105,7 @@ module Services
       queued_count = 0
       ActivityEntry
         .select(:id, :app_id, :created_at)
-        .where(app_id: app.id, created_at: start_at.., activity_type: 'request')
+        .where(app_id: app.id, created_at: start_at..end_at, activity_type: 'request')
         .in_batches(of: BATCH_SIZE) do |activity_entries|
           payload = {
             activity_entry_ids: activity_entries.collect(&:id),
@@ -129,8 +130,8 @@ module Services
     end
 
     def log_info(message, &block)
-      logger.info("[ActivityRerun] run_id=#{run_id} app_id=#{app.name} start_at=#{start_at.iso8601} #{message}")
-      yield({run_id: run_id, app_id: app.name, start_at: start_at.iso8601, message: }) if block_given?
+      logger.info("[ActivityRerun] run_id=#{run_id} app_id=#{app.name} start_at=#{start_at.iso8601} end_at=#{end_at.iso8601} #{message}")
+      yield({run_id: run_id, app_id: app.name, start_at: start_at.iso8601, end_at: end_at.iso8601, message: }) if block_given?
     end
 
   end # class ActivityRerun
