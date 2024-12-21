@@ -94,7 +94,7 @@ class ActivityEntriesController < ApplicationController
 
   def update
     updatable_entry.update!(activity_entry_update_params)
-    render json: updatable_entry.activity_attributes
+    render status: :ok, json: { message: "ok" }
   end
 
   def send_new
