@@ -124,7 +124,7 @@ already_invoiced:
 
 ready_to_invoice_warehouse_one:
   id: 9,
-  app_id: 1,
+  app_id: 2,
   register_id: 4,
   amount: 100
   description: 'Test'
@@ -139,7 +139,7 @@ ready_to_invoice_warehouse_one:
 
 ready_to_invoice_warehouse_two:
   id: 10,
-  app_id: 1,
+  app_id: 2,
   register_id: 4,
   amount: 150
   description: 'Test'
@@ -154,7 +154,7 @@ ready_to_invoice_warehouse_two:
 
 ready_to_invoice_wrong_customer:
   id: 11,
-  app_id: 1,
+  app_id: 2,
   register_id: 4,
   amount: 150
   description: 'Test'
