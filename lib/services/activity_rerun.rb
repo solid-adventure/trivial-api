@@ -12,17 +12,17 @@ module Services
 
     attr_accessor :app, :start_at, :end_at, :logger, :last_id, :run_id
 
-    def initialize(app, start_at, end_at)
+    def initialize(app:, start_at:, end_at:, run_id:)
       @app = app
       @start_at = start_at
       @end_at = end_at
+      @run_id = run_id
       @logger = Rails.logger
       @last_id = nil
-      @run_id = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
     end
 
     def call(&block)
-      log_info("Rerun started", &block)
+      log_info("Rerun started, app_id=#{app.name} start_at=#{start_at.iso8601} end_at=#{end_at.iso8601}", &block)
       validate_params!
       ActiveRecord::Base.transaction do
         # TODO Create an audit
@@ -130,7 +130,7 @@ module Services
     end
 
     def log_info(message, &block)
-      logger.info("[ActivityRerun] run_id=#{run_id} app_id=#{app.name} start_at=#{start_at.iso8601} end_at=#{end_at.iso8601} #{message}")
+      logger.info("[ActivityRerun] run_id=#{run_id} #{message}")
       yield({run_id: run_id, app_id: app.name, start_at: start_at.iso8601, end_at: end_at.iso8601, message: }) if block_given?
     end
 
