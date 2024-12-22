@@ -1,10 +1,3 @@
-# Logging signature:
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Rerun started
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Activity entries reset. count=0
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Register items deleted. count=0
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Activities queued. count=19392
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Rerun completed. register_items_deleted=0 activities_reset=0 queued=19392
-
 module Services
 
   class ActivityRerun
@@ -21,19 +14,19 @@ module Services
       @last_id = nil
     end
 
-    def call(&block)
-      log_info("Rerun started, app_id=#{app.name} start_at=#{start_at.iso8601} end_at=#{end_at.iso8601}", &block)
+    def call
+      log_info("Rerun started, app_id=#{app.name} start_at=#{start_at.iso8601} end_at=#{end_at.iso8601}")
       validate_params!
       ActiveRecord::Base.transaction do
         # TODO Create an audit
         unless get_advisory_lock
-          log_info("Rerun already in progress, skipping", &block)
+          log_info("Rerun already in progress, skipping")
           return
         end
-        reset_count = reset_activity_entries(&block)
-        deleted_count = delete_register_items(&block)
-        queued_count = queue_activities_for_rerun(&block)
-        log_info("Rerun cleanup and re-queuing completed. The register will now begin recalculating. register_items_deleted=#{deleted_count} activities_reset=#{reset_count} queued=#{queued_count}", &block)
+        reset_count = reset_activity_entries
+        deleted_count = delete_register_items
+        queued_count = queue_activities_for_rerun
+        log_info("Rerun cleanup and re-queuing completed. The register will now begin recalculating. register_items_deleted=#{deleted_count} activities_reset=#{reset_count} queued=#{queued_count}")
         true
       end
     end
@@ -58,7 +51,7 @@ module Services
       raise "app must be an App" unless app.is_a?(App)
     end
 
-    def reset_activity_entries(&block)
+    def reset_activity_entries
       total_count = 0
       ActivityEntry
         .where(
@@ -75,14 +68,14 @@ module Services
           )
           total_count += batch_count
 
-          log_info("Activity entries batch reset. batch_count: #{batch_count}, total_count: #{total_count}", &block)
+          log_info("Activity entries batch reset. batch_count: #{batch_count}, total_count: #{total_count}")
         end
 
-      log_info("Activity entries reset. count=#{total_count}", &block)
+      log_info("Activity entries reset. count=#{total_count}")
       total_count
     end
 
-    def delete_register_items(&block)
+    def delete_register_items
       total_count = 0
        RegisterItem
         .where(
@@ -93,14 +86,14 @@ module Services
       .in_batches(of: BATCH_SIZE) do |register_items|
         batch_count = register_items.delete_all
         total_count += batch_count
-        log_info("Register items batch deleted. batch_count: #{batch_count}, total_count: #{total_count}", &block)
+        log_info("Register items batch deleted. batch_count: #{batch_count}, total_count: #{total_count}")
       end
 
-      log_info("Register items deleted. count=#{total_count}", &block)
+      log_info("Register items deleted. count=#{total_count}")
       total_count
     end
 
-    def queue_activities_for_rerun(&block)
+    def queue_activities_for_rerun
       key = "app_#{app.id}_rerun_#{run_id}"
       queued_count = 0
       ActivityEntry
@@ -118,20 +111,19 @@ module Services
           )
           queued_count += activity_entries.size
           @last_id = activity_entries.last.id
-        log_info("Activities batch queued. count=#{queued_count}", &block)
+        log_info("Activities batch queued. count=#{queued_count}")
         end
-        log_info("All Activities queued. count=#{queued_count}", &block)
+        log_info("All Activities queued. count=#{queued_count}")
         queued_count
       rescue StandardError => e
-        log_info("Requeing failed. last_id=#{last_id}", &block)
+        log_info("Requeing failed. last_id=#{last_id}")
         puts e.message
         puts e.backtrace.join("\n")
         raise
     end
 
-    def log_info(message, &block)
+    def log_info(message)
       logger.info("[ActivityRerun] run_id=#{run_id} #{message}")
-      yield({run_id: run_id, app_id: app.name, start_at: start_at.iso8601, end_at: end_at.iso8601, message: }) if block_given?
     end
 
   end # class ActivityRerun
