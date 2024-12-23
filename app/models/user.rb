@@ -33,6 +33,7 @@ class User < ActiveRecord::Base
   has_many :permitted_registers, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Register'
   has_many :permitted_register_items, -> { distinct }, through: :permissions, source: :permissible, source_type: 'RegisterItem'
   has_many :permitted_dashboards, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Dashboard'
+  has_many :permitted_invoices, -> { distinct }, through: :permissions, source: :permissible, source_type: 'Invoice'
 
   enum role: %i[member admin client]
   enum approval: %i[pending approved rejected]
@@ -89,7 +90,7 @@ class User < ActiveRecord::Base
   def associated_activity_entries
     associated_resources_via_app('activity_entries')
   end
-  
+
   # Only explicitly shared credential sets are exposed and are  not visibile via org membership alone
   def associated_credential_sets
     associated_resources('credential_sets', 'admin')
@@ -118,6 +119,10 @@ class User < ActiveRecord::Base
 
   def associated_dashboards
     associated_resources('dashboards')
+  end
+
+  def associated_invoices
+    associated_resources('invoices')
   end
 
   private
