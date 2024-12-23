@@ -1,18 +1,19 @@
 # Logging signature
 #
-# [ActivityRerun] rerun 688294 Rerun started, app_id=0a7f5bc49c8190 start_at=2024-12-01T00:00:00-08:00 end_at=2024-12-25T00:00:00-08:00
-# [ActivityRerun] rerun 688294 1000 of 9255 activity entries reset
+# [ActivityRerun] rerun 447662 Started, app_id=0a7f5bc49c8190 start_at=2024-12-02T08:00:00Z end_at=2024-12-03T08:00:00Z
+# [ActivityRerun] rerun 447662 872 of 872 activity entries reset
+# [ActivityRerun] rerun 447662 Reset step 1 of 4 completed, all activity entries reset
+# [ActivityRerun] rerun 447662 Reset step 2 of 4 completed, all register items deleted
+# [ActivityRerun] rerun 447662 872 of 872 activities queued
+# [ActivityRerun] rerun 447662 Reset step 3 of 4 completed, all activities queued
+# [ActivityRerun] rerun 447662 Reset complete. The register will now begin recalculating
+#
+# << Queued events are processed by trivial-event-consumer, which logs using the same format  >>
+#
+# [ActivityRerun] rerun 447662 Starting, batch 1 of 9
 # ...
-# [ActivityRerun] rerun 688294 9255 of 9255 activity entries reset
-# [ActivityRerun] rerun 688294 Reset step 1 of 3 completed, all activity entries reset
-# [ActivityRerun] rerun 688294 1000 of 1670 register items deleted
-# [ActivityRerun] rerun 688294 1670 of 1670 register items deleted
-# [ActivityRerun] rerun 688294 Reset step 2 of 3 completed, all register items deleted
-# [ActivityRerun] rerun 688294 1000 of 9255 activities queued
-# ...
-# [ActivityRerun] rerun 688294 9255 of 9255 activities queued
-# [ActivityRerun] rerun 688294 Reset step 3 of 3 completed, all activities queued
-# [ActivityRerun] rerun 688294 Reset commplete. The register will now begin recalculating
+# [ActivityRerun] rerun 447662 Completed, batch 9 of 9
+# [ActivityRerun] rerun 447662 Reset step 4 of 4 completed, all activities reprocessed
 
 module Services
 
@@ -41,7 +42,7 @@ module Services
         reset_activity_entries
         delete_register_items
         queue_activities_for_rerun
-        log_info("Reset commplete. The register will now begin recalculating")
+        log_info("Reset complete. The register will now begin recalculating")
         commit_transaction = true
       end
     end
@@ -88,7 +89,7 @@ module Services
           log_info("#{reset_count} of #{to_reset_count} activity entries reset")
         end
 
-      log_info("Reset step 1 of 3 completed, all activity entries reset")
+      log_info("Reset step 1 of 4 completed, all activity entries reset")
     end
 
     def delete_register_items
@@ -107,7 +108,7 @@ module Services
         log_info("#{deleted_count} of #{to_delete_count} register items deleted")
       end
 
-      log_info("Reset step 2 of 3 completed, all register items deleted")
+      log_info("Reset step 2 of 4 completed, all register items deleted")
     end
 
     def queue_activities_for_rerun
@@ -118,10 +119,17 @@ module Services
         .select(:id, :app_id, :created_at)
         .where(app_id: app.id, created_at: start_at..end_at, activity_type: 'request')
         to_queue_count = activity_entries.size
+        batch_number = 0
+        batch_count = (to_queue_count / BATCH_SIZE.to_f).ceil
         activity_entries.in_batches(of: BATCH_SIZE) do |activity_entries|
+          batch_number += 1
           payload = {
             activity_entry_ids: activity_entries.collect(&:id),
-            key: key,
+            message: "rerun #{run_id} batch #{batch_number} of #{batch_count}",
+            run_id:,
+            batch_number:,
+            batch_count:,
+            key:,
           }
           KAFKA.produce_sync(
             topic: Services::Kafka.topic,
@@ -131,7 +139,7 @@ module Services
           queued_count += activity_entries.size
         log_info("#{queued_count} of #{to_queue_count} activities queued")
         end
-        log_info("Reset step 3 of 3 completed, all activities queued")
+        log_info("Reset step 3 of 4 completed, all activities queued")
     end
 
     def log_info(message)
