@@ -107,6 +107,21 @@ rerun_deletable_two:
   originated_at: <%= Time.parse("2024-11-01 00:00:00") + 2.days %>
   invoice_id:
 
+rerun_not_deletable_by_end_at:
+  id: 12
+  app_id: 1
+  register_id: 1
+  description: "rerun_not_deletable_by_end_at"
+  units: USD
+  amount: 200
+  meta1:
+  meta2:
+  meta3:
+  owner_id: 1
+  owner_type: Organization
+  originated_at: <%= Time.parse("2024-12-01 00:00:00") %>
+  invoice_id:
+
 already_invoiced:
   id: 8,
   app_id: 1,
@@ -124,7 +139,7 @@ already_invoiced:
 
 ready_to_invoice_warehouse_one:
   id: 9,
-  app_id: 1,
+  app_id: 2,
   register_id: 4,
   amount: 100
   description: 'Test'
@@ -139,7 +154,7 @@ ready_to_invoice_warehouse_one:
 
 ready_to_invoice_warehouse_two:
   id: 10,
-  app_id: 1,
+  app_id: 2,
   register_id: 4,
   amount: 150
   description: 'Test'
@@ -154,7 +169,7 @@ ready_to_invoice_warehouse_two:
 
 ready_to_invoice_wrong_customer:
   id: 11,
-  app_id: 1,
+  app_id: 2,
   register_id: 4,
   amount: 150
   description: 'Test'

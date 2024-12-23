@@ -5,9 +5,6 @@ class ActivityEntriesController < ApplicationController
   # Prevent an extra auth header from being set after a stream is opened
   skip_after_action :update_auth_header, only: [:rerun]
 
-  # Enable streaming
-  include ActionController::Live
-
   def index
     authorize! :index, ActivityEntry
 
@@ -50,19 +47,20 @@ class ActivityEntriesController < ApplicationController
     @app = current_user.associated_apps.kept.find_by_name!(params[:app_id])
     authorize! :update, @app
     start_at = params.require(:start_at)
-    start_at = Time.parse(start_at) if start_at.is_a?(String)
-    headers["Content-Type"] = "text/event-stream"
-    response.headers["Last-Modified"] = Time.now.httpdate # Add this line if your Rack version is 2.2.x, which we are as of 2024-11-21
+    end_at = params.require(:end_at)
+    run_id = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
 
-    service = Services::ActivityRerun.new(@app, start_at)
-    service.call do |progress|
-      response.stream.write("#{progress.to_json}\n\n")
-    end
-
-  rescue StandardError => exception
-    response.stream.write("error: #{exception.message}\n\n")
-  ensure
-    response.stream.close
+    RerunActivityJob.perform_later(
+      app: @app,
+      start_at: start_at.is_a?(String) ? Time.parse(start_at) : start_at,
+      end_at: end_at.is_a?(String) ? Time.parse(end_at) : end_at,
+      run_id:
+    )
+    render json: {
+      status: 'success',
+      message: "Rerun started. Run ID: #{run_id}",
+      run_id:
+    }
   end
 
   def show
