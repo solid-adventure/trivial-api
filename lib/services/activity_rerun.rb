@@ -1,39 +1,49 @@
-# Logging signature:
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Rerun started
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Activity entries reset. count=0
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Register items deleted. count=0
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Activities queued. count=19392
-# [ActivityRerun] run_id=788287 app_id=0a7f5bc49c8190 start_at=2024-10-01T00:00:00-07:00 Rerun completed. register_items_deleted=0 activities_reset=0 queued=19392
+# Logging signature
+#
+# [ActivityRerun] rerun 447662 Started, app_id=0a7f5bc49c8190 start_at=2024-12-02T08:00:00Z end_at=2024-12-03T08:00:00Z
+# [ActivityRerun] rerun 447662 872 of 872 activity entries reset
+# [ActivityRerun] rerun 447662 Reset step 1 of 4 completed, all activity entries reset
+# [ActivityRerun] rerun 447662 Reset step 2 of 4 completed, all register items deleted
+# [ActivityRerun] rerun 447662 872 of 872 activities queued
+# [ActivityRerun] rerun 447662 Reset step 3 of 4 completed, all activities queued
+# [ActivityRerun] rerun 447662 Reset complete. The register will now begin recalculating
+#
+# << Queued events are processed by trivial-event-consumer, which logs using the same format  >>
+#
+# [ActivityRerun] rerun 447662 Starting, batch 1 of 9
+# ...
+# [ActivityRerun] rerun 447662 Completed, batch 9 of 9
+# [ActivityRerun] rerun 447662 Reset step 4 of 4 completed, all activities reprocessed
 
 module Services
 
   class ActivityRerun
     BATCH_SIZE = 1000
 
-    attr_accessor :app, :start_at, :logger, :last_id, :run_id
+    attr_accessor :app, :start_at, :end_at, :logger, :run_id
 
-    def initialize(app, start_at)
+    def initialize(app:, start_at:, end_at:, run_id:)
       @app = app
       @start_at = start_at
+      @end_at = end_at
+      @run_id = run_id
       @logger = Rails.logger
-      @last_id = nil
-      @run_id = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
     end
 
-    def call(&block)
-      log_info("Rerun started", &block)
+    def call
+      log_info("Started, app_id=#{app.name} start_at=#{start_at.iso8601} end_at=#{end_at.iso8601}")
       validate_params!
       ActiveRecord::Base.transaction do
         # TODO Create an audit
         unless get_advisory_lock
-          log_info("Rerun already in progress, skipping", &block)
+          log_info("Rerun already in progress, skipping")
           return
         end
-        reset_count = reset_activity_entries(&block)
-        deleted_count = delete_register_items(&block)
-        queued_count = queue_activities_for_rerun(&block)
-        log_info("Rerun cleanup and re-queuing completed. The register will now begin recalculating. register_items_deleted=#{deleted_count} activities_reset=#{reset_count} queued=#{queued_count}", &block)
-        true
+        reset_activity_entries
+        delete_register_items
+        queue_activities_for_rerun
+        log_info("Reset complete. The register will now begin recalculating")
+        commit_transaction = true
       end
     end
 
@@ -52,63 +62,74 @@ module Services
 
     def validate_params!
       raise "start_at required" unless start_at.present?
+      raise "end_at required" unless end_at.present?
       raise "app required" unless app.present?
       raise "app must be an App" unless app.is_a?(App)
     end
 
-    def reset_activity_entries(&block)
-      total_count = 0
-      ActivityEntry
+    def reset_activity_entries
+      to_reset_count = 0
+      reset_count = 0
+      activity_entries = ActivityEntry
         .where(
           app_id: app.id,
-          created_at: start_at..,
+          created_at: start_at..end_at,
           activity_type: 'request',
         )
-        .in_batches(of: BATCH_SIZE) do |activity_entries|
+        to_reset_count = activity_entries.size
+        activity_entries.in_batches(of: BATCH_SIZE) do |activity_entries|
           batch_count = activity_entries.update_all(
             register_item_id: nil,
             diagnostics: nil,
             status: nil,
             duration_ms: nil
           )
-          total_count += batch_count
+          reset_count += batch_count
 
-          log_info("Activity entries batch reset. batch_count: #{batch_count}, total_count: #{total_count}", &block)
+          log_info("#{reset_count} of #{to_reset_count} activity entries reset")
         end
 
-      log_info("Activity entries reset. count=#{total_count}", &block)
-      total_count
+      log_info("Reset step 1 of 4 completed, all activity entries reset")
     end
 
-    def delete_register_items(&block)
-      total_count = 0
-
-       RegisterItem
+    def delete_register_items
+      to_delete_count = 0
+      deleted_count = 0
+       register_items = RegisterItem
         .where(
           app_id: app.id,
-          originated_at: start_at..,
+          originated_at: start_at..end_at,
           invoice_id: nil
         )
-      .in_batches(of: BATCH_SIZE) do |register_items|
+      to_delete_count = register_items.size
+      register_items.in_batches(of: BATCH_SIZE) do |register_items|
         batch_count = register_items.delete_all
-        total_count += batch_count
-        log_info("Register items batch deleted. batch_count: #{batch_count}, total_count: #{total_count}", &block)
+        deleted_count += batch_count
+        log_info("#{deleted_count} of #{to_delete_count} register items deleted")
       end
 
-      log_info("Register items deleted. count=#{total_count}", &block)
-      total_count
+      log_info("Reset step 2 of 4 completed, all register items deleted")
     end
 
-    def queue_activities_for_rerun(&block)
+    def queue_activities_for_rerun
       key = "app_#{app.id}_rerun_#{run_id}"
+      to_queue_count = 0
       queued_count = 0
-      ActivityEntry
+      activity_entries = ActivityEntry
         .select(:id, :app_id, :created_at)
-        .where(app_id: app.id, created_at: start_at.., activity_type: 'request')
-        .in_batches(of: BATCH_SIZE) do |activity_entries|
+        .where(app_id: app.id, created_at: start_at..end_at, activity_type: 'request')
+        to_queue_count = activity_entries.size
+        batch_number = 0
+        batch_count = (to_queue_count / BATCH_SIZE.to_f).ceil
+        activity_entries.in_batches(of: BATCH_SIZE) do |activity_entries|
+          batch_number += 1
           payload = {
             activity_entry_ids: activity_entries.collect(&:id),
-            key: key,
+            message: "rerun #{run_id} batch #{batch_number} of #{batch_count}",
+            run_id:,
+            batch_number:,
+            batch_count:,
+            key:,
           }
           KAFKA.produce_sync(
             topic: Services::Kafka.topic,
@@ -116,21 +137,13 @@ module Services
             key: key
           )
           queued_count += activity_entries.size
-          @last_id = activity_entries.last.id
-        log_info("Activities batch queued. count=#{queued_count}", &block)
+        log_info("#{queued_count} of #{to_queue_count} activities queued")
         end
-        log_info("All Activities queued. count=#{queued_count}", &block)
-        queued_count
-      rescue StandardError => e
-        log_info("Requeing failed. last_id=#{last_id}", &block)
-        puts e.message
-        puts e.backtrace.join("\n")
-        raise
+        log_info("Reset step 3 of 4 completed, all activities queued")
     end
 
-    def log_info(message, &block)
-      logger.info("[ActivityRerun] run_id=#{run_id} app_id=#{app.name} start_at=#{start_at.iso8601} #{message}")
-      yield({run_id: run_id, app_id: app.name, start_at: start_at.iso8601, message: }) if block_given?
+    def log_info(message)
+      logger.info("[ActivityRerun] rerun #{run_id} #{message}")
     end
 
   end # class ActivityRerun
