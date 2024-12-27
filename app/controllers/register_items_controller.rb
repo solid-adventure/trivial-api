@@ -71,9 +71,8 @@ class RegisterItemsController < ApplicationController
 
   # POST /register_items/void
   def void
-    @void_items = RegisterItem.void!(@register_items)
-
-    render json: @void_item, status: :ok
+    RegisterItem.void!(@register_items)
+    render status: :ok
   end
 
   # PUT /register_items/1
