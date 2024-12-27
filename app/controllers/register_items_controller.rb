@@ -2,9 +2,9 @@ class RegisterItemsController < ApplicationController
   include Exportable
   self.export_serializer = RegisterItemSerializer
 
-  before_action :set_register
+  before_action :set_register, except: %i[void]
   before_action :set_register_item, only: %i[ show update ]
-  before_action :set_register_items, only: %i[ index sum ]
+  before_action :set_register_items, only: %i[ index sum void ]
   before_action :set_pagination, only: %i[index]
   before_action :set_ordering, only: %i[index]
   around_action :disable_audits, if: -> { current_user.role == 'client' }
@@ -67,6 +67,13 @@ class RegisterItemsController < ApplicationController
       register_items = RegisterItem.create!(register_items_attributes)
       render json: register_items, adapter: :attributes, status: :created
     end
+  end
+
+  # POST /register_items/void
+  def void
+    @void_items = RegisterItem.void!(@register_items)
+
+    render json: @void_item, status: :ok
   end
 
   # PUT /register_items/1

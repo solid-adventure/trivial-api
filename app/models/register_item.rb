@@ -122,4 +122,35 @@ class RegisterItem < ApplicationRecord
     return create_ordering(column, ordering_direction)
   end
 
+  def self.void!(register_items)
+    # discard any previously voided transactions
+    voidable_items = register_items.where.not("description ILIKE ?", '% - VOID')
+    transaction do
+      # zero out any voidable items that are uninvoiced
+      uninvoiced_items = voidable_items.where(invoice_id: nil)
+      uninvoiced_items.update_all(amount: 0)
+
+      # create new transactions for voidable items that have been invoiced
+      invoiced_items = register_items.where.not(invoice_id: nil)
+      void_transactions = invoiced_items.map do |item|
+        void_attributes = item.attributes.except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key')
+        void_attributes.merge(
+          created_at: Time.current,
+          updated_at: Time.current,
+          unique_key: item.unique_key + ' - VOID',
+          amount: -1 * item.amount
+        )
+      end
+      RegisterItem.insert_all!(void_transactions) unless void_transactions.empty?
+
+      # mark all voidable_items as voided
+      # this relation should include new void transactions since we search on entity_id and entity_type
+      voidable_items.update_all("description = description || ' - VOID'")
+
+      # ensure that all items sum to 0
+      unless register_items.sum(:amount) == 0.0
+        raise "[VOID ERROR] sum of items is not zero"
+      end
+    end
+  end
 end
