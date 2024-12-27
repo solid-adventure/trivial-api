@@ -145,24 +145,23 @@ class RegisterItem < ApplicationRecord
     end
   end
 
-  # zero out any voidable items that are uninvoiced
-  def self.void_uninvoiced_items(items)
-    return if items.empty?
-    items.update_all(amount: 0)
-  end
-
-  # create new transactions for voidable items that have been invoiced
-  def self.void_invoiced_items(items)
-    return if items.empty?
-    void_transactions = items.map do |item|
-      void_attributes = item.attributes.except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key')
-      void_attributes.merge(
-        created_at: Time.current,
-        updated_at: Time.current,
-        unique_key: item.unique_key + ' - VOID',
-        amount: -1 * item.amount
-      )
+  private
+    def self.void_uninvoiced_items(items)
+      return if items.empty?
+      items.update_all(amount: 0)
     end
-    insert_all!(void_transactions) unless void_transactions.empty?
-  end
+
+    def self.void_invoiced_items(items)
+      return if items.empty?
+      void_transactions = items.map do |item|
+        void_attributes = item.attributes.except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key')
+        void_attributes.merge(
+          created_at: Time.current,
+          updated_at: Time.current,
+          unique_key: item.unique_key + ' - VOID',
+          amount: -1 * item.amount
+        )
+      end
+      insert_all!(void_transactions) unless void_transactions.empty?
+    end
 end
