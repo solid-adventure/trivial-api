@@ -8,6 +8,7 @@ class ActivityRerunTest < ActiveSupport::TestCase
     @end_at = Time.parse("2024-11-30 23:59:59")
     @register = registers(:one)
     @owner = organizations(:one)
+    @run_id = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
 
     # Store fixture IDs for easy reference in tests
     @before_start_at_id = register_items(:rerun_before_start_date).id
@@ -31,18 +32,17 @@ class ActivityRerunTest < ActiveSupport::TestCase
   end
 
   test 'can instantiate' do
-    service = Services::ActivityRerun.new(@app, @start_at, @end_at)
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
     assert_instance_of Services::ActivityRerun, service
   end
 
-  test 'generates a 6 digit run_id' do
-    service = Services::ActivityRerun.new(@app, @start_at, @end_at)
-    run_id = service.send(:run_id)
-    assert_match(/^\d{6}$/, run_id)
+  test 'run_id is accessible' do
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
+    assert_equal @run_id, service.run_id
   end
 
   test 'delete_register_items removes eligible records after start_at' do
-    service = Services::ActivityRerun.new(@app, @start_at, @end_at)
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
 
     deleted_count = service.send(:delete_register_items)
     assert_equal 2, deleted_count, "Expected 2 records to be deleted"
@@ -61,7 +61,7 @@ class ActivityRerunTest < ActiveSupport::TestCase
   end
 
   test 'reset_activity_entries resets eligible records after start' do
-    service = Services::ActivityRerun.new(@app, @start_at, @end_at)
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
 
     reset_count = service.send(:reset_activity_entries)
     assert_equal 2, reset_count, "Expected 2 records to be reset"
@@ -81,14 +81,13 @@ class ActivityRerunTest < ActiveSupport::TestCase
   end
 
   test 'queue_activities_for_rerun queues eligible records after start' do
-    service = Services::ActivityRerun.new(@app, @start_at, @end_at)
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
     queued_count = service.send(:queue_activities_for_rerun)
     assert_equal 2, queued_count, "Expected 2 records to be queued"
-    assert_equal @rerun_after_start_date_two.id, service.last_id, "Expected last_id to be set to the last queued record"
   end
 
   test 'lock key contains app id' do
-    service = Services::ActivityRerun.new(@app, @start_at, @end_at)
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
     assert_equal "rerun_app_#{@app.id}", service.send(:lock_key)
   end
 

@@ -77,6 +77,7 @@ module Services
           activity_type: 'request',
         )
         to_reset_count = activity_entries.size
+        log_info("Activity entries to reset: #{to_reset_count}")
         activity_entries.in_batches(of: BATCH_SIZE) do |activity_entries|
           batch_count = activity_entries.update_all(
             register_item_id: nil,
@@ -90,18 +91,22 @@ module Services
         end
 
       log_info("Reset step 1 of 4 completed, all activity entries reset")
+      return reset_count
     end
 
     def delete_register_items
       to_delete_count = 0
       deleted_count = 0
-       register_items = RegisterItem
+      customer_id_col = register.meta_columns_from_name(['customer_id']).first
+      raise "Meta column customer_id required" unless customer_id_col
+      register_items = register.register_items
         .where(
-          app_id: app.id,
           originated_at: start_at..end_at,
           invoice_id: nil
         )
+        .where(customer_id_col => customer_ids)
       to_delete_count = register_items.size
+      log_info("Register items to delete: #{to_delete_count}")
       register_items.in_batches(of: BATCH_SIZE) do |register_items|
         batch_count = register_items.delete_all
         deleted_count += batch_count
@@ -109,6 +114,7 @@ module Services
       end
 
       log_info("Reset step 2 of 4 completed, all register items deleted")
+      return deleted_count
     end
 
     def queue_activities_for_rerun
@@ -121,6 +127,7 @@ module Services
         to_queue_count = activity_entries.size
         batch_number = 0
         batch_count = (to_queue_count / BATCH_SIZE.to_f).ceil
+        log_info("Activities to queue: #{to_queue_count}")
         activity_entries.in_batches(of: BATCH_SIZE) do |activity_entries|
           batch_number += 1
           payload = {
@@ -140,10 +147,22 @@ module Services
         log_info("#{queued_count} of #{to_queue_count} activities queued")
         end
         log_info("Reset step 3 of 4 completed, all activities queued")
+        return queued_count
     end
 
     def log_info(message)
       logger.info("[ActivityRerun] rerun #{run_id} #{message}")
+    end
+
+    def register
+      org = @app.owner
+      @register ||= org.owned_registers.find_by_name("Income Account")
+      raise "Register not found" unless @register
+      @register
+    end
+
+    def customer_ids
+      @customer_ids ||= @app.tags.where(context: "customer_id").pluck(:name).uniq
     end
 
   end # class ActivityRerun

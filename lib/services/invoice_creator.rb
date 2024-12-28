@@ -107,6 +107,7 @@ module Services
       to_invoice(customer_id).where(conditions).sum("CAST(#{item_count_col} AS INTEGER)")
     end
 
+    # TODO This is now available as @register.meta_columns_from_name
     def meta_columns_from_name(column_labels)
       meta = @register.meta.invert
       meta_columns_from_name = column_labels.map do |column|

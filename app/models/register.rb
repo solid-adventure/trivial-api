@@ -27,6 +27,13 @@ class Register < ApplicationRecord
 
   alias_attribute :reference_name, :name
 
+  def meta_columns_from_name(column_labels)
+    meta = self.meta.invert
+    meta_columns_from_name = column_labels.map do |column|
+      meta.fetch(column) { |c| raise ArgumentError, "Invalid column_labels #{c} is not a meta-column for register" }
+    end
+  end
+
   private
     def set_defaults
       self.sample_type ||= 'increment'
