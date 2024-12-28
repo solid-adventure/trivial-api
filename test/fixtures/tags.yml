@@ -2,10 +2,12 @@
 
 one:
   taggable_type: App
+  taggable_id: 1
   context: customer_id
   name: 1
 
 two:
   taggable_type: App
+  taggable_id: 2
   context: customer_id
   name: 2

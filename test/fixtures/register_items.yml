@@ -87,6 +87,7 @@ rerun_deletable_one:
   meta1:
   meta2:
   meta3:
+  meta4: 1
   owner_id: 1
   owner_type: Organization
   originated_at: <%= Time.parse("2024-11-01 00:00:00") + 1.day %>
@@ -102,6 +103,23 @@ rerun_deletable_two:
   meta1:
   meta2:
   meta3:
+  meta4: 1
+  owner_id: 1
+  owner_type: Organization
+  originated_at: <%= Time.parse("2024-11-01 00:00:00") + 2.days %>
+  invoice_id:
+
+rerun_not_deletable_by_app_tag:
+  id: 13
+  app_id: 1
+  register_id: 1
+  description: "Test Item 2"
+  units: USD
+  amount: 200
+  meta1:
+  meta2:
+  meta3:
+  meta4: 2
   owner_id: 1
   owner_type: Organization
   originated_at: <%= Time.parse("2024-11-01 00:00:00") + 2.days %>

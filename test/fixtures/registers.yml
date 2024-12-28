@@ -6,11 +6,12 @@
 #
 one:
   id: 1
-  name: Register 1
+  name: Income Account
   units: USD
   meta: {
     "meta0": "income_account",
     "meta2": "warehouse",
+    "meta4": "customer_id",
     "meta5": "channel"
   }
   owner_type: Organization
