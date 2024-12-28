@@ -122,6 +122,7 @@ class RegisterItem < ApplicationRecord
     return create_ordering(column, ordering_direction)
   end
 
+  # this method assumes that register_items is a relation which will pick up any newly created void transactions
   def self.void!(register_items)
     transaction do
       # this is for fast look up by unique key without hitting the database
