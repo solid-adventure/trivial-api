@@ -80,6 +80,12 @@ class ActivityRerunTest < ActiveSupport::TestCase
     assert_not_nil @rerun_before_start_date.duration_ms, "Expected duration_ms to be unchanged"
   end
 
+  test 'queue_activities_for_rerun queues eligible records after start' do
+    service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
+    queued_count = service.send(:queue_activities_for_rerun)
+    assert_equal 2, queued_count, "Expected 2 records to be queued"
+  end
+
   test 'lock key contains app id' do
     service = Services::ActivityRerun.new(app: @app, start_at: @start_at, end_at: @end_at, run_id: @run_id)
     assert_equal "rerun_app_#{@app.id}", service.send(:lock_key)
