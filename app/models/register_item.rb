@@ -125,18 +125,26 @@ class RegisterItem < ApplicationRecord
   def self.void!(register_items)
     transaction do
       # discard any previously voided transactions
-      voidable_items = register_items.where.not("description ILIKE ?", '% - VOID')
+      key_to_item = register_items.index_by(&:unique_key)
 
-      # handle uninvoiced transactions
-      uninvoiced_items = voidable_items.where(invoice_id: nil)
-      void_uninvoiced_items(uninvoiced_items)
+      void_transactions = []
+      register_items.each do |item|
+        next if item.unique_key.end_with?(' - VOID')
 
-      # handle invoiced transactions
-      invoiced_items = voidable_items.where.not(invoice_id: nil)
-      void_invoiced_items(invoiced_items)
-
-      # this relation should include new void transactions since we search on entity_id and entity_type
-      voidable_items.update_all("description = description || ' - VOID'")
+        void_key = item.unique_key + ' - VOID'
+        unless key_to_item.key?(void_key)
+          void_attributes = item.attributes
+            .except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key', 'description')
+          void_transactions << void_attributes.merge(
+            created_at: Time.current,
+            updated_at: Time.current,
+            unique_key: item.unique_key + ' - VOID',
+            description: item.description + ' - VOID',
+            amount: -1 * item.amount
+          )
+        end
+      end
+      insert_all!(void_transactions) unless void_transactions.empty?
 
       # ensure that all items sum to 0
       unless register_items.sum(:amount) == 0.0
@@ -144,24 +152,4 @@ class RegisterItem < ApplicationRecord
       end
     end
   end
-
-  private
-    def self.void_uninvoiced_items(items)
-      return if items.empty?
-      items.update_all(amount: 0)
-    end
-
-    def self.void_invoiced_items(items)
-      return if items.empty?
-      void_transactions = items.map do |item|
-        void_attributes = item.attributes.except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key')
-        void_attributes.merge(
-          created_at: Time.current,
-          updated_at: Time.current,
-          unique_key: item.unique_key + ' - VOID',
-          amount: -1 * item.amount
-        )
-      end
-      insert_all!(void_transactions) unless void_transactions.empty?
-    end
 end
