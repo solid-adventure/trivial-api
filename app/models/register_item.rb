@@ -124,15 +124,15 @@ class RegisterItem < ApplicationRecord
 
   def self.void!(register_items)
     transaction do
-      # discard any previously voided transactions
-      key_to_item = register_items.index_by(&:unique_key)
+      # this is for fast look up by unique key without hitting the database
+      unique_keys = register_items.pluck(:unique_key).to_set
 
       void_transactions = []
       register_items.each do |item|
         next if item.unique_key.end_with?(' - VOID')
 
         void_key = item.unique_key + ' - VOID'
-        unless key_to_item.key?(void_key)
+        unless unique_keys.include?(void_key)
           void_attributes = item.attributes
             .except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key', 'description')
           void_transactions << void_attributes.merge(
