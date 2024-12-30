@@ -145,12 +145,19 @@ class RegisterItem < ApplicationRecord
           )
         end
       end
-      insert_all!(void_transactions) unless void_transactions.empty?
+      void_item_ids = if void_transactions.any?
+                        result = insert_all!(void_transactions)
+                        result.map { |row| row['id'] }
+                      else
+                        []
+                      end
 
       # ensure that all items sum to 0
       unless register_items.sum(:amount) == 0.0
         raise "[VOID ERROR] sum of items is not zero"
       end
+
+      where(id: void_item_ids)
     end
   end
 end
