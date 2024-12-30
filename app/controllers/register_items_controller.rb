@@ -2,7 +2,7 @@ class RegisterItemsController < ApplicationController
   include Exportable
   self.export_serializer = RegisterItemSerializer
 
-  before_action :set_register, except: %i[void]
+  before_action :set_register
   before_action :set_register_item, only: %i[ show update ]
   before_action :set_register_items, only: %i[ index sum void ]
   before_action :set_pagination, only: %i[index]
