@@ -122,4 +122,42 @@ class RegisterItem < ApplicationRecord
     return create_ordering(column, ordering_direction)
   end
 
+  # this method assumes that register_items is a relation which will pick up any newly created void transactions
+  def self.void!(register_items)
+    transaction do
+      # this is for fast look up by unique key without hitting the database
+      unique_keys = register_items.pluck(:unique_key).to_set
+
+      void_transactions = []
+      register_items.each do |item|
+        next if item.unique_key.end_with?(' - VOID')
+
+        void_key = item.unique_key + ' - VOID'
+        unless unique_keys.include?(void_key)
+          void_attributes = item.attributes
+            .except('id', 'invoice_id', 'created_at', 'updated_at', 'amount', 'unique_key', 'description')
+          void_transactions << void_attributes.merge(
+            created_at: Time.current,
+            updated_at: Time.current,
+            unique_key: item.unique_key + ' - VOID',
+            description: item.description + ' - VOID',
+            amount: -1 * item.amount
+          )
+        end
+      end
+      void_item_ids = if void_transactions.any?
+                        result = insert_all!(void_transactions)
+                        result.map { |row| row['id'] }
+                      else
+                        []
+                      end
+
+      # ensure that all items sum to 0
+      unless register_items.sum(:amount) == 0.0
+        raise "[VOID ERROR] sum of items is not zero"
+      end
+
+      where(id: void_item_ids)
+    end
+  end
 end
