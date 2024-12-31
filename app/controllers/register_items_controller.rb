@@ -4,6 +4,7 @@ class RegisterItemsController < ApplicationController
 
   before_action :set_register
   before_action :set_register_item, only: %i[ show update ]
+  before_action :prevent_alteration, if: -> { @register_item.invoice_id.present? }, only: %i[ update ]
   before_action :set_register_items, only: %i[ index sum void ]
   before_action :set_pagination, only: %i[index]
   before_action :set_ordering, only: %i[index]
@@ -177,5 +178,9 @@ class RegisterItemsController < ApplicationController
       end
     end
     permitted_params
+  end
+
+  def prevent_alteration
+    render json: { error: 'RegisterItem is in a locked state' }, status: :forbidden
   end
 end
