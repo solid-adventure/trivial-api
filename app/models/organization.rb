@@ -54,8 +54,15 @@ class Organization < ApplicationRecord
     customer_tag ? customer_tag.taggable : nil
   end
 
-  def self.create_by_customer_id(customer_id)
-    org = Organization.create!(name: "Customer #{customer_id}", billing_email: 'unknown')
+  def self.create_by_customer_id(customer_id, get_name_proc: nil)
+    name = begin
+             get_name_proc&.call(customer_id) || "Customer #{customer_id}"
+           rescue StandardError => e
+             Rails.logger.warn("Customer name retrieval failed: #{e.message}")
+             "Customer #{customer_id}"
+           end
+
+    org = Organization.create!(name:, billing_email: 'unknown')
     org.addTag!('customer_id', customer_id)
     org
   end
